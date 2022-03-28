@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GamesDataService_API", "Gam
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameAccessService_API", "GameAccessService_API\GameAccessService_API.csproj", "{7FAACAB5-0B82-4EC6-9097-C96CECCFD9F6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "desktopclient", "DesktopClient\desktopclient.csproj", "{8CDEDDC1-9383-4571-8F5B-3649877471F3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -72,5 +74,9 @@ Global
 		{7FAACAB5-0B82-4EC6-9097-C96CECCFD9F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7FAACAB5-0B82-4EC6-9097-C96CECCFD9F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7FAACAB5-0B82-4EC6-9097-C96CECCFD9F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8CDEDDC1-9383-4571-8F5B-3649877471F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8CDEDDC1-9383-4571-8F5B-3649877471F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8CDEDDC1-9383-4571-8F5B-3649877471F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8CDEDDC1-9383-4571-8F5B-3649877471F3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
