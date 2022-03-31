@@ -15,7 +15,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                         ValidateAudience = false
                     };
                 }); 
-builder.Services.AddOcelot();                           
+builder.Services.AddOcelot();                         
 var app = builder.Build();
 await app.UseOcelot();
 

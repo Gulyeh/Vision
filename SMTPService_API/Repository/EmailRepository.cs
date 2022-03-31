@@ -33,9 +33,9 @@ namespace SMTPService_API.Repository
             };
 
             await db.EmailLogs.AddAsync(logs);
-            if(await db.SaveChangesAsync() < 1) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not save email logs" });
+            if(await db.SaveChangesAsync() > 0) return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Email has been sent and logged" });
 
-            return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Email has been sent and logged" });
+            return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not save email logs but email has been sent" });    
         }
     }
 }
