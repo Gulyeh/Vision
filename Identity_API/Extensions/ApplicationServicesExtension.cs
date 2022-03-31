@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using HashidsNet;
 using Identity_API.DbContexts;
+using Identity_API.Middleware;
 using Identity_API.Repository;
 using Identity_API.Repository.IRepository;
 using Identity_API.Services;
@@ -23,6 +24,7 @@ namespace Identity_API.Extensions
             services.AddScoped<IAccountRepository, AccountRepository>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<ErrorHandler>();
             return services;
         }
     }

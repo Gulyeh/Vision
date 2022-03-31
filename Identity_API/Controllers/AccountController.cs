@@ -41,7 +41,7 @@ namespace Identity_API.Controllers
             return Ok(results);
         }
 
-        [HttpPost("Logout")]
+        [HttpGet("Logout")]
         public async Task<ActionResult<ResponseDto>> Logout(){
             return Ok(await accountRepository.SingOut());
         }
