@@ -2,13 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using CodesService_API.Dtos;
+using GameAccessService_API.Dtos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CodesService_API.Controllers
+namespace GameAccessService_API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class BaseApiController : ControllerBase
     {
         [ApiExplorerSettings(IgnoreApi = true)]

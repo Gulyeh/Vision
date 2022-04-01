@@ -22,21 +22,21 @@ namespace SMTPService_API.Controllers
         public async Task<ActionResult<ResponseDto>> ConfirmEmail([FromBody]EmailDataDto data)
         {
             data.EmailType = EmailTypes.Confirmation;
-            return await emailRepository.InitializeEmail(data);
+            return CheckActionResult(await emailRepository.InitializeEmail(data));
         }
 
         [HttpPost("SendPaymentConfrimation")]
         public async Task<ActionResult<ResponseDto>> ConfirmPayment([FromBody]EmailDataDto data)
         {
             data.EmailType = EmailTypes.Payment;
-            return await emailRepository.InitializeEmail(data);
+            return CheckActionResult(await emailRepository.InitializeEmail(data));
         }
 
         [HttpPost("SendResetPassword")]
         public async Task<ActionResult<ResponseDto>> ResetPassword([FromBody]EmailDataDto data)
         {
             data.EmailType = EmailTypes.ResetPassword;
-            return await emailRepository.InitializeEmail(data);
+            return CheckActionResult(await emailRepository.InitializeEmail(data));
         }
     }
 }

@@ -46,19 +46,5 @@ namespace CodesService_API.Controllers
             if(!ModelState.IsValid) return BadRequest();
             return CheckActionResult(await codesRepository.EditCode(data));
         }
-
-
-        private ActionResult<ResponseDto> CheckActionResult(ResponseDto result){
-            switch(result.Status){
-                case 404:
-                    return NotFound(result);
-                case 400:
-                    return BadRequest(result);
-                case 204:
-                    return NoContent();
-                default:
-                    return Ok(result);
-            }
-        }
     }
 }

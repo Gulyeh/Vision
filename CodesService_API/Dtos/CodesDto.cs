@@ -8,10 +8,6 @@ namespace CodesService_API.Dtos
 {
     public class CodesDto
     {
-        public CodesDto(int codeValue)
-        {
-            CodeValue = codeValue;
-        }
         [Required]
         public int CodeValue { get; set; }
     }

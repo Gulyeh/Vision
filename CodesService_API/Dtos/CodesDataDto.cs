@@ -8,12 +8,11 @@ namespace CodesService_API.Dtos
 {
     public class CodesDataDto
     {
-        public CodesDataDto(string id, string code, string codeValue, DateTime expireDate)
+        public CodesDataDto()
         {
-            Id = id;
-            Code = code;
-            CodeValue = codeValue;
-            ExpireDate = expireDate;
+            Id = string.Empty;
+            Code = string.Empty;
+            CodeValue = string.Empty;
         }
 
         [Required]

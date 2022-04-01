@@ -8,12 +8,10 @@ namespace CodesService_API.Entites
 {
     public class Codes
     {
-        public Codes(int id, string code, string codeValue, DateTime expireDate)
+        public Codes()
         {
-            Id = id;
-            Code = code;
-            CodeValue = codeValue;
-            ExpireDate = expireDate;
+            Code = string.Empty;
+            CodeValue = string.Empty;
         }
 
         [Key]
