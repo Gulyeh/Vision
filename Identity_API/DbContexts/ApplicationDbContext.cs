@@ -13,7 +13,9 @@ namespace Identity_API.DbContexts
     {
         public ApplicationDbContext(DbContextOptions options) : base(options)
         {
-        
+            BannedUsers = Set<BannedUsers>();
         }
+
+        public DbSet<BannedUsers> BannedUsers { get; set; }
     }
 }

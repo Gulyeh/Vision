@@ -12,5 +12,7 @@ namespace Identity_API.Repository.IRepository
         Task<ResponseDto> Login(LoginDto loginData);
         Task<ResponseDto> SingOut();
         Task<ResponseDto> ConfirmEmail(string userId, string token);
+        Task<ResponseDto> BanUser(BannedUsersDto data);
+        Task<ResponseDto> UnbanUser(string userId);
     }
 }
