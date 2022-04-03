@@ -8,6 +8,7 @@ using HashidsNet;
 using Identity_API.DbContexts;
 using Identity_API.Dtos;
 using Identity_API.Entities;
+using Identity_API.Extensions;
 using Identity_API.Repository.IRepository;
 using Identity_API.Services.IServices;
 using Identity_API.Statics;
@@ -37,25 +38,10 @@ namespace Identity_API.Repository
             this.db = db;
         }
 
-        public async Task<ResponseDto> BanUser(BannedUsersDto data)
-        {
-            var user = await userManager.Users.FirstOrDefaultAsync(x => x.Id == data.UserId);
-            if(user is null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "User does not exist" });
-
-            var alreadyBanned = await db.BannedUsers.FirstOrDefaultAsync(x => x.UserId == data.UserId);
-            if(alreadyBanned is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "User has beed already banned" });
-
-            var mapped = mapper.Map<BannedUsers>(data);
-            await db.BannedUsers.AddAsync(mapped);
-            if(await db.SaveChangesAsync() > 0) return new ResponseDto(true, StatusCodes.Status200OK, new[] { "User has been banned successfuly" });
-
-            return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not ban a user" });
-        }
-
         public async Task<ResponseDto> ConfirmEmail(string userId, string token)
         {
             var user = await userManager.Users.FirstOrDefaultAsync(x => x.Id == userId);
-            if(user is null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "User does not exist" });
+            if(user is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "User does not exist" });
 
             var result = await userManager.ConfirmEmailAsync(user, token);
             if(!result.Succeeded) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not confirm email address" });
@@ -68,8 +54,15 @@ namespace Identity_API.Repository
             var user = await userManager.Users.FirstOrDefaultAsync(u => u.Email == loginData.Email);
             if(user is null) return new ResponseDto(false, StatusCodes.Status401Unauthorized, new[] { "Wrong email or password" });
 
-            var results = await signInManager.PasswordSignInAsync(user, loginData.Password, false, false);
+            var results = await signInManager.CheckPasswordSignInAsync(user, loginData.Password, false);
             if(!results.Succeeded) return new ResponseDto(false, StatusCodes.Status401Unauthorized, new[] { "Wrong email or password" });
+
+            var isBanned = await db.BannedUsers.FirstOrDefaultAsync(x => x.UserId == user.Id && x.BanExpires > DateTime.Now);
+            if(isBanned is not null) return new ResponseDto(false, StatusCodes.Status401Unauthorized, new{
+                Message = "Your account has been banned",
+                Reason = isBanned.Reason,
+                BanExpires = isBanned.BanExpires.ToShortDate(),
+            });
 
             return new ResponseDto(true, StatusCodes.Status200OK, new UserDto(
                 username: string.Empty,
@@ -99,27 +92,7 @@ namespace Identity_API.Repository
 
             return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Account has been registered successfuly. Please check your mailbox and confirm your email address" });
         }
-
-        public async Task<ResponseDto> SingOut()
-        {
-            await signInManager.SignOutAsync();
-            return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Signed out successfuly" });
-        }
-
-        public async Task<ResponseDto> UnbanUser(string userId)
-        {
-            var user = await userManager.Users.FirstOrDefaultAsync(x => x.Id == userId);
-            if(user is null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "User does not exist" });
-
-            var alreadyBanned = await db.BannedUsers.FirstOrDefaultAsync(x => x.UserId == userId);
-            if(alreadyBanned is null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "User is not banned" });
-
-            db.BannedUsers.Remove(alreadyBanned);
-            if(await db.SaveChangesAsync() > 0) return new ResponseDto(true, StatusCodes.Status200OK, new[] { "User has been unbanned successfuly" });
-
-            return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not unban a user" });
-        }
-
+        
         private async Task<bool> UserExists(string email){
             return await userManager.Users.AnyAsync(e => e.Email == email);
         }

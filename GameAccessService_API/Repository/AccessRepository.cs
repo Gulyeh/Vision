@@ -41,9 +41,9 @@ namespace GameAccessService_API.Repository
 
         public async Task<ResponseDto> UnbanUserAccess(AccessDataDto data)
         {
-            var banData = await db.UsersGameAccess.FirstOrDefaultAsync(x => x.UserId == data.UserId && x.GameId == data.GameId);
-            if(banData is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "User is not banned in this game" });
-            db.UsersGameAccess.Remove(banData);
+            var isBanned = await db.UsersGameAccess.FirstOrDefaultAsync(x => x.UserId == data.UserId && x.GameId == data.GameId);
+            if(isBanned is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "User is not banned in this game" });
+            db.UsersGameAccess.Remove(isBanned);
             if(await db.SaveChangesAsync() > 0) return new ResponseDto(true, StatusCodes.Status200OK, new[] { "User has been unbanned successfuly" });
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not unban a user" });
         }

@@ -1,4 +1,4 @@
-namespace SMTPService_API.Entities
+namespace SMTPService_API.Helpers
 {
     public enum EmailTypes
     {

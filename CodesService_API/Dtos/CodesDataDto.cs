@@ -10,13 +10,12 @@ namespace CodesService_API.Dtos
     {
         public CodesDataDto()
         {
-            Id = string.Empty;
             Code = string.Empty;
             CodeValue = string.Empty;
         }
 
         [Required]
-        public string Id { get; set; }
+        public int Id { get; set; }
         [Required]
         public string Code { get; set; }
         [Required]

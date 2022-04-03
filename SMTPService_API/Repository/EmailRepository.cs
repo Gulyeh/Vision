@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using SMTPService_API.DBContexts;
 using SMTPService_API.Dtos;
-using SMTPService_API.Entities;
+using SMTPService_API.Entites;
 using SMTPService_API.Repository.IRepository;
 using SMTPService_API.Services.IServices;
 

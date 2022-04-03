@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SMTPService_API.Entities
+namespace SMTPService_API.Entites
 {
     public class EmailLogs
     {

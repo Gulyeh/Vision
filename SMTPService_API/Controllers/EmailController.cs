@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using SMTPService_API.Dtos;
-using SMTPService_API.Entities;
+using SMTPService_API.Helpers;
 using SMTPService_API.Repository.IRepository;
 
 namespace SMTPService_API.Controllers
@@ -18,14 +18,14 @@ namespace SMTPService_API.Controllers
             this.emailRepository = emailRepository;
         }
 
-        [HttpPost("SendEmailConfrimation")]
+        [HttpPost("SendEmailConfirmation")]
         public async Task<ActionResult<ResponseDto>> ConfirmEmail([FromBody]EmailDataDto data)
         {
             data.EmailType = EmailTypes.Confirmation;
             return CheckActionResult(await emailRepository.InitializeEmail(data));
         }
 
-        [HttpPost("SendPaymentConfrimation")]
+        [HttpPost("SendPaymentConfirmation")]
         public async Task<ActionResult<ResponseDto>> ConfirmPayment([FromBody]EmailDataDto data)
         {
             data.EmailType = EmailTypes.Payment;

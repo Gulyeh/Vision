@@ -43,16 +43,16 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, opts => {
-                    opts.RequireHttpsMetadata = true;
-                    opts.SaveToken = true;
-                    opts.TokenValidationParameters = new TokenValidationParameters{
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetValue<string>("PrivateKey"))),
-                        ValidateIssuer = false,
-                        ValidateAudience = false
-                    };
-                });
+.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, opts => {
+    opts.RequireHttpsMetadata = true;
+    opts.SaveToken = true;
+    opts.TokenValidationParameters = new TokenValidationParameters{
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetValue<string>("PrivateKey"))),
+        ValidateIssuer = false,
+        ValidateAudience = false
+    };
+});
 builder.Services.AddApplicationServices(builder.Configuration);
 var app = builder.Build();
 

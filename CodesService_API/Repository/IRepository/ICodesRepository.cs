@@ -11,7 +11,7 @@ namespace CodesService_API.Repository.IRepository
     {
         Task<ResponseDto> CheckCode(string code);
         Task<ResponseDto> GetAllCodes();
-        Task<ResponseDto> RemoveCode(string code);
+        Task<ResponseDto> RemoveCode(int codeId);
         Task<ResponseDto> EditCode(CodesDataDto codeData);
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Identity_API.Dtos;
+using Identity_API.Entities;
 using Microsoft.AspNetCore.Identity;
 
 namespace Identity_API
@@ -13,6 +14,7 @@ namespace Identity_API
         public MapperConfig()
         {
             CreateMap<RegisterDto, IdentityUser>().ReverseMap();
+            CreateMap<BannedUsersDto, BannedUsers>().ReverseMap();
         }
     }
 }

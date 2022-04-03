@@ -21,9 +21,9 @@ namespace CodesService_API.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("Validate")]
+        [HttpGet("Validate")]
         public async Task<ActionResult<ResponseDto>> ValidateCode([FromQuery]string code){
-            if(code == string.Empty || code is null) return BadRequest();
+            if(string.IsNullOrEmpty(code)) return BadRequest();
             return CheckActionResult(await codesRepository.CheckCode(code));
         }
 
@@ -35,9 +35,9 @@ namespace CodesService_API.Controllers
 
         [Authorize(Roles = StaticData.AdminRole)]
         [HttpDelete]
-        public async Task<ActionResult<ResponseDto>> RemoveCode([FromQuery]string code){
-            if(code == string.Empty || code is null) return BadRequest();
-            return CheckActionResult(await codesRepository.RemoveCode(code));
+        public async Task<ActionResult<ResponseDto>> RemoveCode([FromQuery]int codeId){
+            if(codeId <= 0) return BadRequest();
+            return CheckActionResult(await codesRepository.RemoveCode(codeId));
         }
 
         [Authorize(Roles = StaticData.AdminRole)]

@@ -22,6 +22,7 @@ namespace Identity_API.Extensions
                 opt.UseSqlServer(config.GetConnectionString("Connection"));
             });
             services.AddScoped<IAccountRepository, AccountRepository>();
+            services.AddScoped<IAccessRepository, AccessRepository>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<ErrorHandler>();

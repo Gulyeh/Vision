@@ -22,7 +22,6 @@ namespace CodesService_API.Extensions
             services.AddScoped<ICodesRepository, CodesRepository>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<ErrorHandler>();
-            services.AddSingleton<IHashids>(new Hashids("mNnxUY'7}WCP}fM/KX_2WP(RyaLfQ~vG", 8));
             return services;
         }
     }

@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using SMTPService_API.Entities;
+using SMTPService_API.Entites;
 
 namespace SMTPService_API.DBContexts
 {
