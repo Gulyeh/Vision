@@ -27,11 +27,18 @@ namespace CodesService_API.Repository
             this.memoryCache = memoryCache;
         }
 
+        public async Task<ResponseDto> AddCode(AddCodesDto code)
+        {
+            await db.Codes.AddAsync(mapper.Map<Codes>(code));
+            if(await db.SaveChangesAsync() > 0) return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Code has been added successfuly" });
+            return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not add code" });
+        }
+
         public async Task<ResponseDto> CheckCode(string code)
         {
             IEnumerable<Codes> Codes;
             if(!memoryCache.TryGetValue("Codes", out Codes)){
-                Codes = await db.Codes.ToListAsync();
+                Codes = await db.Codes.Where(x => x.ExpireDate >= DateTime.Now).ToListAsync();
                 var cacheOptions = new MemoryCacheEntryOptions()
                     .SetSlidingExpiration(TimeSpan.FromMinutes(5));
                 memoryCache.Set("Codes", Codes, cacheOptions);
@@ -41,8 +48,7 @@ namespace CodesService_API.Repository
             if(checkCode is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Code does not exist" });
             if(checkCode.ExpireDate <= DateTime.Now) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Code expired" });
 
-            var mapped = mapper.Map<CodesDto>(checkCode);
-            return new ResponseDto(true, StatusCodes.Status200OK, mapped);
+            return new ResponseDto(true, StatusCodes.Status200OK, new { codeValue = checkCode.CodeValue });
         }
 
         public async Task<ResponseDto> EditCode(CodesDataDto codeData)

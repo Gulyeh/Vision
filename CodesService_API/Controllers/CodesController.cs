@@ -46,5 +46,12 @@ namespace CodesService_API.Controllers
             if(!ModelState.IsValid) return BadRequest(ModelState);
             return CheckActionResult(await codesRepository.EditCode(data));
         }
+
+        [Authorize(Roles = StaticData.AdminRole)]
+        [HttpPost("AddCode")]
+        public async Task<ActionResult<ResponseDto>> AddCode([FromBody]AddCodesDto data){
+            if(!ModelState.IsValid) return BadRequest(ModelState);
+            return CheckActionResult(await codesRepository.AddCode(data));
+        }
     }
 }

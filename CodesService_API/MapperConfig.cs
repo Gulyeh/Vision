@@ -13,8 +13,8 @@ namespace CodesService_API
     {
         public MapperConfig()
         {
-            CreateMap<Codes, CodesDto>().ReverseMap();
             CreateMap<CodesDataDto, Codes>().ReverseMap();
+            CreateMap<AddCodesDto, Codes>();
         }
     }
 }
