@@ -14,9 +14,10 @@ namespace GameAccessService_API.Extensions
             return name is not null ? name : string.Empty; 
         }
 
-        public static string GetId(this ClaimsPrincipal user){
-            var id = user?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            return id != null ? id : string.Empty; 
+        public static Guid GetId(this ClaimsPrincipal user){
+            Guid id = Guid.Empty;
+            Guid.TryParse(user?.FindFirst(ClaimTypes.NameIdentifier)?.Value, out id);
+            return id != Guid.Empty ? id : Guid.Empty; 
         }
     }
 }

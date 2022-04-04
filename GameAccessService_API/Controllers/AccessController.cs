@@ -23,15 +23,15 @@ namespace GameAccessService_API.Controllers
         }
 
         [HttpGet("CheckGameAccess")]
-        public async Task<ActionResult<ResponseDto>> CheckAccess([FromQuery]string gameId){
-            if(!ModelState.IsValid) return BadRequest();
+        public async Task<ActionResult<ResponseDto>> CheckAccess([FromQuery]Guid gameId){
+            if(gameId == Guid.Empty) return BadRequest();
             return Ok(new ResponseDto(true, StatusCodes.Status200OK, new HasAccess(await accessRepository.CheckUserAccess(gameId, User.GetId()))));
         }
 
         [Authorize(Roles = StaticData.AdminRole)]
         [HttpPost("BanUser")]
         public async Task<ActionResult<ResponseDto>> BanUser([FromBody]UserAccessDto data){
-            if(!ModelState.IsValid) return BadRequest();
+            if(!ModelState.IsValid) return BadRequest(ModelState);
             if(User?.GetId() == data.UserId) return BadRequest(new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "You cannot ban yourself" }));
             return CheckActionResult(await accessRepository.BanUserAccess(data));
         }
@@ -39,7 +39,7 @@ namespace GameAccessService_API.Controllers
         [Authorize(Roles = StaticData.AdminRole)]
         [HttpPost("UnbanUser")]
         public async Task<ActionResult<ResponseDto>> UnbanUser([FromBody]AccessDataDto data){
-            if(!ModelState.IsValid) return BadRequest();
+            if(!ModelState.IsValid) return BadRequest(ModelState);
             return CheckActionResult(await accessRepository.UnbanUserAccess(data));
         }
     }

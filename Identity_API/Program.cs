@@ -48,7 +48,6 @@ builder.Services.AddIdentityServices(builder.Configuration);
 builder.Services.AddApplicationServices(builder.Configuration);
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -70,7 +69,7 @@ async Task SeedRoles(){
     using (var scope = app.Services.CreateScope()){
         try{
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            var role = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var role = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
             await RoleSeeder.CreateRoles(role, context);
         }catch(Exception e){
             var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();

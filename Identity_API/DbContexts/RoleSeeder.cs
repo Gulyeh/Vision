@@ -10,7 +10,7 @@ namespace Identity_API.DbContexts
 {
     public static class RoleSeeder
     {
-        public static async Task CreateRoles(RoleManager<IdentityRole> roleManager, ApplicationDbContext db){
+        public static async Task CreateRoles(RoleManager<ApplicationRole> roleManager, ApplicationDbContext db){
 
             if (db.Database.CanConnect())
             {
@@ -25,10 +25,10 @@ namespace Identity_API.DbContexts
                 }
 
                 if(!await roleManager.Roles.AnyAsync()){
-                    var roles = new List<IdentityRole>{
-                        new IdentityRole{ Name= StaticData.AdminRole },
-                        new IdentityRole{ Name= StaticData.ModeratorRole },
-                        new IdentityRole{ Name= StaticData.UserRole }
+                    var roles = new List<ApplicationRole>{
+                        new ApplicationRole{ Name= StaticData.AdminRole },
+                        new ApplicationRole{ Name= StaticData.ModeratorRole },
+                        new ApplicationRole{ Name= StaticData.UserRole }
                     };
 
                     foreach(var role in roles){

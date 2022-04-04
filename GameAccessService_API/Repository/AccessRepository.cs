@@ -32,7 +32,7 @@ namespace GameAccessService_API.Repository
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not ban a user" });
         }
 
-        public async Task<bool> CheckUserAccess(string gameId, string userId)
+        public async Task<bool> CheckUserAccess(Guid gameId, Guid userId)
         {
             var results = await db.UsersGameAccess.FirstOrDefaultAsync(u => u.UserId == userId && u.GameId == gameId);
             if(results is null) return true;

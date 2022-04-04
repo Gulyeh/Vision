@@ -10,14 +10,13 @@ namespace Identity_API.Entities
     {
         public BannedUsers()
         {
-            UserId = string.Empty;
             Reason = string.Empty;
         }
 
         [Key]
         public int Id { get; set; }
         [Required]
-        public string UserId { get; set; }
+        public Guid UserId { get; set; }
         public string? Reason { get; set; }
         [Required]
         public DateTime BanDate { get; set; }

@@ -10,6 +10,6 @@ namespace Identity_API.Repository.IRepository
     {
         Task<ResponseDto> Register(RegisterDto registerData, string baseUri);
         Task<ResponseDto> Login(LoginDto loginData);
-        Task<ResponseDto> ConfirmEmail(string userId, string token);
+        Task<ResponseDto> ConfirmEmail(Guid userId, string token);
     }
 }

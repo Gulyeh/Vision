@@ -11,11 +11,10 @@ namespace Identity_API.Dtos
     {
         public BannedUsersDto()
         {
-            UserId = string.Empty;
             Reason = string.Empty;
         }
         [Required]
-        public string UserId { get; set; }
+        public Guid UserId { get; set; }
         public string? Reason { get; set; }
         [JsonIgnore]
         public DateTime BanDate { get; set; } = DateTime.Now;

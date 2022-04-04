@@ -43,7 +43,7 @@ namespace CodesService_API.Controllers
         [Authorize(Roles = StaticData.AdminRole)]
         [HttpPost("EditCode")]
         public async Task<ActionResult<ResponseDto>> EditCode([FromBody]CodesDataDto data){
-            if(!ModelState.IsValid) return BadRequest();
+            if(!ModelState.IsValid) return BadRequest(ModelState);
             return CheckActionResult(await codesRepository.EditCode(data));
         }
     }

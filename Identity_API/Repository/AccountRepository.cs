@@ -20,14 +20,14 @@ namespace Identity_API.Repository
     public class AccountRepository : IAccountRepository
     {
         private readonly IMapper mapper;
-        private readonly UserManager<IdentityUser> userManager;
-        private readonly SignInManager<IdentityUser> signInManager;
-        private readonly RoleManager<IdentityRole> roleManager;
+        private readonly UserManager<ApplicationUser> userManager;
+        private readonly SignInManager<ApplicationUser> signInManager;
+        private readonly RoleManager<ApplicationRole> roleManager;
         private readonly ITokenService tokenService;
         private readonly ApplicationDbContext db;
 
-        public AccountRepository(IMapper mapper, UserManager<IdentityUser> userManager, 
-            SignInManager<IdentityUser> signInManager, RoleManager<IdentityRole> roleManager, ITokenService tokenService,
+        public AccountRepository(IMapper mapper, UserManager<ApplicationUser> userManager, 
+            SignInManager<ApplicationUser> signInManager, RoleManager<ApplicationRole> roleManager, ITokenService tokenService,
             ApplicationDbContext db)
         {
             this.mapper = mapper;
@@ -38,7 +38,7 @@ namespace Identity_API.Repository
             this.db = db;
         }
 
-        public async Task<ResponseDto> ConfirmEmail(string userId, string token)
+        public async Task<ResponseDto> ConfirmEmail(Guid userId, string token)
         {
             var user = await userManager.Users.FirstOrDefaultAsync(x => x.Id == userId);
             if(user is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "User does not exist" });
@@ -79,7 +79,7 @@ namespace Identity_API.Repository
                 return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "User with this email already exists" });
             }
 
-            var user = mapper.Map<IdentityUser>(registerData);
+            var user = mapper.Map<ApplicationUser>(registerData);
             user.UserName = registerData.Email;
 
             var result = await userManager.CreateAsync(user, registerData.Password);

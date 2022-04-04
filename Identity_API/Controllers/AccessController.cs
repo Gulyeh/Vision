@@ -30,9 +30,9 @@ namespace Identity_API.Controllers
         }
 
         [HttpPost("UnbanUser")]
-        public async Task<ActionResult<ResponseDto>> UnbanUserAccount([FromQuery]string userId)
+        public async Task<ActionResult<ResponseDto>> UnbanUserAccount([FromQuery]Guid userId)
         {
-            if(userId is null || string.IsNullOrEmpty(userId)) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Wrong data" });
+            if(userId == Guid.Empty) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Wrong data" });
             return CheckActionResult(await accessRepository.UnbanUser(userId));
         }
     }

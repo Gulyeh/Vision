@@ -8,7 +8,7 @@ namespace GameAccessService_API.Repository.IRepository
 {
     public interface IAccessRepository
     {
-        Task<bool> CheckUserAccess(string gameId, string userId);
+        Task<bool> CheckUserAccess(Guid gameId, Guid userId);
         Task<ResponseDto> BanUserAccess(UserAccessDto data);
         Task<ResponseDto> UnbanUserAccess(AccessDataDto data);
     }

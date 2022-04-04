@@ -8,10 +8,10 @@ namespace Identity_API.Helpers
 {
     public class BasicUserData
     {
-        public BasicUserData(string password, string email)
+        public BasicUserData()
         {
-            Password = password;
-            Email = email;
+            Password = string.Empty;
+            Email = string.Empty;
         }
 
         [Required(ErrorMessage = "Password is required")]

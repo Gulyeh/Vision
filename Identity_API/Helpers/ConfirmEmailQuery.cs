@@ -10,12 +10,11 @@ namespace Identity_API.Helpers
     {
         public ConfirmEmailQuery()
         {
-            this.userId = string.Empty;
             this.token = string.Empty;
         }
 
         [Required]
-        public string userId { get; set; }
+        public Guid userId { get; set; }
         [Required]
         public string token { get; set; }
     }

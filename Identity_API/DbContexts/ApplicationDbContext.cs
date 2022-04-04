@@ -9,7 +9,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Identity_API.DbContexts
 {
-    public class ApplicationDbContext : IdentityDbContext
+    public class ApplicationUser : IdentityUser<Guid>{}
+    public class ApplicationRole : IdentityRole<Guid>{}
+
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
     {
         public ApplicationDbContext(DbContextOptions options) : base(options)
         {

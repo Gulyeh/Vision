@@ -12,16 +12,14 @@ namespace GameAccessService_API.Dtos
     {
         public UserAccessDto()
         {
-            UserId = string.Empty;
-            GameId = string.Empty;
             Reason = string.Empty;
             BlockedBy = string.Empty;
         }
 
         [Required]
-        public string UserId { get; set; }
+        public Guid UserId { get; set; }
         [Required]
-        public string GameId { get; set; }
+        public Guid GameId { get; set; }
         public string? Reason { get; set; }
         [Required]
         public string BlockedBy { get; set; }

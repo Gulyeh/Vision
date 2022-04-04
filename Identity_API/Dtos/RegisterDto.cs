@@ -9,9 +9,9 @@ namespace Identity_API.Dtos
 {
     public class RegisterDto : BasicUserData
     {
-        public RegisterDto(string password, string email, string confirmpassword) : base(password, email)
+        public RegisterDto()
         {
-            ConfirmPassword = confirmpassword;
+            ConfirmPassword = string.Empty;
         }
         [Required(ErrorMessage = "Confirm Password required")]
         [Compare("Password", ErrorMessage = "Password doesn't match.")]

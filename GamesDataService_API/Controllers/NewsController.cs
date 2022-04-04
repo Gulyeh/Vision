@@ -21,7 +21,7 @@ namespace GamesDataService_API.Controllers
 
         [HttpGet("GetNews")]
         public async Task<ActionResult<ResponseDto>> GetGameNews([FromQuery]Guid gameId){
-            if(string.IsNullOrEmpty(gameId.ToString())) return BadRequest();
+            if(gameId == Guid.Empty) return BadRequest();
             return CheckActionResult(await newsRepository.GetGameNews(gameId));
         }
 
@@ -36,7 +36,7 @@ namespace GamesDataService_API.Controllers
         [Authorize(Policy = "HasAdminOrModRole")]
         public async Task<ActionResult<ResponseDto>> DeleteGameNews([FromQuery]Guid newsId)
         {
-            if(string.IsNullOrEmpty(newsId.ToString())) return BadRequest();
+            if(newsId == Guid.Empty) return BadRequest();
             return CheckActionResult(await newsRepository.DeleteNews(newsId));
         }
 

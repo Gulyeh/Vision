@@ -9,8 +9,5 @@ namespace Identity_API.Dtos
 {
     public class UpdateUserDto : BasicUserData
     {
-        public UpdateUserDto(string password, string email) : base(password, email)
-        {
-        }
     }
 }

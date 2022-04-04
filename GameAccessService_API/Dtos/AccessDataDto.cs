@@ -8,15 +8,9 @@ namespace GameAccessService_API.Dtos
 {
     public class AccessDataDto
     {
-        public AccessDataDto()
-        {
-            this.GameId = string.Empty;
-            this.UserId = string.Empty;
-        }
-
         [Required]
-        public string GameId { get; set; }
+        public Guid GameId { get; set; }
         [Required]
-        public string UserId { get; set; }
+        public Guid UserId { get; set; }
     }
 }

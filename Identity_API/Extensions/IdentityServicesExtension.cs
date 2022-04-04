@@ -17,7 +17,7 @@ namespace Identity_API.Extensions
     {
         public static IServiceCollection AddIdentityServices(this IServiceCollection services, IConfiguration config)
         {
-            services.AddIdentityCore<IdentityUser>(opts => {
+            services.AddIdentityCore<ApplicationUser>(opts => {
                 opts.User.RequireUniqueEmail = true;
                 opts.SignIn.RequireConfirmedEmail = true;
                 opts.Password.RequiredLength = 8;
@@ -26,10 +26,10 @@ namespace Identity_API.Extensions
                 opts.Password.RequiredUniqueChars = 0;
                 opts.Password.RequireUppercase = false;
             })
-                .AddRoles<IdentityRole>()
-                .AddRoleManager<RoleManager<IdentityRole>>()
-                .AddSignInManager<SignInManager<IdentityUser>>()
-                .AddRoleValidator<RoleValidator<IdentityRole>>()
+                .AddRoles<ApplicationRole>()
+                .AddRoleManager<RoleManager<ApplicationRole>>()
+                .AddSignInManager<SignInManager<ApplicationUser>>()
+                .AddRoleValidator<RoleValidator<ApplicationRole>>()
                 .AddDefaultTokenProviders()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 

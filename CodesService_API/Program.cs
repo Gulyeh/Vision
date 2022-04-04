@@ -17,7 +17,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "CodesService", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Codes Service", Version = "v1" });
     c.EnableAnnotations();
     c.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
     {
@@ -42,17 +42,7 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, opts => {
-    opts.RequireHttpsMetadata = true;
-    opts.SaveToken = true;
-    opts.TokenValidationParameters = new TokenValidationParameters{
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetValue<string>("PrivateKey"))),
-        ValidateIssuer = false,
-        ValidateAudience = false
-    };
-});
+builder.Services.AddIdentityServices(builder.Configuration);
 builder.Services.AddApplicationServices(builder.Configuration);
 var app = builder.Build();
 

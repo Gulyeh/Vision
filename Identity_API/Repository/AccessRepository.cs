@@ -15,10 +15,10 @@ namespace Identity_API.Repository
     public class AccessRepository : IAccessRepository
     {
         private readonly IMapper mapper;
-        private readonly UserManager<IdentityUser> userManager;
+        private readonly UserManager<ApplicationUser> userManager;
         private readonly ApplicationDbContext db;
 
-        public AccessRepository(IMapper mapper, UserManager<IdentityUser> userManager, ApplicationDbContext db)
+        public AccessRepository(IMapper mapper, UserManager<ApplicationUser> userManager, ApplicationDbContext db)
         {
             this.mapper = mapper;
             this.userManager = userManager;
@@ -40,7 +40,7 @@ namespace Identity_API.Repository
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not ban a user" });
         }
 
-        public async Task<ResponseDto> UnbanUser(string userId)
+        public async Task<ResponseDto> UnbanUser(Guid userId)
         {
             var user = await userManager.Users.FirstOrDefaultAsync(x => x.Id == userId);
             if(user is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "User does not exist" });
