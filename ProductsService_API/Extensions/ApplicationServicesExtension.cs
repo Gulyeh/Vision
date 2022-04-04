@@ -21,6 +21,7 @@ namespace ProductsService_API.Extensions
                 opt.UseSqlServer(config.GetConnectionString("Connection"));
             });
             services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));
+            services.AddMemoryCache();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<ErrorHandler>();
             services.AddScoped<IUploadService, UploadService>();

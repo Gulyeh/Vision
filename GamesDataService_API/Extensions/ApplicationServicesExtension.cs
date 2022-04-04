@@ -21,6 +21,7 @@ namespace GamesDataService_API.Extensions
             {
                 opt.UseSqlServer(config.GetConnectionString("Connection"));
             });
+            services.AddMemoryCache();
             services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<ErrorHandler>();

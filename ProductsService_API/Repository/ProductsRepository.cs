@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
 using ProductsService_API.DbContexts;
 using ProductsService_API.Dtos;
 using ProductsService_API.Entites;
@@ -17,12 +19,14 @@ namespace ProductsService_API.Repository
         private readonly ApplicationDbContext db;
         private readonly IMapper mapper;
         private readonly IUploadService uploadService;
+        private readonly IMemoryCache memoryCache;
 
-        public ProductsRepository(ApplicationDbContext db, IMapper mapper, IUploadService uploadService)
+        public ProductsRepository(ApplicationDbContext db, IMapper mapper, IUploadService uploadService, IMemoryCache memoryCache)
         {
             this.db = db;
             this.mapper = mapper;
             this.uploadService = uploadService;
+            this.memoryCache = memoryCache;
         }
 
         public async Task<ResponseDto> AddProduct(AddProductsDto data)
@@ -89,7 +93,15 @@ namespace ProductsService_API.Repository
 
         public async Task<ResponseDto> GetGameProducts(Guid gameId)
         {
-            var products = await db.GamesProducts.Where(x => x.GameId == gameId).ToListAsync();
+            IEnumerable<Products> products;
+            if(!memoryCache.TryGetValue("GameProducts", out products))
+            {
+                products = await db.GamesProducts.Where(x => x.GameId == gameId).ToListAsync();
+                
+                var cacheOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(5));
+                memoryCache.Set("GameProducts", products, cacheOptions);
+            }
             return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<ProductsDto>>(products));
         }
     }

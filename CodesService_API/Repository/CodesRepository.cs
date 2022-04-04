@@ -10,6 +10,7 @@ using CodesService_API.Repository.IRepository;
 using HashidsNet;
 using Microsoft.EntityFrameworkCore;
 using CodesService_API.Extensions;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace CodesService_API.Repository
 {
@@ -17,16 +18,26 @@ namespace CodesService_API.Repository
     {
         private readonly ApplicationDbContext db;
         private readonly IMapper mapper;
+        private readonly IMemoryCache memoryCache;
 
-        public CodesRepository(ApplicationDbContext db, IMapper mapper)
+        public CodesRepository(ApplicationDbContext db, IMapper mapper, IMemoryCache memoryCache)
         {
             this.db = db;
             this.mapper = mapper;
+            this.memoryCache = memoryCache;
         }
 
         public async Task<ResponseDto> CheckCode(string code)
         {
-            var checkCode = await db.Codes.FirstOrDefaultAsync(c => c.Code == code);
+            IEnumerable<Codes> Codes;
+            if(!memoryCache.TryGetValue("Codes", out Codes)){
+                Codes = await db.Codes.ToListAsync();
+                var cacheOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(5));
+                memoryCache.Set("Codes", Codes, cacheOptions);
+            }
+            
+            var checkCode = Codes.FirstOrDefault(c => c.Code == code);
             if(checkCode is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Code does not exist" });
             if(checkCode.ExpireDate <= DateTime.Now) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Code expired" });
 

@@ -11,6 +11,7 @@ using GamesDataService_API.Repository.IRepository;
 using GamesDataService_API.Services.IServices;
 using HashidsNet;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace GamesDataService_API.Repository
 {
@@ -19,12 +20,14 @@ namespace GamesDataService_API.Repository
         private readonly IUploadService uploadService;
         private readonly ApplicationDbContext db;
         private readonly IMapper mapper;
+        private readonly IMemoryCache memoryCache;
 
-        public NewsRepository(IUploadService uploadService, ApplicationDbContext db, IMapper mapper)
+        public NewsRepository(IUploadService uploadService, ApplicationDbContext db, IMapper mapper, IMemoryCache memoryCache)
         {
             this.uploadService = uploadService;
             this.db = db;
             this.mapper = mapper;
+            this.memoryCache = memoryCache;
         }
 
         public async Task<ResponseDto> AddNews(AddNewsDto data)
@@ -87,8 +90,17 @@ namespace GamesDataService_API.Repository
         {
             if(!await new CheckGameExists(db).GameExists(gameId)) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Game does not exist" });
 
-            IEnumerable<News> news = await db.News.Where(x => x.GameId == gameId).OrderByDescending(x => x.Id).Take(5).ToListAsync();
+            IEnumerable<News> news;
             
+            if(!memoryCache.TryGetValue("News", out news)){
+                news = await db.News.Where(x => x.GameId == gameId).OrderByDescending(x => x.Id).Take(5).ToListAsync();
+
+                var cacheOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(5));
+
+                memoryCache.Set("News", news, cacheOptions);
+            }
+
             return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<NewsDto>>(news));
         }
     }

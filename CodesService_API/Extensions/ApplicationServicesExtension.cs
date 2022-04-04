@@ -19,6 +19,7 @@ namespace CodesService_API.Extensions
             {
                 opt.UseSqlServer(config.GetConnectionString("Connection"));
             });
+            services.AddMemoryCache();
             services.AddScoped<ICodesRepository, CodesRepository>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<ErrorHandler>();

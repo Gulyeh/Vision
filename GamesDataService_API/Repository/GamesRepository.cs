@@ -10,6 +10,7 @@ using GamesDataService_API.Helpers;
 using GamesDataService_API.Repository.IRepository;
 using GamesDataService_API.Services.IServices;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace GamesDataService_API.Repository
 {
@@ -18,12 +19,14 @@ namespace GamesDataService_API.Repository
         private readonly IUploadService uploadService;
         private readonly ApplicationDbContext db;
         private readonly IMapper mapper;
+        private readonly IMemoryCache memoryCache;
 
-        public GamesRepository(IUploadService uploadService, ApplicationDbContext db, IMapper mapper)
+        public GamesRepository(IUploadService uploadService, ApplicationDbContext db, IMapper mapper, IMemoryCache memoryCache)
         {
             this.uploadService = uploadService;
             this.db = db;
             this.mapper = mapper;
+            this.memoryCache = memoryCache;
         }
 
         public async Task<ResponseDto> AddGame(AddGamesDto data)
@@ -103,7 +106,15 @@ namespace GamesDataService_API.Repository
 
         public async Task<ResponseDto> GetGames()
         {
-            IEnumerable<Games> games = await db.Games.ToListAsync();
+            IEnumerable<Games> games;
+            if(!memoryCache.TryGetValue("Games", out games)){
+                games = await db.Games.ToListAsync();
+
+                var cacheOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(5));
+
+                memoryCache.Set("Games", games, cacheOptions);
+            }
             return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<GamesDto>>(games));
         }
     }
