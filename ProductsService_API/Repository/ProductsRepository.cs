@@ -77,11 +77,11 @@ namespace ProductsService_API.Repository
             mapper.Map(data, product);
             db.GamesProducts.Update(product);
             if(await db.SaveChangesAsync() > 0){
-                await uploadService.DeletePhoto(oldPhotoId);
+                if(!string.IsNullOrEmpty(oldPhotoId)) await uploadService.DeletePhoto(oldPhotoId);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Product has been updated successfuly" });
             } 
 
-            await uploadService.DeletePhoto(product.PhotoId);
+            if(!string.IsNullOrEmpty(product.PhotoId)) await uploadService.DeletePhoto(product.PhotoId);
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not update product" });
         }
 

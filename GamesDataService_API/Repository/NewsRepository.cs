@@ -66,13 +66,15 @@ namespace GamesDataService_API.Repository
         {
             if(!await new CheckGameExists(db).GameExists(data.GameId)) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Game does not exist" });
 
+            string oldPhotoId = string.Empty;
+
             var news = await db.News.FirstOrDefaultAsync(x => x.Id == data.Id);
             if(news is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "News does not exist" });
 
             if(data.Photo is not null){
                 var results = await uploadService.UploadPhoto(data.Photo);
                 if(results.Error is null) {
-                    await uploadService.DeletePhoto(news.PhotoId);
+                    oldPhotoId = news.PhotoId;
                     news.PhotoId = results.PublicId;
                     news.PhotoUrl = results.SecureUrl.AbsoluteUri;
                 }
@@ -80,7 +82,10 @@ namespace GamesDataService_API.Repository
 
             mapper.Map(data, news);
             db.News.Update(news);
-            if(await db.SaveChangesAsync() > 0) return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Edited news successfuly" });
+            if(await db.SaveChangesAsync() > 0){
+                if(!string.IsNullOrEmpty(oldPhotoId)) await uploadService.DeletePhoto(oldPhotoId);
+                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Edited news successfuly" });
+            } 
             
             await uploadService.DeletePhoto(news.PhotoId);
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not edit news" });
@@ -88,12 +93,12 @@ namespace GamesDataService_API.Repository
 
         public async Task<ResponseDto> GetGameNews(Guid gameId)
         {
-            if(!await new CheckGameExists(db).GameExists(gameId)) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Game does not exist" });
+            if(!await new CheckGameExists(db).GameExists(gameId)) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game does not exist" });
 
             IEnumerable<News> news;
             
             if(!memoryCache.TryGetValue("News", out news)){
-                news = await db.News.Where(x => x.GameId == gameId).OrderByDescending(x => x.Id).Take(5).ToListAsync();
+                news = await db.News.ToListAsync();
 
                 var cacheOptions = new MemoryCacheEntryOptions()
                     .SetSlidingExpiration(TimeSpan.FromMinutes(5));
@@ -101,6 +106,7 @@ namespace GamesDataService_API.Repository
                 memoryCache.Set("News", news, cacheOptions);
             }
 
+            IEnumerable<News> gameNews = news.Where(x => x.GameId == gameId).OrderByDescending(x => x.Id).Take(5);
             return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<NewsDto>>(news));
         }
     }
