@@ -47,7 +47,7 @@ namespace GamesDataService_API.Repository
 
             await db.Games.AddAsync(mapped);
             if(await db.SaveChangesAsync() > 0){
-                await cacheService.TryRemoveFromCache<Games>(CacheType.Games);
+                await cacheService.TryAddToCache<Games>(CacheType.Games, mapped);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Added game successfuly" });
             }
 
@@ -65,7 +65,7 @@ namespace GamesDataService_API.Repository
             if(await db.SaveChangesAsync() > 0) {
                 if(!string.IsNullOrEmpty(game.IconId)) await uploadService.DeletePhoto(game.IconId);
                 if(!string.IsNullOrEmpty(game.CoverId)) await uploadService.DeletePhoto(game.CoverId);
-                await cacheService.TryRemoveFromCache<Games>(CacheType.Games);
+                await cacheService.TryRemoveFromCache<Games>(CacheType.Games, game);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Deleted game successfuly" });
             }
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not delete game" });

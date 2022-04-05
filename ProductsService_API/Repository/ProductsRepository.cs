@@ -43,7 +43,7 @@ namespace ProductsService_API.Repository
             await db.GamesProducts.AddAsync(mapped);
             if(await db.SaveChangesAsync() > 0) 
             {
-                await cacheService.TryRemoveFromCache<Products>(CacheType.GameProducts, mapped.GameId);
+                await cacheService.TryAddToCache<Products>(CacheType.GameProducts, mapped.GameId, mapped);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Product has been added successfuly" });
             }
 
@@ -58,7 +58,7 @@ namespace ProductsService_API.Repository
             
             db.GamesProducts.Remove(product);
             if(await db.SaveChangesAsync() > 0) {
-                await cacheService.TryRemoveFromCache<Products>(CacheType.GameProducts, product.GameId);
+                await cacheService.TryRemoveFromCache<Products>(CacheType.GameProducts, product.GameId, product);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Product has been deleted successfuly" });
             }
         

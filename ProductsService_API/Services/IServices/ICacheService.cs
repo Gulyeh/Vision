@@ -10,6 +10,7 @@ namespace ProductsService_API.Services.IServices
     public interface ICacheService
     {
         Task<IEnumerable<T>> TryGetFromCache<T>(CacheType type, Guid gameId) where T : class;
-        Task TryRemoveFromCache<T>(CacheType type, Guid gameId) where T : class;
+        Task TryRemoveFromCache<T>(CacheType type, Guid gameId, T data) where T : class;
+        Task TryAddToCache<T>(CacheType type, Guid gameId, T data) where T : class;
     }
 }

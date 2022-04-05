@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using CodesService_API.DbContexts;
-using CodesService_API.Helpers;
-using CodesService_API.Services.IServices;
+using GameAccessService_API.DbContexts;
+using GameAccessService_API.Helpers;
+using GameAccessService_API.Services.IServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace CodesService_API.Services
+namespace GameAccessService_API.Services
 {
     public class CacheService : ICacheService
     {

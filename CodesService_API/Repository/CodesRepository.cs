@@ -31,10 +31,11 @@ namespace CodesService_API.Repository
 
         public async Task<ResponseDto> AddCode(AddCodesDto code)
         {
-            await db.Codes.AddAsync(mapper.Map<Codes>(code));
+            var mapped = mapper.Map<Codes>(code);
+            await db.Codes.AddAsync(mapped);
             if(await db.SaveChangesAsync() > 0) 
             {
-                await cacheService.TryRemoveFromCache<Codes>(CacheType.Codes);
+                await cacheService.TryAddToCache<Codes>(CacheType.Codes, mapped);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Code has been added successfuly" });
             }
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not add code" });
@@ -75,7 +76,7 @@ namespace CodesService_API.Repository
             db.Codes.Remove(checkCode);
             if(await db.SaveChangesAsync() > 0)
             {
-                await cacheService.TryRemoveFromCache<Codes>(CacheType.Codes);
+                await cacheService.TryRemoveFromCache<Codes>(CacheType.Codes, checkCode);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Code has been deleted successfuly" });
             }
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not delete code" });

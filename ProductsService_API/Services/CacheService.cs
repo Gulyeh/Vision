@@ -22,27 +22,44 @@ namespace ProductsService_API.Services
             this.memoryCache = memoryCache;
         }
 
+        public Task TryAddToCache<T>(CacheType type, Guid gameId, T data) where T : class
+        {
+            List<T> value;
+            string cacheName = $"{type}-{gameId}";
+            if(memoryCache.TryGetValue(cacheName, out value)){
+                value.Add(data);
+                SetCache<T>(cacheName, value);
+            }
+            return Task.CompletedTask;
+        }
+
         public async Task<IEnumerable<T>> TryGetFromCache<T>(CacheType type, Guid gameId) where T : class
         {
             IEnumerable<T> value;
-            if(!memoryCache.TryGetValue($"{type}-{gameId}", out value)){
+            string cacheName = $"{type}-{gameId}";
+            if(!memoryCache.TryGetValue(cacheName, out value)){
                 value = await db.Set<T>().ToListAsync();
-
-                var cacheOptions = new MemoryCacheEntryOptions()
-                    .SetSlidingExpiration(TimeSpan.FromMinutes(5));
-
-                memoryCache.Set($"{type}-{gameId}", value, cacheOptions);
+                SetCache<T>(cacheName, value);
             }
             return value;
         }
 
-        public Task TryRemoveFromCache<T>(CacheType type, Guid gameId) where T : class
+        public Task TryRemoveFromCache<T>(CacheType type, Guid gameId, T data) where T : class
         {
-            IEnumerable<T> value;
-            if(memoryCache.TryGetValue($"{type}-{gameId}", out value)){
-                memoryCache.Remove($"{type}-{gameId}");
+            List<T> value;
+            string cacheName = $"{type}-{gameId}";
+            if(memoryCache.TryGetValue(cacheName, out value)){
+                value.Remove(data);
+                SetCache<T>(cacheName, value);
             }
             return Task.CompletedTask;
+        }
+
+        private void SetCache<T>(string type, IEnumerable<T> value){
+            var cacheOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(5));
+
+            memoryCache.Set(type, value, cacheOptions);
         }
     }
 }

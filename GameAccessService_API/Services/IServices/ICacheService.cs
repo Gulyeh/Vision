@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using CodesService_API.Helpers;
+using GameAccessService_API.Helpers;
 
-namespace CodesService_API.Services.IServices
+namespace GameAccessService_API.Services.IServices
 {
     public interface ICacheService
     {

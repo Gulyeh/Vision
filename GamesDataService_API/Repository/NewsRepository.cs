@@ -47,7 +47,7 @@ namespace GamesDataService_API.Repository
             game.News.Add(mapped);
             if(await db.SaveChangesAsync() > 0)
             {
-                await cacheService.TryRemoveFromCache<News>(CacheType.News);
+                await cacheService.TryAddToCache<News>(CacheType.News, mapped);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Added news successfuly" });
             }
             
@@ -68,7 +68,7 @@ namespace GamesDataService_API.Repository
 
             game.News.Remove(news);
             if(await db.SaveChangesAsync() > 0){ 
-                await cacheService.TryRemoveFromCache<News>(CacheType.News);
+                await cacheService.TryRemoveFromCache<News>(CacheType.News, news);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Deleted news successfuly" });
             }
             
