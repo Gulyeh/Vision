@@ -11,6 +11,8 @@ namespace ProductsService_API.Dtos
     public class AddProductsDto : BaseProducts
     {
         [Required]
+        public Guid GameId { get; set; }
+        [Required]
         [NotNull]
         public IFormFile? Photo { get; set; }
     }

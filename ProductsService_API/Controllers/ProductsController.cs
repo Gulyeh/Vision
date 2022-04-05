@@ -33,9 +33,9 @@ namespace ProductsService_API.Controllers
 
         [HttpDelete("DeleteProduct")]
         [Authorize(Roles = StaticData.AdminRole)]
-        public async Task<ActionResult<ResponseDto>> DeleteProduct([FromQuery]Guid gameId){
-            if(gameId == Guid.Empty) return BadRequest();
-            return CheckActionResult(await productsRepository.DeleteProduct(gameId));
+        public async Task<ActionResult<ResponseDto>> DeleteProduct([FromQuery]Guid productId){
+            if(productId == Guid.Empty) return BadRequest();
+            return CheckActionResult(await productsRepository.DeleteProduct(productId));
         }
 
         [HttpPost("EditProduct")]

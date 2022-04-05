@@ -34,10 +34,10 @@ namespace GamesDataService_API.Controllers
 
         [HttpDelete("DeleteNews")]
         [Authorize(Policy = "HasAdminOrModRole")]
-        public async Task<ActionResult<ResponseDto>> DeleteGameNews([FromQuery]Guid newsId)
+        public async Task<ActionResult<ResponseDto>> DeleteGameNews([FromQuery]Guid newsId, [FromQuery]Guid gameId)
         {
             if(newsId == Guid.Empty) return BadRequest();
-            return CheckActionResult(await newsRepository.DeleteNews(newsId));
+            return CheckActionResult(await newsRepository.DeleteNews(newsId, gameId));
         }
 
         [HttpPost("EditNews")]

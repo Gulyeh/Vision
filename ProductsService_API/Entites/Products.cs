@@ -21,5 +21,7 @@ namespace ProductsService_API.Entites
         public string PhotoUrl { get; set; }
         [Required]
         public string PhotoId { get; set; }
+        [Required]
+        public Guid GameId { get; set; }
     }
 }

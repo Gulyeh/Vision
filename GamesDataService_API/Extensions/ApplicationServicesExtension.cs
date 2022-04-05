@@ -28,6 +28,7 @@ namespace GamesDataService_API.Extensions
             services.AddScoped<IGamesRepository, GamesRepository>();
             services.AddScoped<INewsRepository, NewsRepository>();
             services.AddScoped<IUploadService, UploadService>();
+            services.AddScoped<ICacheService, CacheService>();
             return services;
         }
     }

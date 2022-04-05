@@ -9,6 +9,7 @@ using Microsoft.Extensions.Caching.Memory;
 using ProductsService_API.DbContexts;
 using ProductsService_API.Dtos;
 using ProductsService_API.Entites;
+using ProductsService_API.Helpers;
 using ProductsService_API.Repository.IRepository;
 using ProductsService_API.Services.IServices;
 
@@ -19,14 +20,14 @@ namespace ProductsService_API.Repository
         private readonly ApplicationDbContext db;
         private readonly IMapper mapper;
         private readonly IUploadService uploadService;
-        private readonly IMemoryCache memoryCache;
+        private readonly ICacheService cacheService;
 
-        public ProductsRepository(ApplicationDbContext db, IMapper mapper, IUploadService uploadService, IMemoryCache memoryCache)
+        public ProductsRepository(ApplicationDbContext db, IMapper mapper, IUploadService uploadService, ICacheService cacheService)
         {
             this.db = db;
             this.mapper = mapper;
             this.uploadService = uploadService;
-            this.memoryCache = memoryCache;
+            this.cacheService = cacheService;
         }
 
         public async Task<ResponseDto> AddProduct(AddProductsDto data)
@@ -40,7 +41,11 @@ namespace ProductsService_API.Repository
             mapped.PhotoId = results.PublicId;
             
             await db.GamesProducts.AddAsync(mapped);
-            if(await db.SaveChangesAsync() > 0) return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Product has been added successfuly" });
+            if(await db.SaveChangesAsync() > 0) 
+            {
+                await cacheService.TryRemoveFromCache<Products>(CacheType.GameProducts, mapped.GameId);
+                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Product has been added successfuly" });
+            }
 
             await uploadService.DeletePhoto(results.PublicId);
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not add product" });
@@ -52,14 +57,16 @@ namespace ProductsService_API.Repository
             if(product is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Product does not exist" });
             
             db.GamesProducts.Remove(product);
-            if(await db.SaveChangesAsync() > 0) return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Product has been deleted successfuly" });
+            if(await db.SaveChangesAsync() > 0) {
+                await cacheService.TryRemoveFromCache<Products>(CacheType.GameProducts, product.GameId);
+                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Product has been deleted successfuly" });
+            }
         
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not delete product" });
         }
 
         public async Task<ResponseDto> EditProduct(ProductsDto data)
         {
-            //TODO: ask gamedata server if game exists by rabbitMQ
             string oldPhotoId = string.Empty;
 
             var product = await db.GamesProducts.FirstOrDefaultAsync(x => x.Id == data.Id);
@@ -75,7 +82,6 @@ namespace ProductsService_API.Repository
             }
 
             mapper.Map(data, product);
-            db.GamesProducts.Update(product);
             if(await db.SaveChangesAsync() > 0){
                 if(!string.IsNullOrEmpty(oldPhotoId)) await uploadService.DeletePhoto(oldPhotoId);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Product has been updated successfuly" });
@@ -93,15 +99,7 @@ namespace ProductsService_API.Repository
 
         public async Task<ResponseDto> GetGameProducts(Guid gameId)
         {
-            IEnumerable<Products> products;
-            if(!memoryCache.TryGetValue("GameProducts", out products))
-            {
-                products = await db.GamesProducts.Where(x => x.GameId == gameId).ToListAsync();
-                
-                var cacheOptions = new MemoryCacheEntryOptions()
-                    .SetSlidingExpiration(TimeSpan.FromMinutes(5));
-                memoryCache.Set("GameProducts", products, cacheOptions);
-            }
+            IEnumerable<Products> products = await cacheService.TryGetFromCache<Products>(CacheType.GameProducts, gameId);
             return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<ProductsDto>>(products));
         }
     }

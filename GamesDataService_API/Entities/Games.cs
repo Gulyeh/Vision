@@ -13,6 +13,7 @@ namespace GamesDataService_API.Entities
         {
             CoverId = string.Empty;
             IconId = string.Empty;
+            News = new List<News>();
         }
 
         [Key]
@@ -21,6 +22,6 @@ namespace GamesDataService_API.Entities
         public string IconId { get; set; }
         [Required]
         public string CoverId { get; set; }
-        public ICollection<News>? News { get; set; }
+        public ICollection<News> News { get; set; }
     }
 }

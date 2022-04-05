@@ -11,6 +11,6 @@ namespace GamesDataService_API.Repository.IRepository
         Task<ResponseDto> GetGameNews(Guid gameId);
         Task<ResponseDto> AddNews(AddNewsDto data);
         Task<ResponseDto> EditNews(NewsDto data);
-        Task<ResponseDto> DeleteNews(Guid newsId);
+        Task<ResponseDto> DeleteNews(Guid newsId, Guid gameId);
     }
 }

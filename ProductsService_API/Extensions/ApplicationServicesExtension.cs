@@ -22,6 +22,7 @@ namespace ProductsService_API.Extensions
             });
             services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));
             services.AddMemoryCache();
+            services.AddScoped<ICacheService, CacheService>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<ErrorHandler>();
             services.AddScoped<IUploadService, UploadService>();

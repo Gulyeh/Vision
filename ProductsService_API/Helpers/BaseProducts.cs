@@ -16,11 +16,9 @@ namespace ProductsService_API.Helpers
         }
 
         [Required]
-        public Guid GameId { get; set; }
-        [Required]
         public string Title { get; set; }
         [Required]
-        [Column(TypeName = "decimal(4,2)")]
+        [Column(TypeName = "decimal(15,2)")]
         public decimal Price { get; set; }
         [Required]
         public bool IsAvailable { get; set; }
