@@ -11,5 +11,6 @@ namespace GameAccessService_API.Repository.IRepository
         Task<bool> CheckUserAccess(Guid gameId, Guid userId);
         Task<ResponseDto> BanUserAccess(UserAccessDto data);
         Task<ResponseDto> UnbanUserAccess(AccessDataDto data);
+        Task<bool> CheckUserHasGame(Guid gameId, Guid userId);
     }
 }

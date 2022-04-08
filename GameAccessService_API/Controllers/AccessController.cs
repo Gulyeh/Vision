@@ -42,5 +42,12 @@ namespace GameAccessService_API.Controllers
             if(!ModelState.IsValid) return BadRequest(ModelState);
             return CheckActionResult(await accessRepository.UnbanUserAccess(data));
         }
+
+        [HttpGet("BoughtGame")]
+        public async Task<ActionResult<ResponseDto>> CheckUserBoughtGame([FromQuery]Guid gameId){
+            if(gameId == Guid.Empty) return BadRequest();
+            return Ok(new ResponseDto(true, StatusCodes.Status200OK, new HasAccess(await accessRepository.CheckUserHasGame(gameId, User.GetId()))));
+        }
+
     }
 }

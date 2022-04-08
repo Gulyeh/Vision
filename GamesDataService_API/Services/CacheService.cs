@@ -26,8 +26,10 @@ namespace GamesDataService_API.Services
         {
             List<T> value;
             if(memoryCache.TryGetValue(type, out value)){
-                value.Add(data);
-                SetCache<T>(type, value);
+                lock(value){
+                    value.Add(data);
+                    SetCache<T>(type, value);
+                }
             }
             return Task.CompletedTask;
         }
@@ -46,8 +48,10 @@ namespace GamesDataService_API.Services
         {
             List<T> value;
             if(memoryCache.TryGetValue(type, out value)){
-                value.Remove(data);
-                SetCache<T>(type, value);
+                lock(value){
+                    value.Remove(data);
+                    SetCache<T>(type, value);
+                }
             }
             return Task.CompletedTask;
         }

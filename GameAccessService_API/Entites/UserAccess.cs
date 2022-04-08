@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using GameAccessService_API.Helpers;
 
 namespace GameAccessService_API.Entites
 {
-    public class UserAccess
+    public class UserAccess : BaseUser
     {
         public UserAccess()
         {
@@ -16,10 +17,6 @@ namespace GameAccessService_API.Entites
 
         [Key]
         public int Id { get; set; }
-        [Required]
-        public Guid UserId { get; set; }
-        [Required]
-        public Guid GameId { get; set; }
         public string? Reason { get; set; }
         [Required]
         public string BlockedBy { get; set; }

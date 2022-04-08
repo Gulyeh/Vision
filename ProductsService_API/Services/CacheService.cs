@@ -27,8 +27,10 @@ namespace ProductsService_API.Services
             List<T> value;
             string cacheName = $"{type}-{gameId}";
             if(memoryCache.TryGetValue(cacheName, out value)){
-                value.Add(data);
-                SetCache<T>(cacheName, value);
+                lock(value){
+                    value.Add(data);
+                    SetCache<T>(cacheName, value);
+                }
             }
             return Task.CompletedTask;
         }
@@ -49,8 +51,10 @@ namespace ProductsService_API.Services
             List<T> value;
             string cacheName = $"{type}-{gameId}";
             if(memoryCache.TryGetValue(cacheName, out value)){
-                value.Remove(data);
-                SetCache<T>(cacheName, value);
+                lock(value){
+                    value.Remove(data);
+                    SetCache<T>(cacheName, value);
+                }
             }
             return Task.CompletedTask;
         }

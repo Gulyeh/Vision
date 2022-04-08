@@ -41,10 +41,12 @@ namespace GameAccessService_API.Repository
 
         public async Task<bool> CheckUserAccess(Guid gameId, Guid userId)
         {
-            var cache = await cacheService.TryGetFromCache<UserAccess>(CacheType.GameAccess);
-            var results = cache.FirstOrDefault(u => u.UserId == userId && u.GameId == gameId);
-            if(results is null) return true;
-            return false;
+            return await CheckCache<UserAccess>(gameId, userId, CacheType.GameAccess);
+        }
+
+        public async Task<bool> CheckUserHasGame(Guid gameId, Guid userId)
+        {
+            return await CheckCache<UserGames>(gameId, userId, CacheType.OwnGame);
         }
 
         public async Task<ResponseDto> UnbanUserAccess(AccessDataDto data)
@@ -57,6 +59,23 @@ namespace GameAccessService_API.Repository
                  return new ResponseDto(true, StatusCodes.Status200OK, new[] { "User has been unbanned successfuly" });
             }
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not unban a user" });
+        }
+
+        private async Task<bool> CheckCache<T>(Guid gameId, Guid userId, CacheType type) where T : BaseUser
+        {
+            var cache = await cacheService.TryGetFromCache<T>(type);
+            var results = cache.FirstOrDefault(x => x.GameId == gameId && x.UserId == userId);
+
+            switch(type){
+                case CacheType.GameAccess:
+                    if(results is null) return true;
+                    return false;
+                case CacheType.OwnGame:
+                    if(results is null) return false;
+                    return true;
+                default:
+                    return false;
+            }
         }
     }
 }

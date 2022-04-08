@@ -12,8 +12,10 @@ namespace GameAccessService_API.DbContexts
         public ApplicationDbContext(DbContextOptions options) : base(options)
         {
             UsersGameAccess = Set<UserAccess>();
+            UsersGames = Set<UserGames>();
         }
 
         public DbSet<UserAccess> UsersGameAccess { get; set; }
+        public DbSet<UserGames> UsersGames { get; set; }
     }
 }
