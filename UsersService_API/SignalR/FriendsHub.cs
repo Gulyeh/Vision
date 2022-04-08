@@ -23,6 +23,12 @@ namespace UsersService_API.SignalR
             userId = Context.User != null ? Context.User.GetId() : Guid.Empty;
         }
 
+        public override async Task OnConnectedAsync(){
+            await Clients.Caller.SendAsync("GetFriendsData", await friendsRepository.GetPendingRequests(userId), 
+                await friendsRepository.GetFriendRequests(userId),
+                await friendsRepository.GetFriends(userId));
+        }
+
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
             await base.OnDisconnectedAsync(exception);
