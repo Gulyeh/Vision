@@ -23,8 +23,6 @@ namespace GameAccessService_API.Dtos
         public string? Reason { get; set; }
         [Required]
         public string BlockedBy { get; set; }
-        [JsonIgnore]
-        public DateTime BlockDate { get; set; } = DateTime.Now;
         [Required]
         public DateTime ExpireDate { get; set; } 
     }

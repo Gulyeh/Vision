@@ -135,6 +135,14 @@ namespace UsersService_API.Repository
             return connList;
         }
 
+        public async Task<IEnumerable<UserDataDto>> FindUsers(string containsString)
+        {
+            IEnumerable<UserDataDto> Users = new List<UserDataDto>();
+            var foundUsers = await db.Users.Where(x => x.Nickname.ToLower().Contains(containsString.ToLower())).ToListAsync();
+            Users = mapper.Map<IEnumerable<UserDataDto>>(foundUsers);
+            return Users;
+        }
+
         private async Task<bool> SaveChangesAsync(){
             if(await db.SaveChangesAsync() > 0) return true;
             return false;

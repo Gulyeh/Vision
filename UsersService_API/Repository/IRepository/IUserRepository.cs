@@ -17,5 +17,6 @@ namespace UsersService_API.Repository.IRepository
         Task<bool> UserOffline(Guid userId, string connectionId);
         Task<List<string>> GetUserFriendsOnline(Guid userId);
         Task<List<string>> CheckFriendIsOnline(Guid friendId);
+        Task<IEnumerable<UserDataDto>> FindUsers(string containsString);
     }
 }

@@ -21,7 +21,7 @@ namespace GameAccessService_API.Entites
         [Required]
         public string BlockedBy { get; set; }
         [Required]
-        public DateTime BlockDate { get; set; }
+        public DateTime BlockDate { get; set; } = DateTime.UtcNow;
         [Required]
         public DateTime ExpireDate { get; set; }   
     }
