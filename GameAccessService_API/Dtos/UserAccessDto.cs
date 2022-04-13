@@ -1,10 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using AutoMapper.Configuration.Annotations;
 
 namespace GameAccessService_API.Dtos
 {
@@ -24,6 +18,6 @@ namespace GameAccessService_API.Dtos
         [Required]
         public string BlockedBy { get; set; }
         [Required]
-        public DateTime ExpireDate { get; set; } 
+        public DateTime ExpireDate { get; set; }
     }
 }

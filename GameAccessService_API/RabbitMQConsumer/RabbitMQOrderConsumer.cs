@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using GameAccessService_API.Helpers;
 using GameAccessService_API.Messages;
 using GameAccessService_API.RabbitMQSender;
@@ -11,6 +6,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using System.Text;
 
 
 namespace GameAccessService_API.RabbitMQConsumer
@@ -33,9 +29,9 @@ namespace GameAccessService_API.RabbitMQConsumer
 
             connection = factory.CreateConnection();
             channel = connection.CreateModel();
-            channel.QueueDeclare(queue: "AccessProductQueue", false, false, false, arguments: null);     
+            channel.QueueDeclare(queue: "AccessProductQueue", false, false, false, arguments: null);
             this.rabbitMQSender = rabbitMQSender;
-            
+
             using var scope = scopeFactory.CreateScope();
             accessRepository = scope.ServiceProvider.GetRequiredService<IAccessRepository>();
         }
@@ -59,10 +55,14 @@ namespace GameAccessService_API.RabbitMQConsumer
 
         private async Task HandleMessage(UserPurchaseDto? data)
         {
-            if(data is not null){ 
-                if(data.productId is not null) {
+            if (data is not null)
+            {
+                if (data.productId is not null)
+                {
                     data.isSuccess = await accessRepository.AddProductOrGame(data.userId, data.gameId, (Guid)data.productId);
-                }else{
+                }
+                else
+                {
                     data.isSuccess = await accessRepository.AddProductOrGame(data.userId, data.gameId);
                 }
 

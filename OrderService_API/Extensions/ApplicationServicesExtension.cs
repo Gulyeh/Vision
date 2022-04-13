@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using OrderService_API.DbContexts;
 using OrderService_API.Helpers;
@@ -17,7 +13,8 @@ namespace OrderService_API.Extensions
 {
     public static class ApplicationServicesExtension
     {
-        public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config){
+        public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config)
+        {
             services.AddDbContext<ApplicationDbContext>(opt =>
             {
                 opt.UseSqlServer(config.GetConnectionString("Connection"));

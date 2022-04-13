@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using PaymentService_API.Helpers;
 using PaymentService_API.Repository.IRepository;
@@ -20,7 +16,8 @@ namespace PaymentService_API.Controllers
         }
 
         [HttpGet("Success")]
-        public async Task<ContentResult> PaymentSuccess([FromQuery]string sessionId){
+        public async Task<ContentResult> PaymentSuccess([FromQuery] string sessionId)
+        {
             await paymentRepository.PaymentCompleted(sessionId, PaymentStatus.Completed);
             return base.Content(@"
                     <body>
@@ -31,7 +28,8 @@ namespace PaymentService_API.Controllers
         }
 
         [HttpGet("Failed")]
-        public async Task<ContentResult> PaymentFailed([FromQuery]string sessionId){
+        public async Task<ContentResult> PaymentFailed([FromQuery] string sessionId)
+        {
             await paymentRepository.PaymentCompleted(sessionId, PaymentStatus.Cancelled);
             return base.Content(@"
                     <body>

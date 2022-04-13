@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
 using GamesDataService_API.DbContexts;
 using GamesDataService_API.Dtos;
@@ -22,7 +18,7 @@ namespace GamesDataService_API.Repository
         private readonly IMapper mapper;
         private readonly IMemoryCache memoryCache;
 
-        public GamesRepository(IUploadService uploadService, ICacheService cacheService ,ApplicationDbContext db, IMapper mapper, IMemoryCache memoryCache)
+        public GamesRepository(IUploadService uploadService, ICacheService cacheService, ApplicationDbContext db, IMapper mapper, IMemoryCache memoryCache)
         {
             this.uploadService = uploadService;
             this.cacheService = cacheService;
@@ -36,42 +32,44 @@ namespace GamesDataService_API.Repository
             var mapped = mapper.Map<Games>(data);
 
             var results = await uploadService.UploadPhoto(data.CoverPhoto);
-            if(results.Error is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not upload cover image" });
+            if (results.Error is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not upload cover image" });
             mapped.CoverId = results.PublicId;
             mapped.CoverUrl = results.SecureUrl.AbsoluteUri;
 
             results = await uploadService.UploadPhoto(data.IconPhoto);
-            if(results.Error is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not upload icon image" });
+            if (results.Error is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not upload icon image" });
             mapped.IconUrl = results.SecureUrl.AbsoluteUri;
             mapped.IconId = results.PublicId;
 
             await db.Games.AddAsync(mapped);
-            if(await db.SaveChangesAsync() > 0){
+            if (await db.SaveChangesAsync() > 0)
+            {
                 await cacheService.TryAddToCache<Games>(CacheType.Games, mapped);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Added game successfuly" });
             }
 
-            if(!string.IsNullOrEmpty(mapped.IconId)) await uploadService.DeletePhoto(mapped.IconId);
-            if(!string.IsNullOrEmpty(mapped.CoverId)) await uploadService.DeletePhoto(mapped.CoverId);
+            if (!string.IsNullOrEmpty(mapped.IconId)) await uploadService.DeletePhoto(mapped.IconId);
+            if (!string.IsNullOrEmpty(mapped.CoverId)) await uploadService.DeletePhoto(mapped.CoverId);
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not add game" });
         }
 
         public async Task<ResponseDto> CheckGame(Guid gameId)
         {
             var game = await db.Games.FirstOrDefaultAsync(x => x.Id == gameId);
-            if(game is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game does not exist" });
+            if (game is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game does not exist" });
             return new ResponseDto(true, StatusCodes.Status200OK, true);
         }
 
         public async Task<ResponseDto> DeleteGame(Guid gameId)
         {
             Games game;
-            if(!await GameExists(gameId, out game)) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game does not exists" });
+            if (!await GameExists(gameId, out game)) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game does not exists" });
 
             db.Games.Remove(game);
-            if(await db.SaveChangesAsync() > 0) {
-                if(!string.IsNullOrEmpty(game.IconId)) await uploadService.DeletePhoto(game.IconId);
-                if(!string.IsNullOrEmpty(game.CoverId)) await uploadService.DeletePhoto(game.CoverId);
+            if (await db.SaveChangesAsync() > 0)
+            {
+                if (!string.IsNullOrEmpty(game.IconId)) await uploadService.DeletePhoto(game.IconId);
+                if (!string.IsNullOrEmpty(game.CoverId)) await uploadService.DeletePhoto(game.CoverId);
                 await cacheService.TryRemoveFromCache<Games>(CacheType.Games, game);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Deleted game successfuly" });
             }
@@ -84,35 +82,38 @@ namespace GamesDataService_API.Repository
             var oldIconId = string.Empty;
 
             Games game;
-            if(!await GameExists(data.Id, out game)) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game does not exists" });
+            if (!await GameExists(data.Id, out game)) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game does not exists" });
 
             mapper.Map(data, game);
-            if(data.CoverPhoto is not null){
+            if (data.CoverPhoto is not null)
+            {
                 var results = await uploadService.UploadPhoto(data.CoverPhoto);
-                if(results.Error is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not upload cover photo" });
-                
-                oldCoverId = game.CoverId;            
+                if (results.Error is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not upload cover photo" });
+
+                oldCoverId = game.CoverId;
                 game.CoverId = results.PublicId;
                 game.CoverUrl = results.SecureUrl.AbsoluteUri;
             }
 
-            if(data.IconPhoto is not null){
+            if (data.IconPhoto is not null)
+            {
                 var results = await uploadService.UploadPhoto(data.IconPhoto);
-                if(results.Error is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not upload icon photo" });
-                
+                if (results.Error is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not upload icon photo" });
+
                 oldIconId = game.IconId;
                 game.IconId = results.PublicId;
                 game.IconUrl = results.SecureUrl.AbsoluteUri;
             }
-            
-            if(await db.SaveChangesAsync() > 0)  {
-                if(!string.IsNullOrEmpty(oldIconId)) await uploadService.DeletePhoto(oldIconId); 
-                if(!string.IsNullOrEmpty(oldCoverId)) await uploadService.DeletePhoto(oldCoverId); 
-                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Game edited successfuly" });
-            }        
 
-            if(!string.IsNullOrEmpty(oldIconId)) await uploadService.DeletePhoto(game.IconId); 
-            if(!string.IsNullOrEmpty(oldCoverId)) await uploadService.DeletePhoto(game.CoverId); 
+            if (await db.SaveChangesAsync() > 0)
+            {
+                if (!string.IsNullOrEmpty(oldIconId)) await uploadService.DeletePhoto(oldIconId);
+                if (!string.IsNullOrEmpty(oldCoverId)) await uploadService.DeletePhoto(oldCoverId);
+                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Game edited successfuly" });
+            }
+
+            if (!string.IsNullOrEmpty(oldIconId)) await uploadService.DeletePhoto(game.IconId);
+            if (!string.IsNullOrEmpty(oldCoverId)) await uploadService.DeletePhoto(game.CoverId);
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not edit game" });
         }
 
@@ -122,12 +123,14 @@ namespace GamesDataService_API.Repository
             return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<GamesDto>>(games));
         }
 
-        private Task<bool> GameExists(Guid gameId, out Games game){
+        private Task<bool> GameExists(Guid gameId, out Games game)
+        {
 
             IEnumerable<Games> gameExists;
-            if(memoryCache.TryGetValue(CacheType.Games, out gameExists)){
+            if (memoryCache.TryGetValue(CacheType.Games, out gameExists))
+            {
                 var findGame = gameExists.FirstOrDefault(x => x.Id == gameId);
-                if(findGame is not null) 
+                if (findGame is not null)
                 {
                     game = findGame;
                     return Task.FromResult(true);
@@ -135,7 +138,7 @@ namespace GamesDataService_API.Repository
             }
 
             var dbgameExists = db.Games.FirstOrDefault(x => x.Id == gameId);
-            if(dbgameExists is not null) 
+            if (dbgameExists is not null)
             {
                 game = dbgameExists;
                 return Task.FromResult(true);

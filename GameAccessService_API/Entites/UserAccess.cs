@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 using GameAccessService_API.Helpers;
+using System.ComponentModel.DataAnnotations;
 
 namespace GameAccessService_API.Entites
 {
@@ -23,6 +19,6 @@ namespace GameAccessService_API.Entites
         [Required]
         public DateTime BlockDate { get; set; } = DateTime.UtcNow;
         [Required]
-        public DateTime ExpireDate { get; set; }   
+        public DateTime ExpireDate { get; set; }
     }
 }

@@ -1,12 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Identity_API.Helpers;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
+using System.Text;
 
 namespace Identity_API.RabbitMQSender
 {
@@ -46,7 +42,7 @@ namespace Identity_API.RabbitMQSender
 
         private bool ConnectionExists()
         {
-            if(connection != null)
+            if (connection != null)
             {
                 return true;
             }

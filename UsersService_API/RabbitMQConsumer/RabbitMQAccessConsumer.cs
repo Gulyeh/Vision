@@ -1,13 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using System.Text;
 using UsersService_API.Helpers;
 using UsersService_API.Messages;
 using UsersService_API.Services.IServices;
@@ -59,11 +55,14 @@ namespace UsersService_API.RabbitMQConsumer
 
         private async Task HandleMessage(UserGameDto? data)
         {
-            if(data is not null){ 
+            if (data is not null)
+            {
                 var userCache = await cacheService.TryGetFromCache();
-                if(userCache.ContainsKey(data.userId)){
+                if (userCache.ContainsKey(data.userId))
+                {
                     var connIds = userCache.GetValueOrDefault(data.userId);
-                    if(connIds is not null){
+                    if (connIds is not null)
+                    {
                         await hubContext.Clients.Clients(connIds).SendAsync("GamePurchased");
                     }
                 }

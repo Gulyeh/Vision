@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace Identity_API.Dtos
 {
     public class UserDto
@@ -20,6 +15,6 @@ namespace Identity_API.Dtos
         public string Username { get; set; }
         public string Token { get; set; }
         public string PhotoUrl { get; set; }
-        public string Description { get; set; }      
+        public string Description { get; set; }
     }
 }

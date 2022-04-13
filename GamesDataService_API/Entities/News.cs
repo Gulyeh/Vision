@@ -1,10 +1,6 @@
-using System;
-using System.Collections.Generic;
+using GamesDataService_API.Helpers;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
-using GamesDataService_API.Helpers;
 
 namespace GamesDataService_API.Entities
 {
@@ -21,6 +17,6 @@ namespace GamesDataService_API.Entities
         [Required]
         public string PhotoId { get; set; }
         [ForeignKey("GameId")]
-        public Games Game { get; set;}
+        public Games Game { get; set; }
     }
 }

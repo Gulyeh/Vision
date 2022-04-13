@@ -1,13 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using PaymentService_API.DbContexts;
-using PaymentService_API.Entities;
 using PaymentService_API.Helpers;
-using PaymentService_API.Messages;
 using PaymentService_API.Middleware;
 using PaymentService_API.RabbitMQConsumer;
 using PaymentService_API.RabbitMQSender;
@@ -20,7 +13,8 @@ namespace PaymentService_API.Extensions
 {
     public static class ApplicationServicesExtension
     {
-        public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config){
+        public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config)
+        {
             services.AddDbContext<ApplicationDbContext>(opt =>
             {
                 opt.UseSqlServer(config.GetConnectionString("Connection"));

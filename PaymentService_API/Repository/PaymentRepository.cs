@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using PaymentService_API.DbContexts;
@@ -39,19 +35,23 @@ namespace PaymentService_API.Repository
         public async Task<bool> PaymentCompleted(string sessionId, PaymentStatus status)
         {
             var payment = await db.Payments.FirstOrDefaultAsync(x => x.StripeId == sessionId);
-            if(payment is null || payment.PaymentStatus != PaymentStatus.Inprogress) return false;
+            if (payment is null || payment.PaymentStatus != PaymentStatus.Inprogress) return false;
             payment.PaymentStatus = status;
-            rabbitMQSender.SendMessage(new { isSuccess = status == PaymentStatus.Completed ? true : false, 
+            rabbitMQSender.SendMessage(new
+            {
+                isSuccess = status == PaymentStatus.Completed ? true : false,
                 userId = payment.UserId,
-                Email = payment.Email ,
-                orderId = payment.OrderId} , "PaymentQueue");
+                Email = payment.Email,
+                orderId = payment.OrderId
+            }, "PaymentQueue");
             return true;
         }
 
         public async Task<PaymentUrlData> RequestStripePayment(PaymentMessage data)
         {
             var url = await stripeService.GeneratePayment(data);
-            return new PaymentUrlData(){
+            return new PaymentUrlData()
+            {
                 userId = data.UserId,
                 PaymentUrl = url
             };

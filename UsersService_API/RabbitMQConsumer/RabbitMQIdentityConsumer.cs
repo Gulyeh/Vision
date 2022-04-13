@@ -1,12 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using System.Text;
 using UsersService_API.Helpers;
 using UsersService_API.Repository.IRepository;
 
@@ -54,7 +49,7 @@ namespace UsersService_API.RabbitMQConsumer
         {
             Guid Id;
             Guid.TryParse(userId, out Id);
-            if(Id != Guid.Empty) await userRepository.CreateUser(Id);
+            if (Id != Guid.Empty) await userRepository.CreateUser(Id);
         }
     }
 }

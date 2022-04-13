@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using SMTPService_API.Helpers;
 
 namespace SMTPService_API.Messages

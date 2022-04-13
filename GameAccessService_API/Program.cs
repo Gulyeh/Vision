@@ -1,10 +1,6 @@
-using System.Text;
-using GameAccessService_API.DbContexts;
 using GameAccessService_API.Extensions;
 using GameAccessService_API.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);

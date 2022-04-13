@@ -1,16 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using MessageService_API.Helpers;
 using MessageService_API.Messages;
 using MessageService_API.Repository.IRepository;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using System.Text;
 
 namespace MessageService_API.RabbitMQConsumer
 {
@@ -32,7 +27,7 @@ namespace MessageService_API.RabbitMQConsumer
             connection = factory.CreateConnection();
             channel = connection.CreateModel();
             channel.QueueDeclare(queue: "DeleteChatQueue", false, false, false, arguments: null);
-            
+
             using var scope = scopeFactory.CreateScope();
             chatRepository = scope.ServiceProvider.GetRequiredService<IChatRepository>();
         }
@@ -56,7 +51,8 @@ namespace MessageService_API.RabbitMQConsumer
 
         private async Task HandleMessage(DeleteChat? data)
         {
-            if(data is not null){ 
+            if (data is not null)
+            {
                 await chatRepository.DeleteChat(data.User1, data.User2);
             }
         }

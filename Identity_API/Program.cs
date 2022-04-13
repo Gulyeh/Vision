@@ -1,12 +1,8 @@
-using System.Text;
 using Identity_API.DbContexts;
 using Identity_API.Extensions;
 using Identity_API.Middleware;
-using Identity_API.Statics;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -65,13 +61,18 @@ app.UseAuthorization();
 app.MapControllers();
 app.Run();
 
-async Task SeedRoles(){
-    using (var scope = app.Services.CreateScope()){
-        try{
+async Task SeedRoles()
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        try
+        {
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var role = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
             await RoleSeeder.CreateRoles(role, context);
-        }catch(Exception e){
+        }
+        catch (Exception e)
+        {
             var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
             logger.LogError(e.Message, "An error has occured while migration");
         }

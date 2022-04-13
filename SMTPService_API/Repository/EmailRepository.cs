@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using SMTPService_API.DBContexts;
 using SMTPService_API.Entites;
 using SMTPService_API.Messages;
@@ -25,7 +21,8 @@ namespace SMTPService_API.Repository
         {
             var sent = await emailSerivce.SendEmail(data);
 
-            EmailLogs logs = new EmailLogs(){
+            EmailLogs logs = new EmailLogs()
+            {
                 Email = data.ReceiverEmail,
                 Log = $"Sent {data.EmailType} email"
             };

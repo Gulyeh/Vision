@@ -1,12 +1,8 @@
-using System.Collections.Generic;
 using GameAccessService_API.Extensions;
 using MessageService_API.Middleware;
 using MessageService_API.SignalR;
 using MessagesService_API.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);

@@ -1,16 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.IdentityModel.Tokens;
 using UsersService_API.DbContexts;
-using UsersService_API.Dtos;
-using UsersService_API.Entites;
 using UsersService_API.Helpers;
 using UsersService_API.Middleware;
 using UsersService_API.RabbitMQConsumer;
@@ -24,8 +13,10 @@ namespace UsersService_API.Extensions
 {
     public static class ApplicationServiceExtensions
     {
-        public static IServiceCollection AddApplicationService(this IServiceCollection services, IConfiguration config){
-            services.AddDbContext<ApplicationDbContext>(opts => {
+        public static IServiceCollection AddApplicationService(this IServiceCollection services, IConfiguration config)
+        {
+            services.AddDbContext<ApplicationDbContext>(opts =>
+            {
                 opts.UseSqlServer(config.GetConnectionString("Connection"));
             });
             services.AddSignalR();

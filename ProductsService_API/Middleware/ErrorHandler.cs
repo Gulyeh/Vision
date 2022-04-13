@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace ProductsService_API.Middleware
 {
     public class ErrorHandler : IMiddleware
@@ -18,7 +13,7 @@ namespace ProductsService_API.Middleware
         {
             try
             {
-               await next.Invoke(context);
+                await next.Invoke(context);
             }
             catch (Exception ex)
             {

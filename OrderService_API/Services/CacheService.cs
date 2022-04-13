@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using OrderService_API.DbContexts;
 using OrderService_API.Services.IServices;
@@ -24,8 +18,10 @@ namespace OrderService_API.Services
         public Task TryAddToCache(Guid userId, string connId)
         {
             List<string> value;
-            if(memoryCache.TryGetValue(userId, out value)){
-                lock(value){
+            if (memoryCache.TryGetValue(userId, out value))
+            {
+                lock (value)
+                {
                     value.Add(connId);
                     SetCache(userId, value);
                 }
@@ -43,17 +39,20 @@ namespace OrderService_API.Services
         public Task TryRemoveFromCache(Guid userId, string connId)
         {
             List<string> value;
-            if(memoryCache.TryGetValue(userId, out value)){
-                lock(value){
+            if (memoryCache.TryGetValue(userId, out value))
+            {
+                lock (value)
+                {
                     value.Remove(connId);
-                    if(value.Count() == 0) memoryCache.Remove(userId);
+                    if (value.Count() == 0) memoryCache.Remove(userId);
                     else SetCache(userId, value);
                 }
             }
             return Task.CompletedTask;
         }
 
-        private void SetCache(Guid userId, List<string> value){
+        private void SetCache(Guid userId, List<string> value)
+        {
             var cacheOptions = new MemoryCacheEntryOptions()
                     .SetSlidingExpiration(TimeSpan.FromMinutes(5));
 

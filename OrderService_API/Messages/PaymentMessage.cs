@@ -1,11 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using OrderService_API.Dtos;
-using OrderService_API.Entities;
-using OrderService_API.Helpers;
-
 namespace OrderService_API.Messages
 {
     public class PaymentMessage

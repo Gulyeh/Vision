@@ -1,13 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AutoMapper;
-using HashidsNet;
 using Identity_API.DbContexts;
 using Identity_API.Dtos;
-using Identity_API.Entities;
 using Identity_API.Extensions;
 using Identity_API.Helpers;
 using Identity_API.RabbitMQSender;
@@ -16,6 +9,7 @@ using Identity_API.Services.IServices;
 using Identity_API.Statics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
 
 namespace Identity_API.Repository
 {
@@ -29,7 +23,7 @@ namespace Identity_API.Repository
         private readonly ApplicationDbContext db;
         private readonly IRabbitMQSender rabbitMQSender;
 
-        public AccountRepository(IMapper mapper, UserManager<ApplicationUser> userManager, 
+        public AccountRepository(IMapper mapper, UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager, RoleManager<ApplicationRole> roleManager, ITokenService tokenService,
             ApplicationDbContext db, IRabbitMQSender rabbitMQSender)
         {
@@ -45,10 +39,10 @@ namespace Identity_API.Repository
         public async Task<ResponseDto> ConfirmEmail(Guid userId, string token)
         {
             var user = await userManager.Users.FirstOrDefaultAsync(x => x.Id == userId);
-            if(user is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "User does not exist" });
+            if (user is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "User does not exist" });
 
             var result = await userManager.ConfirmEmailAsync(user, token);
-            if(!result.Succeeded) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not confirm email address" });
+            if (!result.Succeeded) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not confirm email address" });
 
             return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Email has been confirmed" });
         }
@@ -56,13 +50,14 @@ namespace Identity_API.Repository
         public async Task<ResponseDto> Login(LoginDto loginData)
         {
             var user = await userManager.Users.FirstOrDefaultAsync(u => u.Email == loginData.Email);
-            if(user is null) return new ResponseDto(false, StatusCodes.Status401Unauthorized, new[] { "Wrong email or password" });
+            if (user is null) return new ResponseDto(false, StatusCodes.Status401Unauthorized, new[] { "Wrong email or password" });
 
             var results = await signInManager.CheckPasswordSignInAsync(user, loginData.Password, false);
-            if(!results.Succeeded) return new ResponseDto(false, StatusCodes.Status401Unauthorized, new[] { "Wrong email or password" });
+            if (!results.Succeeded) return new ResponseDto(false, StatusCodes.Status401Unauthorized, new[] { "Wrong email or password" });
 
             var isBanned = await db.BannedUsers.FirstOrDefaultAsync(x => x.UserId == user.Id && x.BanExpires > DateTime.Now);
-            if(isBanned is not null) return new ResponseDto(false, StatusCodes.Status401Unauthorized, new{
+            if (isBanned is not null) return new ResponseDto(false, StatusCodes.Status401Unauthorized, new
+            {
                 Message = "Your account has been banned",
                 Reason = isBanned.Reason,
                 BanExpires = isBanned.BanExpires.ToShortDate(),
@@ -79,7 +74,8 @@ namespace Identity_API.Repository
 
         public async Task<ResponseDto> Register(RegisterDto registerData, string baseUri)
         {
-            if(await UserExists(registerData.Email)){
+            if (await UserExists(registerData.Email))
+            {
                 return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "User with this email already exists" });
             }
 
@@ -87,14 +83,15 @@ namespace Identity_API.Repository
             user.UserName = registerData.Email;
 
             var result = await userManager.CreateAsync(user, registerData.Password);
-            if(!result.Succeeded) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not register user" });
+            if (!result.Succeeded) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not register user" });
             await userManager.AddToRoleAsync(user, StaticData.UserRole);
 
             var token = Encoding.UTF8.GetBytes(await userManager.GenerateEmailConfirmationTokenAsync(user));
             var link = $"{baseUri}/ConfirmEmail?userId={user.Id}&token={token}";
 
             rabbitMQSender.SendMessage(new { userId = user.Id }, "CreateUserQueue");
-            rabbitMQSender.SendMessage(new EmailDataDto(){
+            rabbitMQSender.SendMessage(new EmailDataDto()
+            {
                 userId = user.Id,
                 Content = $"Confirm your email by entering {link}",
                 ReceiverEmail = user.UserName,
@@ -103,8 +100,9 @@ namespace Identity_API.Repository
 
             return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Account has been registered successfuly. Please check your mailbox and confirm your email address" });
         }
-        
-        private async Task<bool> UserExists(string email){
+
+        private async Task<bool> UserExists(string email)
+        {
             return await userManager.Users.AnyAsync(e => e.Email == email);
         }
     }

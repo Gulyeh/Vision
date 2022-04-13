@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using GamesDataService_API.Helpers;
@@ -16,7 +12,8 @@ namespace GamesDataService_API.Services
 
         public UploadService(IOptions<CloudinarySettings> options)
         {
-            var cloudinaryAccount = new Account{
+            var cloudinaryAccount = new Account
+            {
                 ApiKey = options.Value.ApiKey,
                 ApiSecret = options.Value.ApiSecret,
                 Cloud = options.Value.CloudName
@@ -31,14 +28,15 @@ namespace GamesDataService_API.Services
             var results = await cloudinary.DestroyAsync(deleteParams);
             return results;
         }
-        
+
         public async Task<ImageUploadResult> UploadPhoto(IFormFile file)
         {
             var uploadResults = new ImageUploadResult();
-            if(file.Length > 0)
+            if (file.Length > 0)
             {
                 using var stream = file.OpenReadStream();
-                var uploadParams = new ImageUploadParams{
+                var uploadParams = new ImageUploadParams
+                {
                     File = new FileDescription(file.FileName, stream)
                 };
 

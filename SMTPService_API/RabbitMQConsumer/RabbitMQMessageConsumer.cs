@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
@@ -10,6 +5,7 @@ using RabbitMQ.Client.Events;
 using SMTPService_API.Helpers;
 using SMTPService_API.Messages;
 using SMTPService_API.Repository.IRepository;
+using System.Text;
 
 namespace SMTPService_API.RabbitMQConsumer
 {
@@ -55,7 +51,7 @@ namespace SMTPService_API.RabbitMQConsumer
 
         private async Task HandleMessage(EmailDataDto? data)
         {
-            if(data is not null) await emailRepository.InitializeEmail(data);
+            if (data is not null) await emailRepository.InitializeEmail(data);
         }
     }
 }

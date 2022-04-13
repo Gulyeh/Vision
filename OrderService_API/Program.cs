@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.OpenApi.Models;
 using OrderService_API.Extensions;
 using OrderService_API.Middleware;

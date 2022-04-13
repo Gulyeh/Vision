@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using MailKit.Net.Smtp;
 using MimeKit;
 using SMTPService_API.Helpers;
@@ -21,12 +17,14 @@ namespace SMTPService_API.Services
 
         public async Task<bool> SendEmail(EmailDataDto data)
         {
-            try{
+            try
+            {
                 var emailToSend = new MimeMessage();
                 emailToSend.From.Add(MailboxAddress.Parse(config["SenderName"]));
                 emailToSend.To.Add(MailboxAddress.Parse(data.ReceiverEmail));
                 emailToSend.Body = new TextPart(MimeKit.Text.TextFormat.Html) { Text = data.Content };
-                switch(data.EmailType){
+                switch (data.EmailType)
+                {
                     case EmailTypes.ResetPassword:
                         emailToSend.Subject = "Reset Password";
                         break;
@@ -46,7 +44,9 @@ namespace SMTPService_API.Services
                 await emailClient.SendAsync(emailToSend);
                 await emailClient.DisconnectAsync(true);
                 return true;
-            }catch(Exception){
+            }
+            catch (Exception)
+            {
                 return false;
             }
         }

@@ -1,10 +1,6 @@
-using System;
-using System.Collections.Generic;
+using ProductsService_API.Helpers;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
-using ProductsService_API.Helpers;
 
 namespace ProductsService_API.Entites
 {
@@ -23,7 +19,7 @@ namespace ProductsService_API.Entites
         public string PhotoUrl { get; set; }
         [Required]
         public string PhotoId { get; set; }
-        
+
         public Guid GameId { get; set; }
         [ForeignKey("GameId")]
         public Games Game { get; set; }

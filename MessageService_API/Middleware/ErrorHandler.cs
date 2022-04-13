@@ -1,10 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-
 namespace MessageService_API.Middleware
 {
     public class ErrorHandler : IMiddleware
@@ -20,7 +13,7 @@ namespace MessageService_API.Middleware
         {
             try
             {
-               await next.Invoke(context);
+                await next.Invoke(context);
             }
             catch (Exception ex)
             {

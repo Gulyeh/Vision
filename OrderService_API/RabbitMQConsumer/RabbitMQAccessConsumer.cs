@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -13,6 +8,7 @@ using OrderService_API.Services.IServices;
 using OrderService_API.SignalR;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using System.Text;
 
 
 namespace OrderService_API.RabbitMQConsumer
@@ -31,7 +27,7 @@ namespace OrderService_API.RabbitMQConsumer
             this.hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<OrderHub>>();
             this.cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
             this.rabbitMQSender = rabbitMQSender;
-            
+
             var factory = new ConnectionFactory
             {
                 HostName = options.Value.Hostname,
@@ -62,19 +58,21 @@ namespace OrderService_API.RabbitMQConsumer
 
         private async Task HandleMessage(UserAccessDto? data)
         {
-            if(data is not null){ 
-               var connIds = await cacheService.TryGetFromCache(data.userId);
-               if(connIds.Count() > 0) await hubContext.Clients.Clients(connIds).SendAsync("PaymentDone", new { isSuccess = data.isSuccess, gameId = data.gameId, productId = data.productId });
-               rabbitMQSender.SendMessage(GenerateEmail(data), "SendEmailQueue");
+            if (data is not null)
+            {
+                var connIds = await cacheService.TryGetFromCache(data.userId);
+                if (connIds.Count() > 0) await hubContext.Clients.Clients(connIds).SendAsync("PaymentDone", new { isSuccess = data.isSuccess, gameId = data.gameId, productId = data.productId });
+                rabbitMQSender.SendMessage(GenerateEmail(data), "SendEmailQueue");
             }
         }
 
         private SMTPMessage GenerateEmail(UserAccessDto data)
         {
-            var email = new SMTPMessage(){
+            var email = new SMTPMessage()
+            {
                 ReceiverEmail = data.Email,
                 userId = data.userId,
-                EmailType = EmailTypes.Payment,          
+                EmailType = EmailTypes.Payment,
             };
 
             email.Content = "Thank you for your payment";

@@ -1,9 +1,7 @@
-using System.Text;
 using GamesDataService_API.Extensions;
 using GamesDataService_API.Middleware;
 using GamesDataService_API.Statics;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,7 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddAuthorization(opts => {
+builder.Services.AddAuthorization(opts =>
+{
     opts.AddPolicy("HasAdminOrModRole", builder => builder.RequireRole(StaticData.AdminRole, StaticData.ModeratorRole));
 });
 builder.Services.AddSwaggerGen(c =>

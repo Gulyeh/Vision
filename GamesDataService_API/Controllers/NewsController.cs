@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using GamesDataService_API.Dtos;
 using GamesDataService_API.Repository.IRepository;
-using GamesDataService_API.Statics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,30 +15,33 @@ namespace GamesDataService_API.Controllers
         }
 
         [HttpGet("GetNews")]
-        public async Task<ActionResult<ResponseDto>> GetGameNews([FromQuery]Guid gameId){
-            if(gameId == Guid.Empty) return BadRequest();
+        public async Task<ActionResult<ResponseDto>> GetGameNews([FromQuery] Guid gameId)
+        {
+            if (gameId == Guid.Empty) return BadRequest();
             return CheckActionResult(await newsRepository.GetGameNews(gameId));
         }
 
         [HttpPost("AddNews")]
         [Authorize(Policy = "HasAdminOrModRole")]
-        public async Task<ActionResult<ResponseDto>> AddGameNews([FromBody]AddNewsDto data){
-            if(!ModelState.IsValid) return BadRequest();
+        public async Task<ActionResult<ResponseDto>> AddGameNews([FromBody] AddNewsDto data)
+        {
+            if (!ModelState.IsValid) return BadRequest();
             return CheckActionResult(await newsRepository.AddNews(data));
         }
 
         [HttpDelete("DeleteNews")]
         [Authorize(Policy = "HasAdminOrModRole")]
-        public async Task<ActionResult<ResponseDto>> DeleteGameNews([FromQuery]Guid newsId, [FromQuery]Guid gameId)
+        public async Task<ActionResult<ResponseDto>> DeleteGameNews([FromQuery] Guid newsId, [FromQuery] Guid gameId)
         {
-            if(newsId == Guid.Empty) return BadRequest();
+            if (newsId == Guid.Empty) return BadRequest();
             return CheckActionResult(await newsRepository.DeleteNews(newsId, gameId));
         }
 
         [HttpPost("EditNews")]
         [Authorize(Policy = "HasAdminOrModRole")]
-        public async Task<ActionResult<ResponseDto>> EditGameNews([FromBody]NewsDto data){
-            if(!ModelState.IsValid) return BadRequest();
+        public async Task<ActionResult<ResponseDto>> EditGameNews([FromBody] NewsDto data)
+        {
+            if (!ModelState.IsValid) return BadRequest();
             return CheckActionResult(await newsRepository.EditNews(data));
         }
     }

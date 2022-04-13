@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Identity_API.DbContexts;
-
 namespace Identity_API.Statics
 {
     public class StaticData

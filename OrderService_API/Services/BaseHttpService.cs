@@ -1,12 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using OrderService_API.Helpers;
 using OrderService_API.Services.IServices;
+using System.Net.Http.Headers;
+using System.Text;
 
 namespace OrderService_API.Services
 {
@@ -32,11 +28,12 @@ namespace OrderService_API.Services
             request.RequestUri = new Uri(apiRequest.ApiUrl);
             client.DefaultRequestHeaders.Clear();
 
-            if(apiRequest.Data is not null) request.Content = new StringContent(JsonConvert.SerializeObject(apiRequest.Data), Encoding.UTF8, "application/json");
-            if(!string.IsNullOrEmpty(apiRequest.Access_Token)) client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiRequest.Access_Token);
+            if (apiRequest.Data is not null) request.Content = new StringContent(JsonConvert.SerializeObject(apiRequest.Data), Encoding.UTF8, "application/json");
+            if (!string.IsNullOrEmpty(apiRequest.Access_Token)) client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiRequest.Access_Token);
 
             HttpResponseMessage apiResponse;
-            switch(apiRequest.apiType){
+            switch (apiRequest.apiType)
+            {
                 case APIType.GET:
                     request.Method = HttpMethod.Get;
                     break;
@@ -53,9 +50,10 @@ namespace OrderService_API.Services
 
             apiResponse = await client.SendAsync(request);
             var apiContent = await apiResponse.Content.ReadAsStringAsync();
-            if(apiContent is not null){
+            if (apiContent is not null)
+            {
                 var apiResponseDto = JsonConvert.DeserializeObject<T>(apiContent);
-                if(apiResponseDto is not null) return apiResponseDto;
+                if (apiResponseDto is not null) return apiResponseDto;
             }
 
             return default(T);

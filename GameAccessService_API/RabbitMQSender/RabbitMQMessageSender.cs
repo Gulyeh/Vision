@@ -1,13 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using GameAccessService_API.Helpers;
-using GameAccessService_API.RabbitMQSender;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
+using System.Text;
 
 namespace GameAccessService_API.RabbitMQSender
 {
@@ -47,7 +42,7 @@ namespace GameAccessService_API.RabbitMQSender
 
         private bool ConnectionExists()
         {
-            if(connection != null)
+            if (connection != null)
             {
                 return true;
             }

@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using ProdcutsService_API.Helpers;
 using ProductsService_API.Helpers;
 using ProductsService_API.Services.IServices;
@@ -17,13 +13,14 @@ namespace ProductsService_API.Services
 
         public async Task<T?> CheckGameExists<T>(Guid gameId, string Access_Token)
         {
-            var response = await SendAsync<T>(new ApiRequest(){
+            var response = await SendAsync<T>(new ApiRequest()
+            {
                 apiType = APIType.GET,
                 ApiUrl = $"{ApiUrls.GamesData}api/games/checkgame?gameId={gameId}",
                 Access_Token = Access_Token
             });
 
-            if(response is not null) return response;
+            if (response is not null) return response;
             return default(T);
         }
     }

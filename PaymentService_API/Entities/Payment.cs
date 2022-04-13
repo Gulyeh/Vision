@@ -1,10 +1,6 @@
-using System;
-using System.Collections.Generic;
+using PaymentService_API.Helpers;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
-using PaymentService_API.Helpers;
 
 namespace PaymentService_API.Entities
 {

@@ -1,13 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Identity_API.Dtos;
-using Identity_API.Entities;
-using Identity_API.Extensions;
 using Identity_API.Helpers;
 using Identity_API.Repository.IRepository;
-using Identity_API.Statics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,8 +17,9 @@ namespace Identity_API.Controllers
 
         [AllowAnonymous]
         [HttpPost("Register")]
-        public async Task<ActionResult<ResponseDto>> RegisterUser(RegisterDto data){
-            if(!ModelState.IsValid) return BadRequest();
+        public async Task<ActionResult<ResponseDto>> RegisterUser(RegisterDto data)
+        {
+            if (!ModelState.IsValid) return BadRequest();
 
             var baseUri = Url.Content("~/");
             return CheckActionResult(await accountRepository.Register(data, baseUri));
@@ -33,15 +27,17 @@ namespace Identity_API.Controllers
 
         [AllowAnonymous]
         [HttpPost("Login")]
-        public async Task<ActionResult<ResponseDto>> LoginUser(LoginDto data){
-            if(!ModelState.IsValid) return BadRequest();
+        public async Task<ActionResult<ResponseDto>> LoginUser(LoginDto data)
+        {
+            if (!ModelState.IsValid) return BadRequest();
             return CheckActionResult(await accountRepository.Login(data));
         }
-        
+
         [AllowAnonymous]
         [HttpPost("ConfirmEmail")]
-        public async Task<ActionResult<ResponseDto>> ConfirmEmail([FromQuery] ConfirmEmailQuery emailQuery){
-            if(!ModelState.IsValid) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Wrong data" });
+        public async Task<ActionResult<ResponseDto>> ConfirmEmail([FromQuery] ConfirmEmailQuery emailQuery)
+        {
+            if (!ModelState.IsValid) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Wrong data" });
             return CheckActionResult(await accountRepository.ConfirmEmail(emailQuery.userId, emailQuery.token));
         }
     }

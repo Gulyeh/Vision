@@ -1,15 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Identity_API.DbContexts;
-using Identity_API.Entities;
 using Identity_API.Statics;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace Identity_API.Extensions
 {
@@ -17,7 +11,8 @@ namespace Identity_API.Extensions
     {
         public static IServiceCollection AddIdentityServices(this IServiceCollection services, IConfiguration config)
         {
-            services.AddIdentityCore<ApplicationUser>(opts => {
+            services.AddIdentityCore<ApplicationUser>(opts =>
+            {
                 opts.User.RequireUniqueEmail = true;
                 opts.SignIn.RequireConfirmedEmail = true;
                 opts.Password.RequiredLength = 8;
@@ -34,10 +29,12 @@ namespace Identity_API.Extensions
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, opts => {
+                .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, opts =>
+                {
                     opts.RequireHttpsMetadata = true;
                     opts.SaveToken = true;
-                    opts.TokenValidationParameters = new TokenValidationParameters{
+                    opts.TokenValidationParameters = new TokenValidationParameters
+                    {
                         ValidateIssuerSigningKey = true,
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.GetValue<string>("PrivateKey"))),
                         ValidateIssuer = false,
@@ -45,7 +42,8 @@ namespace Identity_API.Extensions
                     };
                 });
 
-            services.AddAuthorization(opts => {
+            services.AddAuthorization(opts =>
+            {
                 opts.AddPolicy("HasAdminRole", builder => builder.RequireRole(StaticData.AdminRole));
                 opts.AddPolicy("HasAdminOrModRole", builder => builder.RequireRole(StaticData.AdminRole, StaticData.ModeratorRole));
             });

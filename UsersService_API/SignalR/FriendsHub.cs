@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using GameAccessService_API.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -23,8 +19,9 @@ namespace UsersService_API.SignalR
             userId = Context.User != null ? Context.User.GetId() : Guid.Empty;
         }
 
-        public override async Task OnConnectedAsync(){
-            await Clients.Caller.SendAsync("GetFriendsData", await friendsRepository.GetPendingRequests(userId), 
+        public override async Task OnConnectedAsync()
+        {
+            await Clients.Caller.SendAsync("GetFriendsData", await friendsRepository.GetPendingRequests(userId),
                 await friendsRepository.GetFriendRequests(userId),
                 await friendsRepository.GetFriends(userId));
         }
@@ -34,8 +31,9 @@ namespace UsersService_API.SignalR
             await base.OnDisconnectedAsync(exception);
         }
 
-        public async Task AcceptFriendRequest(Guid SenderId){
-            if(!await friendsRepository.AcceptFriendRequest(userId, SenderId)) throw new HubException();
+        public async Task AcceptFriendRequest(Guid SenderId)
+        {
+            if (!await friendsRepository.AcceptFriendRequest(userId, SenderId)) throw new HubException();
 
             await SendToUserOnlineData(SenderId, "NewFriend");
 
@@ -43,25 +41,28 @@ namespace UsersService_API.SignalR
             await Clients.Caller.SendAsync("NewFriend", senderData);
         }
 
-        public async Task DeclineFriendRequest(Guid SenderId){
-            if(!await friendsRepository.DeclineFriendRequest(userId, SenderId)) throw new HubException();
+        public async Task DeclineFriendRequest(Guid SenderId)
+        {
+            if (!await friendsRepository.DeclineFriendRequest(userId, SenderId)) throw new HubException();
 
             await SendToUserOnlineId(SenderId, "RequestDeclined");
 
             await Clients.Caller.SendAsync("RequestDeclined", SenderId);
         }
 
-        public async Task DeleteFriend(Guid FriendToDelete){
-            if(!await friendsRepository.DeleteFriend(userId, FriendToDelete)) throw new HubException();
+        public async Task DeleteFriend(Guid FriendToDelete)
+        {
+            if (!await friendsRepository.DeleteFriend(userId, FriendToDelete)) throw new HubException();
 
             await SendToUserOnlineId(FriendToDelete, "FriendDeleted");
 
             await Clients.Caller.SendAsync("FriendDeleted", FriendToDelete);
         }
-        
-        public async Task SendFriendRequest(FriendRequestDto data){
+
+        public async Task SendFriendRequest(FriendRequestDto data)
+        {
             data.Sender = userId;
-            if(!await friendsRepository.SendFriendRequest(data)) throw new HubException();
+            if (!await friendsRepository.SendFriendRequest(data)) throw new HubException();
 
             await SendToUserOnlineData(data.Receiver, "NewFriendRequest");
 
@@ -69,17 +70,21 @@ namespace UsersService_API.SignalR
             await Clients.Caller.SendAsync("FriendRequestsPending", requestedData);
         }
 
-        private async Task SendToUserOnlineData(Guid friendId, string connName){
+        private async Task SendToUserOnlineData(Guid friendId, string connName)
+        {
             var connIds = await userRepository.CheckFriendIsOnline(friendId);
-            if(connIds.Count > 0){
+            if (connIds.Count > 0)
+            {
                 var data = await userRepository.GetUserData(userId);
                 await Clients.Users(connIds).SendAsync(connName, data);
             }
         }
 
-        private async Task SendToUserOnlineId(Guid friendId, string connName){
+        private async Task SendToUserOnlineId(Guid friendId, string connName)
+        {
             var connIds = await userRepository.CheckFriendIsOnline(friendId);
-            if(connIds.Count > 0){
+            if (connIds.Count > 0)
+            {
                 await Clients.Users(connIds).SendAsync(connName, userId);
             }
         }

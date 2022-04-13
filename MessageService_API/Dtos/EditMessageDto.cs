@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace MessageService_API.Dtos
 {
@@ -13,6 +9,6 @@ namespace MessageService_API.Dtos
         [Required]
         public Guid MessageId { get; set; }
         public string? Content { get; set; }
-        public IEnumerable<Guid>? DeletedAttachmentsId { get; set; } 
+        public IEnumerable<Guid>? DeletedAttachmentsId { get; set; }
     }
 }

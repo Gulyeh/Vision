@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProductsService_API.Dtos;
@@ -21,34 +17,39 @@ namespace ProductsService_API.Controllers
 
         [HttpGet("GetAllProducts")]
         [Authorize(Roles = StaticData.AdminRole)]
-        public async Task<ActionResult<ResponseDto>> GetProducts(){
+        public async Task<ActionResult<ResponseDto>> GetProducts()
+        {
             return CheckActionResult(await productsRepository.GetAllProducts());
         }
 
         [HttpGet("GetGame")]
-        public async Task<ActionResult<ResponseDto>> GetGame([FromQuery]Guid gameId){
-            if(gameId == Guid.Empty) return BadRequest();
+        public async Task<ActionResult<ResponseDto>> GetGame([FromQuery] Guid gameId)
+        {
+            if (gameId == Guid.Empty) return BadRequest();
             return CheckActionResult(await productsRepository.GetGame(gameId));
         }
 
         [HttpDelete("DeleteProduct")]
         [Authorize(Roles = StaticData.AdminRole)]
-        public async Task<ActionResult<ResponseDto>> DeleteProduct([FromQuery]Guid productId){
-            if(productId == Guid.Empty) return BadRequest();
+        public async Task<ActionResult<ResponseDto>> DeleteProduct([FromQuery] Guid productId)
+        {
+            if (productId == Guid.Empty) return BadRequest();
             return CheckActionResult(await productsRepository.DeleteProduct(productId));
         }
 
         [HttpPost("EditProduct")]
         [Authorize(Roles = StaticData.AdminRole)]
-        public async Task<ActionResult<ResponseDto>> EditProduct([FromBody]ProductsDto data){
-            if(!ModelState.IsValid) return BadRequest(ModelState);
+        public async Task<ActionResult<ResponseDto>> EditProduct([FromBody] ProductsDto data)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
             return CheckActionResult(await productsRepository.EditProduct(data));
         }
 
         [HttpPost("AddProduct")]
         [Authorize(Roles = StaticData.AdminRole)]
-        public async Task<ActionResult<ResponseDto>> AddProduct([FromBody]AddProductsDto data){
-            if(!ModelState.IsValid) return BadRequest(ModelState);
+        public async Task<ActionResult<ResponseDto>> AddProduct([FromBody] AddProductsDto data)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
             var token = HttpContext.Request.Query["access_token"];
             return CheckActionResult(await productsRepository.AddProduct(data, token));
         }

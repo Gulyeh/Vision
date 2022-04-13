@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using OrderService_API.Extensions;
-using OrderService_API.Messages;
 using OrderService_API.RabbitMQSender;
 using OrderService_API.Repository.IRepository;
 using OrderService_API.Services.IServices;
@@ -30,19 +25,19 @@ namespace OrderService_API.SignalR
 
         public override async Task OnConnectedAsync()
         {
-            await cacheService.TryAddToCache(userId, Context.ConnectionId); 
+            await cacheService.TryAddToCache(userId, Context.ConnectionId);
             var token = Context.GetHttpContext()?.Request.Query["access_token"];
 
             Guid gameId;
-            Guid.TryParse(Context.GetHttpContext()?.Request.Query["gameId"], out gameId); 
+            Guid.TryParse(Context.GetHttpContext()?.Request.Query["gameId"], out gameId);
 
             Guid productId;
-            Guid.TryParse(Context.GetHttpContext()?.Request.Query["productId"], out productId); 
+            Guid.TryParse(Context.GetHttpContext()?.Request.Query["productId"], out productId);
 
-            if(string.IsNullOrEmpty(token) || gameId == Guid.Empty) throw new HubException("Please provide valid token and GameId");
+            if (string.IsNullOrEmpty(token) || gameId == Guid.Empty) throw new HubException("Please provide valid token and GameId");
             var paymentMessage = await orderRepository.CreateOrder(gameId, userId, userEmail, token, productId);
-            
-            if(paymentMessage is not null) rabbitMQSender.SendMessage(paymentMessage, "CreatePaymentQueue");
+
+            if (paymentMessage is not null) rabbitMQSender.SendMessage(paymentMessage, "CreatePaymentQueue");
             else await Clients.Caller.SendAsync("PaymentDone", new { isSuccess = false });
         }
 

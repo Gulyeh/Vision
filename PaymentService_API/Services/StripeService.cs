@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using PaymentService_API.DbContexts;
 using PaymentService_API.Helpers;
@@ -32,7 +28,7 @@ namespace PaymentService_API.Services
                     Quantity = 1
                   },
                 },
-                PaymentMethodTypes = new List<string> 
+                PaymentMethodTypes = new List<string>
                 {
                     "card",
                 },
@@ -46,7 +42,8 @@ namespace PaymentService_API.Services
             Session session = service.Create(options);
 
             var payment = await db.Payments.FirstOrDefaultAsync(x => x.OrderId == data.OrderId);
-            if(payment is not null){
+            if (payment is not null)
+            {
                 payment.StripeUrl = session.Url;
                 payment.PaymentStatus = PaymentStatus.Inprogress;
                 payment.StripeId = session.Id;

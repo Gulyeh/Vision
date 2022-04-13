@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using MessageService_API.Dtos;
 
 namespace MessageService_API.Repository.IRepository

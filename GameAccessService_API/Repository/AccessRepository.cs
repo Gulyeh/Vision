@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
 using GameAccessService_API.DbContexts;
 using GameAccessService_API.Dtos;
@@ -29,10 +25,11 @@ namespace GameAccessService_API.Repository
         public async Task<ResponseDto> BanUserAccess(UserAccessDto data)
         {
             var isBanned = await db.UsersGameAccess.FirstOrDefaultAsync(u => u.UserId == data.UserId && u.GameId == data.GameId && u.ExpireDate > DateTime.Now);
-            if(isBanned is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "User is already banned on this game" });
+            if (isBanned is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "User is already banned on this game" });
             var mapped = mapper.Map<UserAccess>(data);
             var result = await db.UsersGameAccess.AddAsync(mapped);
-            if(await db.SaveChangesAsync() > 0){
+            if (await db.SaveChangesAsync() > 0)
+            {
                 await cacheService.TryAddToCache<UserAccess>(CacheType.GameAccess, mapped);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "User has been banned successfuly" });
             }
@@ -59,9 +56,10 @@ namespace GameAccessService_API.Repository
             UserGames? game = null;
             UserProducts? product = null;
 
-            if(productId is not null)
+            if (productId is not null)
             {
-                product = new UserProducts(){
+                product = new UserProducts()
+                {
                     GameId = gameId,
                     UserId = userId,
                     ProductId = (Guid)productId
@@ -70,29 +68,32 @@ namespace GameAccessService_API.Repository
             }
             else
             {
-                game = new UserGames(){
+                game = new UserGames()
+                {
                     GameId = gameId,
                     UserId = userId
                 };
                 await db.UsersGames.AddAsync(game);
             }
 
-            if(await db.SaveChangesAsync() > 0){
-                if(product is not null) await cacheService.TryAddToCache<UserProducts>(CacheType.OwnProduct, product);
-                else if(game is not null) await cacheService.TryAddToCache<UserGames>(CacheType.OwnGame, game);
+            if (await db.SaveChangesAsync() > 0)
+            {
+                if (product is not null) await cacheService.TryAddToCache<UserProducts>(CacheType.OwnProduct, product);
+                else if (game is not null) await cacheService.TryAddToCache<UserGames>(CacheType.OwnGame, game);
                 return true;
             }
             return false;
-        } 
+        }
 
         public async Task<ResponseDto> UnbanUserAccess(AccessDataDto data)
         {
             var isBanned = await db.UsersGameAccess.FirstOrDefaultAsync(x => x.UserId == data.UserId && x.GameId == data.GameId);
-            if(isBanned is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "User is not banned in this game" });
+            if (isBanned is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "User is not banned in this game" });
             db.UsersGameAccess.Remove(isBanned);
-            if(await db.SaveChangesAsync() > 0){
-                 await cacheService.TryRemoveFromCache<UserAccess>(CacheType.GameAccess, isBanned);
-                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "User has been unbanned successfuly" });
+            if (await db.SaveChangesAsync() > 0)
+            {
+                await cacheService.TryRemoveFromCache<UserAccess>(CacheType.GameAccess, isBanned);
+                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "User has been unbanned successfuly" });
             }
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not unban a user" });
         }
@@ -102,13 +103,14 @@ namespace GameAccessService_API.Repository
             var cache = await cacheService.TryGetFromCache<T>(type, userId);
             var results = cache.FirstOrDefault(x => x.GameId == gameId && x.UserId == userId);
 
-            switch(type){
+            switch (type)
+            {
                 case CacheType.GameAccess:
-                    if(results is null) return true;
+                    if (results is null) return true;
                     return false;
                 case CacheType.OwnGame:
                 case CacheType.OwnProduct:
-                    if(results is null) return false;
+                    if (results is null) return false;
                     return true;
                 default:
                     return false;

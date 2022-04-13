@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using CodesService_API.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,8 +8,10 @@ namespace CodesService_API.Controllers
     public class BaseApiController : ControllerBase
     {
         [ApiExplorerSettings(IgnoreApi = true)]
-        public ActionResult<ResponseDto> CheckActionResult(ResponseDto result){
-            switch(result.Status){
+        public ActionResult<ResponseDto> CheckActionResult(ResponseDto result)
+        {
+            switch (result.Status)
+            {
                 case 404:
                     return NotFound(result);
                 case 400:

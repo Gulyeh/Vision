@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using ProductsService_API.Dtos;
 
 namespace ProductsService_API.Repository.IRepository

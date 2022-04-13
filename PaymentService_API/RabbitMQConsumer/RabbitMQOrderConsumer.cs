@@ -1,17 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using PaymentService_API.Helpers;
 using PaymentService_API.Messages;
 using PaymentService_API.RabbitMQSender;
-using PaymentService_API.Repository;
 using PaymentService_API.Repository.IRepository;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using System.Text;
 
 
 namespace PaymentService_API.RabbitMQConsumer
@@ -28,7 +23,7 @@ namespace PaymentService_API.RabbitMQConsumer
             using var scope = serviceScopeFactory.CreateScope();
             this.paymentRepository = scope.ServiceProvider.GetRequiredService<IPaymentRepository>();
             this.rabbitMQSender = rabbitMQSender;
-        
+
             var factory = new ConnectionFactory
             {
                 HostName = options.Value.Hostname,
@@ -60,12 +55,14 @@ namespace PaymentService_API.RabbitMQConsumer
 
         private async Task HandleMessage(PaymentMessage? data)
         {
-            if(data is not null){ 
-               await paymentRepository.CreatePayment(data);
-               var paymentData = await paymentRepository.RequestStripePayment(data);
-               rabbitMQSender.SendMessage(paymentData, "PaymentUrlQueue");
+            if (data is not null)
+            {
+                await paymentRepository.CreatePayment(data);
+                var paymentData = await paymentRepository.RequestStripePayment(data);
+                rabbitMQSender.SendMessage(paymentData, "PaymentUrlQueue");
             }
-            else{
+            else
+            {
                 rabbitMQSender.SendMessage(null, "PaymentUrlQueue");
             }
         }

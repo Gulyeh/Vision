@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
 using MessageService_API.DbContexts;
 using MessageService_API.Dtos;
@@ -27,7 +23,8 @@ namespace MessageService_API.Repository
             this.db = db;
         }
 
-        public async Task SendUserMessageNotification(Guid chatId, Guid receiverId, string Access_Token){
+        public async Task SendUserMessageNotification(Guid chatId, Guid receiverId, string Access_Token)
+        {
             await usersService.SendUserMessageNotification<bool>(receiverId, chatId, Access_Token);
         }
 
@@ -36,26 +33,29 @@ namespace MessageService_API.Repository
             var findChat = await db.Chats
                 .Include(x => x.Messages)
                 .FirstOrDefaultAsync(x => x.Id == message.ChatId && (x.User1 == message.userId || x.User2 == message.userId));
-            if(findChat is null) return false;
+            if (findChat is null) return false;
 
             var findMessage = findChat.Messages.FirstOrDefault(x => x.Id == message.MessageId);
-            if(findMessage is null) return false;
+            if (findMessage is null) return false;
 
-            if(findMessage.SenderId == message.userId) findMessage.SenderDeleted = true;
+            if (findMessage.SenderId == message.userId) findMessage.SenderDeleted = true;
             else findMessage.ReceiverDeleted = true;
-            if(!await SaveChangesAsync()) return false;
+            if (!await SaveChangesAsync()) return false;
 
 
-            if(findMessage.SenderDeleted && findMessage.ReceiverDeleted){ 
+            if (findMessage.SenderDeleted && findMessage.ReceiverDeleted)
+            {
                 var attachments = findMessage.Attachments;
                 db.Messages.Remove(findMessage);
-                if(!await SaveChangesAsync()) return false;
+                if (!await SaveChangesAsync()) return false;
 
-                if(attachments is not null && attachments.Any()){
-                    foreach(var attachment in attachments){
+                if (attachments is not null && attachments.Any())
+                {
+                    foreach (var attachment in attachments)
+                    {
                         await uploadService.DeletePhoto(attachment.AttachmentId);
                     }
-                }  
+                }
             }
 
             return true;
@@ -65,24 +65,27 @@ namespace MessageService_API.Repository
         {
             var findChat = await db.Chats.Include(x => x.Messages)
                 .FirstOrDefaultAsync(x => x.Id == message.ChatId);
-            if(findChat is null) return false;
+            if (findChat is null) return false;
 
             var findMessage = findChat.Messages.FirstOrDefault(x => x.Id == message.MessageId);
-            if(findMessage is null) return false;
+            if (findMessage is null) return false;
 
             findMessage.Content = message.Content;
             findMessage.IsEdited = true;
-            if(!await SaveChangesAsync()) return false;
+            if (!await SaveChangesAsync()) return false;
 
-            if(message.DeletedAttachmentsId is not null && message.DeletedAttachmentsId.Any()){
-                foreach(var id in message.DeletedAttachmentsId){
+            if (message.DeletedAttachmentsId is not null && message.DeletedAttachmentsId.Any())
+            {
+                foreach (var id in message.DeletedAttachmentsId)
+                {
                     var attachment = findMessage.Attachments?.FirstOrDefault(x => x.Id == id);
-                    if(attachment is not null) {
+                    if (attachment is not null)
+                    {
                         db.MessagesAttachments.Remove(attachment);
-                        if(await SaveChangesAsync()) await uploadService.DeletePhoto(attachment.AttachmentId);
+                        if (await SaveChangesAsync()) await uploadService.DeletePhoto(attachment.AttachmentId);
                     }
                 }
-            }   
+            }
 
             return true;
         }
@@ -91,9 +94,9 @@ namespace MessageService_API.Repository
         {
             var findChat = await db.Chats.Include(x => x.Messages)
                 .FirstOrDefaultAsync(x => x.Id == chatId);
-            if(findChat is null) return new List<MessageDto>();
+            if (findChat is null) return new List<MessageDto>();
 
-            var messages = findChat.Messages.AsQueryable().Include(x => x.Attachments).Where(x => (x.SenderId == userId && !x.SenderDeleted) 
+            var messages = findChat.Messages.AsQueryable().Include(x => x.Attachments).Where(x => (x.SenderId == userId && !x.SenderDeleted)
                 || (x.ReceiverId == userId && !x.ReceiverDeleted));
 
             return mapper.Map<IEnumerable<MessageDto>>(messages);
@@ -102,14 +105,18 @@ namespace MessageService_API.Repository
         public async Task<MessageDto> SendMessage(AddMessageDto message)
         {
             var findChat = await db.Chats.FirstOrDefaultAsync(x => x.Id == message.ChatId);
-            if(findChat is null) return new MessageDto();
+            if (findChat is null) return new MessageDto();
             var mapped = mapper.Map<Message>(message);
 
-            if(message.Attachments is not null && message.Attachments.Any()){
-                foreach(var attachment in message.Attachments){
+            if (message.Attachments is not null && message.Attachments.Any())
+            {
+                foreach (var attachment in message.Attachments)
+                {
                     var results = await uploadService.UploadPhoto(attachment);
-                    if(results.Error is null){
-                        var msgAttachment = new MessageAttachment(){
+                    if (results.Error is null)
+                    {
+                        var msgAttachment = new MessageAttachment()
+                        {
                             AttachmentId = results.PublicId,
                             AttachmentUrl = results.SecureUrl.AbsoluteUri
                         };
@@ -120,9 +127,12 @@ namespace MessageService_API.Repository
 
             findChat.Messages.Add(mapped);
 
-            if(!await SaveChangesAsync()){
-                if(mapped.Attachments is not null && mapped.Attachments.Any()){
-                    foreach(var attachment in mapped.Attachments){
+            if (!await SaveChangesAsync())
+            {
+                if (mapped.Attachments is not null && mapped.Attachments.Any())
+                {
+                    foreach (var attachment in mapped.Attachments)
+                    {
                         await uploadService.DeletePhoto(attachment.AttachmentId);
                     }
                 }
@@ -132,20 +142,22 @@ namespace MessageService_API.Repository
             return mapper.Map<MessageDto>(mapped);
         }
 
-        public async Task<MessageDto> GetMessage(Guid chatId, Guid messageId){
-             var findChat = await db.Chats
-                .Include(x => x.Messages)
-                .FirstOrDefaultAsync(x => x.Id == chatId);
-            if(findChat is null) return new MessageDto();
+        public async Task<MessageDto> GetMessage(Guid chatId, Guid messageId)
+        {
+            var findChat = await db.Chats
+               .Include(x => x.Messages)
+               .FirstOrDefaultAsync(x => x.Id == chatId);
+            if (findChat is null) return new MessageDto();
 
             var findMessage = findChat.Messages.AsQueryable().Include(x => x.Attachments).FirstOrDefault(x => x.Id == messageId);
-            if(findMessage is null) return new MessageDto();
+            if (findMessage is null) return new MessageDto();
 
             return mapper.Map<MessageDto>(findMessage);
         }
 
-        private async Task<bool> SaveChangesAsync(){
-            if(await db.SaveChangesAsync() > 0) return true;
+        private async Task<bool> SaveChangesAsync()
+        {
+            if (await db.SaveChangesAsync() > 0) return true;
             return false;
         }
     }

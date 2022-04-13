@@ -1,12 +1,6 @@
-using System.Text;
-using CodesService_API.DbContexts;
 using CodesService_API.Extensions;
 using CodesService_API.Middleware;
-using CodesService_API.Repository;
-using CodesService_API.Repository.IRepository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
