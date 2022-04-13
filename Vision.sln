@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameAccessService_API", "Ga
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "desktopclient", "DesktopClient\desktopclient.csproj", "{8CDEDDC1-9383-4571-8F5B-3649877471F3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderService_API", "OrderService_API\OrderService_API.csproj", "{E641F431-FD97-4C00-8189-0B16C0B6A1D9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -78,5 +80,9 @@ Global
 		{8CDEDDC1-9383-4571-8F5B-3649877471F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8CDEDDC1-9383-4571-8F5B-3649877471F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8CDEDDC1-9383-4571-8F5B-3649877471F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E641F431-FD97-4C00-8189-0B16C0B6A1D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E641F431-FD97-4C00-8189-0B16C0B6A1D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E641F431-FD97-4C00-8189-0B16C0B6A1D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E641F431-FD97-4C00-8189-0B16C0B6A1D9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

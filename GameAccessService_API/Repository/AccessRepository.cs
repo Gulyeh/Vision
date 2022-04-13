@@ -49,6 +49,42 @@ namespace GameAccessService_API.Repository
             return await CheckCache<UserGames>(gameId, userId, CacheType.OwnGame);
         }
 
+        public async Task<bool> CheckUserHasProduct(Guid productId, Guid userId)
+        {
+            return await CheckCache<UserProducts>(productId, userId, CacheType.OwnProduct);
+        }
+
+        public async Task<bool> AddProductOrGame(Guid userId, Guid gameId, Guid? productId = null)
+        {
+            UserGames? game = null;
+            UserProducts? product = null;
+
+            if(productId is not null)
+            {
+                product = new UserProducts(){
+                    GameId = gameId,
+                    UserId = userId,
+                    ProductId = (Guid)productId
+                };
+                await db.UsersProducts.AddAsync(product);
+            }
+            else
+            {
+                game = new UserGames(){
+                    GameId = gameId,
+                    UserId = userId
+                };
+                await db.UsersGames.AddAsync(game);
+            }
+
+            if(await db.SaveChangesAsync() > 0){
+                if(product is not null) await cacheService.TryAddToCache<UserProducts>(CacheType.OwnProduct, product);
+                else if(game is not null) await cacheService.TryAddToCache<UserGames>(CacheType.OwnGame, game);
+                return true;
+            }
+            return false;
+        } 
+
         public async Task<ResponseDto> UnbanUserAccess(AccessDataDto data)
         {
             var isBanned = await db.UsersGameAccess.FirstOrDefaultAsync(x => x.UserId == data.UserId && x.GameId == data.GameId);
@@ -63,7 +99,7 @@ namespace GameAccessService_API.Repository
 
         private async Task<bool> CheckCache<T>(Guid gameId, Guid userId, CacheType type) where T : BaseUser
         {
-            var cache = await cacheService.TryGetFromCache<T>(type);
+            var cache = await cacheService.TryGetFromCache<T>(type, userId);
             var results = cache.FirstOrDefault(x => x.GameId == gameId && x.UserId == userId);
 
             switch(type){
@@ -71,6 +107,7 @@ namespace GameAccessService_API.Repository
                     if(results is null) return true;
                     return false;
                 case CacheType.OwnGame:
+                case CacheType.OwnProduct:
                     if(results is null) return false;
                     return true;
                 default:

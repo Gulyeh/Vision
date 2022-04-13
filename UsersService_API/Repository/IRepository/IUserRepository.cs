@@ -18,5 +18,7 @@ namespace UsersService_API.Repository.IRepository
         Task<List<string>> GetUserFriendsOnline(Guid userId);
         Task<List<string>> CheckFriendIsOnline(Guid friendId);
         Task<IEnumerable<UserDataDto>> FindUsers(string containsString);
+        Task CreateUser(Guid userId);
+        Task<ResponseDto> UserExists(Guid userId);
     }
 }

@@ -42,6 +42,12 @@ namespace GamesDataService_API.Controllers
         public async Task<ActionResult<ResponseDto>> DeleteGame([FromQuery]Guid gameId){
             if(gameId == Guid.Empty) return BadRequest();
             return CheckActionResult(await gamesRepository.DeleteGame(gameId));
-        }      
+        } 
+
+        [HttpGet("CheckGame")]
+        public async Task<ActionResult<ResponseDto>> CheckGame([FromQuery] Guid gameId){
+            if(gameId == Guid.Empty) return BadRequest();
+            return CheckActionResult(await gamesRepository.CheckGame(gameId));
+        }     
     }
 }

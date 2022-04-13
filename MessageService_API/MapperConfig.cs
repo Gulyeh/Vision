@@ -15,7 +15,6 @@ namespace MessageService_API
             CreateMap<Message, MessageDto>();
             CreateMap<AddMessageDto, Message>();
             CreateMap<MessageAttachment, MessageAttachmentDto>();
-            CreateMap<CreateChatDto, Chat>();
         }
     }
 }

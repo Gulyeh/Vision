@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using ProductsService_API.DbContexts;
+using ProductsService_API.Entites;
 using ProductsService_API.Helpers;
 using ProductsService_API.Services.IServices;
 
@@ -22,44 +23,30 @@ namespace ProductsService_API.Services
             this.memoryCache = memoryCache;
         }
 
-        public Task TryAddToCache<T>(CacheType type, Guid gameId, T data) where T : class
+        public Task TryAddToCache<T>(Guid gameId, T data) where T : Games
         {
-            List<T> value;
-            string cacheName = $"{type}-{gameId}";
+            T value;
+            string cacheName = gameId.ToString();
             if(memoryCache.TryGetValue(cacheName, out value)){
                 lock(value){
-                    value.Add(data);
-                    SetCache<T>(cacheName, value);
+                    SetCache<T>(cacheName, data);
                 }
             }
             return Task.CompletedTask;
         }
 
-        public async Task<IEnumerable<T>> TryGetFromCache<T>(CacheType type, Guid gameId) where T : class
+        public async Task<T?> TryGetFromCache<T>(Guid gameId) where T : Games
         {
-            IEnumerable<T> value;
-            string cacheName = $"{type}-{gameId}";
+            T? value;
+            string cacheName = gameId.ToString();
             if(!memoryCache.TryGetValue(cacheName, out value)){
-                value = await db.Set<T>().ToListAsync();
-                SetCache<T>(cacheName, value);
+                value = await db.Set<T>().Include(x => x.GameProducts).FirstOrDefaultAsync(x => x.GameId == gameId);
+                if(value is not null) SetCache<T>(cacheName, value);
             }
             return value;
         }
 
-        public Task TryRemoveFromCache<T>(CacheType type, Guid gameId, T data) where T : class
-        {
-            List<T> value;
-            string cacheName = $"{type}-{gameId}";
-            if(memoryCache.TryGetValue(cacheName, out value)){
-                lock(value){
-                    value.Remove(data);
-                    SetCache<T>(cacheName, value);
-                }
-            }
-            return Task.CompletedTask;
-        }
-
-        private void SetCache<T>(string type, IEnumerable<T> value){
+        private void SetCache<T>(string type, T value){
             var cacheOptions = new MemoryCacheEntryOptions()
                     .SetSlidingExpiration(TimeSpan.FromMinutes(5));
 

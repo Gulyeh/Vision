@@ -25,7 +25,7 @@ namespace UsersService_API.Services
                     if(value.ContainsKey(data.UserId)){
                         value[data.UserId].Add(data.connectionId);
                     }else{
-                        value.Add(data.UserId, new List<string>{data.connectionId});
+                        value.Add(data.UserId, new List<string>(){data.connectionId});
                     }
                     memoryCache.Set(CacheType.OnlineUsers, value);
                     return Task.FromResult(true);

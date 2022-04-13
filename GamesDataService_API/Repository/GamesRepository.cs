@@ -56,6 +56,13 @@ namespace GamesDataService_API.Repository
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not add game" });
         }
 
+        public async Task<ResponseDto> CheckGame(Guid gameId)
+        {
+            var game = await db.Games.FirstOrDefaultAsync(x => x.Id == gameId);
+            if(game is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game does not exist" });
+            return new ResponseDto(true, StatusCodes.Status200OK, true);
+        }
+
         public async Task<ResponseDto> DeleteGame(Guid gameId)
         {
             Games game;

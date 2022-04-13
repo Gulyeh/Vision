@@ -49,5 +49,11 @@ namespace GameAccessService_API.Controllers
             return Ok(new ResponseDto(true, StatusCodes.Status200OK, new HasAccess(await accessRepository.CheckUserHasGame(gameId, User.GetId()))));
         }
 
+        [HttpGet("BoughtProduct")]
+        public async Task<ActionResult<ResponseDto>> CheckUserBoughtProduct([FromQuery]Guid gameId, [FromQuery]Guid productId){
+            if(gameId == Guid.Empty || productId == Guid.Empty) return BadRequest();
+            return Ok(new ResponseDto(true, StatusCodes.Status200OK, new HasAccess(await accessRepository.CheckUserHasProduct(productId, User.GetId()))));
+        }   
+
     }
 }

@@ -12,8 +12,10 @@ namespace ProductsService_API.DbContexts
         public ApplicationDbContext(DbContextOptions options) : base(options)
         {
             GamesProducts = Set<Products>();
+            Games = Set<Games>();
         }
 
         public DbSet<Products> GamesProducts { get; set; }
+        public DbSet<Games> Games { get; set; }
     }
 }

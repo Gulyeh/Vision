@@ -12,5 +12,6 @@ namespace GamesDataService_API.Repository.IRepository
         Task<ResponseDto> EditGameData(GamesDto data);
         Task<ResponseDto> DeleteGame(Guid gameId);
         Task<ResponseDto> AddGame(AddGamesDto data);
+        Task<ResponseDto> CheckGame(Guid gameId);
     }
 }

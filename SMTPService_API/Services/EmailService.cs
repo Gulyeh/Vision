@@ -4,7 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using MailKit.Net.Smtp;
 using MimeKit;
-using SMTPService_API.Dtos;
+using SMTPService_API.Helpers;
+using SMTPService_API.Messages;
 using SMTPService_API.Services.IServices;
 
 namespace SMTPService_API.Services
@@ -24,8 +25,20 @@ namespace SMTPService_API.Services
                 var emailToSend = new MimeMessage();
                 emailToSend.From.Add(MailboxAddress.Parse(config["SenderName"]));
                 emailToSend.To.Add(MailboxAddress.Parse(data.ReceiverEmail));
-                emailToSend.Subject = data.EmailType.ToString();
-                emailToSend.Body = new TextPart(MimeKit.Text.TextFormat.Html) { Text = data.Token };
+                emailToSend.Body = new TextPart(MimeKit.Text.TextFormat.Html) { Text = data.Content };
+                switch(data.EmailType){
+                    case EmailTypes.ResetPassword:
+                        emailToSend.Subject = "Reset Password";
+                        break;
+                    case EmailTypes.Confirmation:
+                        emailToSend.Subject = "Account Confirmation";
+                        break;
+                    case EmailTypes.Payment:
+                        emailToSend.Subject = "Payment Confirmation";
+                        break;
+                    default:
+                        break;
+                }
 
                 using var emailClient = new SmtpClient();
                 await emailClient.ConnectAsync(config["SMTPServer"], int.Parse(config["SMTPPort"]), MailKit.Security.SecureSocketOptions.StartTls);

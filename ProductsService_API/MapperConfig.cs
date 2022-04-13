@@ -14,6 +14,7 @@ namespace ProductsService_API
         {
             CreateMap<Products, ProductsDto>().ReverseMap();
             CreateMap<AddProductsDto, Products>();
+            CreateMap<Games, GamesDto>().ReverseMap();
         }
     }
 }

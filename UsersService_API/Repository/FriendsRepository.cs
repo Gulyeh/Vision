@@ -8,6 +8,8 @@ using UsersService_API.DbContexts;
 using UsersService_API.Dtos;
 using UsersService_API.Entites;
 using UsersService_API.Helpers;
+using UsersService_API.Messages;
+using UsersService_API.RabbitMQSender;
 using UsersService_API.Repository.IRepository;
 using UsersService_API.Services.IServices;
 
@@ -17,11 +19,13 @@ namespace UsersService_API.Repository
     {
         private readonly ApplicationDbContext db;
         private readonly IMapper mapper;
+        private readonly IRabbitMQSender rabbitMQSender;
 
-        public FriendsRepository(ApplicationDbContext db, IMapper mapper)
+        public FriendsRepository(ApplicationDbContext db, IMapper mapper, IRabbitMQSender rabbitMQSender)
         {
             this.db = db;
             this.mapper = mapper;
+            this.rabbitMQSender = rabbitMQSender;
         }
 
         public async Task<bool> AcceptFriendRequest(Guid userId, Guid SenderId)
@@ -58,7 +62,11 @@ namespace UsersService_API.Repository
             if(findFriends is null) return false;
 
             db.UsersFriends.Remove(findFriends);
-            return await SaveChangesAsyncBool();
+            if(await SaveChangesAsyncBool()){
+                rabbitMQSender.SendMessage(new DeleteChat { User1 = userId, User2 = ToDeleteUserId }, "DeleteChatQueue");
+                return true;
+            }
+            return false;
         }
 
         public async Task<ResponseDto> GetFriends(Guid userId)

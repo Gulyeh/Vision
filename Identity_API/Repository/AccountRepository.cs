@@ -9,6 +9,8 @@ using Identity_API.DbContexts;
 using Identity_API.Dtos;
 using Identity_API.Entities;
 using Identity_API.Extensions;
+using Identity_API.Helpers;
+using Identity_API.RabbitMQSender;
 using Identity_API.Repository.IRepository;
 using Identity_API.Services.IServices;
 using Identity_API.Statics;
@@ -25,10 +27,11 @@ namespace Identity_API.Repository
         private readonly RoleManager<ApplicationRole> roleManager;
         private readonly ITokenService tokenService;
         private readonly ApplicationDbContext db;
+        private readonly IRabbitMQSender rabbitMQSender;
 
         public AccountRepository(IMapper mapper, UserManager<ApplicationUser> userManager, 
             SignInManager<ApplicationUser> signInManager, RoleManager<ApplicationRole> roleManager, ITokenService tokenService,
-            ApplicationDbContext db)
+            ApplicationDbContext db, IRabbitMQSender rabbitMQSender)
         {
             this.mapper = mapper;
             this.userManager = userManager;
@@ -36,6 +39,7 @@ namespace Identity_API.Repository
             this.roleManager = roleManager;
             this.tokenService = tokenService;
             this.db = db;
+            this.rabbitMQSender = rabbitMQSender;
         }
 
         public async Task<ResponseDto> ConfirmEmail(Guid userId, string token)
@@ -87,8 +91,15 @@ namespace Identity_API.Repository
             await userManager.AddToRoleAsync(user, StaticData.UserRole);
 
             var token = Encoding.UTF8.GetBytes(await userManager.GenerateEmailConfirmationTokenAsync(user));
+            var link = $"{baseUri}/ConfirmEmail?userId={user.Id}&token={token}";
 
-            //TODO:SMTP Server with Confirmation Email
+            rabbitMQSender.SendMessage(new { userId = user.Id }, "CreateUserQueue");
+            rabbitMQSender.SendMessage(new EmailDataDto(){
+                userId = user.Id,
+                Content = $"Confirm your email by entering {link}",
+                ReceiverEmail = user.UserName,
+                EmailType = EmailTypes.Confirmation
+            }, "SendEmailQueue");
 
             return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Account has been registered successfuly. Please check your mailbox and confirm your email address" });
         }

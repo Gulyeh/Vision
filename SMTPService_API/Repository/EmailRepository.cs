@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using SMTPService_API.DBContexts;
-using SMTPService_API.Dtos;
 using SMTPService_API.Entites;
+using SMTPService_API.Messages;
 using SMTPService_API.Repository.IRepository;
 using SMTPService_API.Services.IServices;
 
@@ -21,11 +21,9 @@ namespace SMTPService_API.Repository
             this.emailSerivce = emailSerivce;
         }
 
-        public async Task<ResponseDto> InitializeEmail(EmailDataDto data)
+        public async Task InitializeEmail(EmailDataDto data)
         {
             var sent = await emailSerivce.SendEmail(data);
-
-            if(!sent) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not send confirmation email" });
 
             EmailLogs logs = new EmailLogs(){
                 Email = data.ReceiverEmail,
@@ -33,9 +31,7 @@ namespace SMTPService_API.Repository
             };
 
             await db.EmailLogs.AddAsync(logs);
-            if(await db.SaveChangesAsync() > 0) return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Email has been sent and logged" });
-
-            return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not save email logs but email has been sent" });    
+            await db.SaveChangesAsync();
         }
     }
 }

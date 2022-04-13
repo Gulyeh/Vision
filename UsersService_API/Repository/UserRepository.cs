@@ -6,6 +6,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using UsersService_API.DbContexts;
 using UsersService_API.Dtos;
+using UsersService_API.Entites;
 using UsersService_API.Helpers;
 using UsersService_API.Repository.IRepository;
 using UsersService_API.Services.IServices;
@@ -70,6 +71,7 @@ namespace UsersService_API.Repository
         {
             var user = await db.Users.FirstOrDefaultAsync(x => x.UserId == userId);
             if(user is null) return new UserDataDto();
+            
             return new UserDataDto(){ 
                 UserId = userId,
                 Nickname = user.Nickname,
@@ -141,6 +143,25 @@ namespace UsersService_API.Repository
             var foundUsers = await db.Users.Where(x => x.Nickname.ToLower().Contains(containsString.ToLower())).ToListAsync();
             Users = mapper.Map<IEnumerable<UserDataDto>>(foundUsers);
             return Users;
+        }
+
+        public async Task<ResponseDto> UserExists(Guid userId){
+            var user = await db.Users.FirstOrDefaultAsync(x => x.UserId == userId);
+            if(user is null) return new ResponseDto(true, StatusCodes.Status200OK, false);
+            return new ResponseDto(true, StatusCodes.Status200OK, true);
+        }
+
+        public async Task CreateUser(Guid userId)
+        {
+            var newUser = new Users(){
+                UserId = userId,
+                Nickname = "VisionUser",
+                Status = Status.Offline,
+                LastOnlineStatus = Status.Offline
+            };  
+
+            await db.Users.AddAsync(newUser);
+            await SaveChangesAsync();
         }
 
         private async Task<bool> SaveChangesAsync(){

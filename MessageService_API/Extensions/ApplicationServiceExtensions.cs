@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MessageService_API.DbContexts;
 using MessageService_API.Helpers;
 using MessageService_API.Middleware;
+using MessageService_API.RabbitMQConsumer;
 using MessageService_API.Repository;
 using MessageService_API.Repository.IRepository;
 using MessageService_API.Services;
@@ -25,11 +26,18 @@ namespace MessagesService_API.Extensions
                 opts.UseSqlServer(config.GetConnectionString("Connection"));
             });
             services.AddMemoryCache();
+            services.AddSignalR();
+            services.Configure<RabbitMQSettings>(config.GetSection("RabbitMQSettings"));
+            services.AddHttpClient<IUsersService, UsersService>();
+            services.AddScoped<IUsersService, UsersService>();
             services.AddScoped<IUploadService, UploadService>();
-            services.AddScoped<ICacheService, CacheService>();
+            services.AddScoped<IConnectionsCacheService, ConnectionsCacheService>();
             services.AddScoped<IMessageRepository, MessageRepository>();
+            services.AddScoped<IChatRepository, ChatRepository>();
+            services.AddScoped<IChatCacheService, ChatCacheService>();
             services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            services.AddHostedService<RabbitMQUsersConsumer>();
             services.AddScoped<ErrorHandler>();
             return services;
         }

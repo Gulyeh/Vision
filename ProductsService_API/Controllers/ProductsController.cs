@@ -25,10 +25,10 @@ namespace ProductsService_API.Controllers
             return CheckActionResult(await productsRepository.GetAllProducts());
         }
 
-        [HttpGet("GetGameProducts")]
-        public async Task<ActionResult<ResponseDto>> GetGameProducts([FromQuery]Guid gameId){
+        [HttpGet("GetGame")]
+        public async Task<ActionResult<ResponseDto>> GetGame([FromQuery]Guid gameId){
             if(gameId == Guid.Empty) return BadRequest();
-            return CheckActionResult(await productsRepository.GetGameProducts(gameId));
+            return CheckActionResult(await productsRepository.GetGame(gameId));
         }
 
         [HttpDelete("DeleteProduct")]
@@ -49,7 +49,8 @@ namespace ProductsService_API.Controllers
         [Authorize(Roles = StaticData.AdminRole)]
         public async Task<ActionResult<ResponseDto>> AddProduct([FromBody]AddProductsDto data){
             if(!ModelState.IsValid) return BadRequest(ModelState);
-            return CheckActionResult(await productsRepository.AddProduct(data));
+            var token = HttpContext.Request.Query["access_token"];
+            return CheckActionResult(await productsRepository.AddProduct(data, token));
         }
     }
 }

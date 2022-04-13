@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using ProductsService_API.Entites;
 using ProductsService_API.Helpers;
 
 namespace ProductsService_API.Services.IServices
 {
     public interface ICacheService
     {
-        Task<IEnumerable<T>> TryGetFromCache<T>(CacheType type, Guid gameId) where T : class;
-        Task TryRemoveFromCache<T>(CacheType type, Guid gameId, T data) where T : class;
-        Task TryAddToCache<T>(CacheType type, Guid gameId, T data) where T : class;
+        Task<T?> TryGetFromCache<T>(Guid gameId) where T : Games;
+        Task TryAddToCache<T>(Guid gameId, T data) where T : Games;
     }
 }

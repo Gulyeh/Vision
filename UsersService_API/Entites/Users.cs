@@ -11,7 +11,7 @@ namespace UsersService_API.Entites
     {
         public Users()
         {
-            PhotoUrl = string.Empty;
+            PhotoUrl = "default";
             Nickname = string.Empty;
             PhotoId = string.Empty;
         }

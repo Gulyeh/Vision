@@ -22,6 +22,33 @@ namespace ProductsService_API.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
+            modelBuilder.Entity("ProductsService_API.Entites.Games", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("Discount")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("GameId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsAvailable")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(15,2)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Games");
+                });
+
             modelBuilder.Entity("ProductsService_API.Entites.Products", b =>
                 {
                     b.Property<Guid>("Id")
@@ -54,7 +81,25 @@ namespace ProductsService_API.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("GameId");
+
                     b.ToTable("GamesProducts");
+                });
+
+            modelBuilder.Entity("ProductsService_API.Entites.Products", b =>
+                {
+                    b.HasOne("ProductsService_API.Entites.Games", "Game")
+                        .WithMany("GameProducts")
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Game");
+                });
+
+            modelBuilder.Entity("ProductsService_API.Entites.Games", b =>
+                {
+                    b.Navigation("GameProducts");
                 });
 #pragma warning restore 612, 618
         }

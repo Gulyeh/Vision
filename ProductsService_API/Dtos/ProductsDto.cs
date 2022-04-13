@@ -15,7 +15,9 @@ namespace ProductsService_API.Dtos
         }
 
         [Required]
-        public Guid Id { get; set; }
+        public Guid ProductId { get; set; }
+        [Required]
+        public Guid GameId { get; set; }
         [Required]
         public string PhotoUrl { get; set; }
         public IFormFile? Photo { get; set; }

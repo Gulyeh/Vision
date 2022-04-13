@@ -17,21 +17,18 @@ namespace MessageService_API.Repository
         private readonly IMapper mapper;
         private readonly ApplicationDbContext db;
         private readonly IUploadService uploadService;
+        private readonly IUsersService usersService;
 
-        public MessageRepository(IMapper mapper, ApplicationDbContext db, IUploadService uploadService)
+        public MessageRepository(IMapper mapper, ApplicationDbContext db, IUploadService uploadService, IUsersService usersService)
         {
             this.uploadService = uploadService;
+            this.usersService = usersService;
             this.mapper = mapper;
             this.db = db;
         }
 
-        public async Task<Guid> CreateChat(CreateChatDto chat)
-        {
-            //TODO: Ask UserService if user exists
-            var mapped = mapper.Map<Chat>(chat);
-            await db.Chats.AddAsync(mapped);
-            if(await SaveChangesAsync()) return mapped.Id;
-            return Guid.Empty;
+        public async Task SendUserMessageNotification(Guid chatId, Guid receiverId, string Access_Token){
+            await usersService.SendUserMessageNotification<bool>(receiverId, chatId, Access_Token);
         }
 
         public async Task<bool> DeleteMessage(DeleteMessageDto message)

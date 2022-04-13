@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using SMTPService_API.Dtos;
+using SMTPService_API.Messages;
 
 namespace SMTPService_API.Services.IServices
 {

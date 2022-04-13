@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using SMTPService_API.DBContexts;
+using SMTPService_API.Helpers;
+using SMTPService_API.RabbitMQConsumer;
 using SMTPService_API.Repository;
 using SMTPService_API.Repository.IRepository;
 using SMTPService_API.Services;
@@ -14,14 +16,15 @@ namespace SMTPService_API.Extensions
 {
     public static class ApplicationServicesExtension
     {
-        public static IServiceCollection AddApplicationService(this IServiceCollection service, IConfiguration config){
-            service.AddDbContext<ApplicationDbContext>(opts => {
+        public static IServiceCollection AddApplicationService(this IServiceCollection services, IConfiguration config){
+            services.AddDbContext<ApplicationDbContext>(opts => {
                 opts.UseSqlServer(config.GetConnectionString("Connection"));
             });
-
-            service.AddScoped<IEmailRepository, EmailRepository>();
-            service.AddScoped<IEmailService, EmailService>();
-            return service;
+            services.Configure<RabbitMQSettings>(config.GetSection("RabbitMQSettings"));
+            services.AddHostedService<RabbitMQMessageConsumer>();
+            services.AddScoped<IEmailRepository, EmailRepository>();
+            services.AddScoped<IEmailService, EmailService>();
+            return services;
         }
     }
 }

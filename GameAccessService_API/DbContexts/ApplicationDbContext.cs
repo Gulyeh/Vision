@@ -13,9 +13,11 @@ namespace GameAccessService_API.DbContexts
         {
             UsersGameAccess = Set<UserAccess>();
             UsersGames = Set<UserGames>();
+            UsersProducts = Set<UserProducts>();
         }
 
         public DbSet<UserAccess> UsersGameAccess { get; set; }
         public DbSet<UserGames> UsersGames { get; set; }
+        public DbSet<UserProducts> UsersProducts { get; set; }
     }
 }

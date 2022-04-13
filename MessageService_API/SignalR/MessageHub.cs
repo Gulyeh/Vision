@@ -16,36 +16,57 @@ namespace MessageService_API.SignalR
     public class MessageHub : Hub
     {
         private readonly IMessageRepository messageRepository;
+        private readonly IChatRepository chatRepository;
         private readonly Guid userId;
-        private readonly ICacheService cacheService;
+        private readonly IConnectionsCacheService cacheService;
+        private readonly IUsersService usersService;
 
-        public MessageHub(IMessageRepository messageRepository, ICacheService cacheService)
+        public MessageHub(IMessageRepository messageRepository, IChatRepository chatRepository, IConnectionsCacheService cacheService, IUsersService usersService)
         {
             this.cacheService = cacheService;
+            this.usersService = usersService;
             this.messageRepository = messageRepository;
+            this.chatRepository = chatRepository;
             userId = Context.User != null ? Context.User.GetId() : Guid.Empty;
         }
 
         public override async Task OnConnectedAsync()
         {
-            var chatId = Context.GetHttpContext()?.Request.Query["chatId"].ToString();
-            if(string.IsNullOrEmpty(chatId)) throw new HubException("Please provide a valid chatId");
-            var chatGuid = Guid.Parse(chatId);
+                var token = Context.GetHttpContext()?.Request.Query["access_token"];
+                var receiverId = Context.GetHttpContext()?.Request.Query["receiverId"];
+                Guid chatGuid = Guid.Empty;
+                Guid revceiverGuid = Guid.Empty;
 
-            await Groups.AddToGroupAsync(Context.ConnectionId, chatId);
-            await cacheService.AddToGroupCache(chatGuid, Context.ConnectionId);
+                Guid.TryParse(receiverId, out revceiverGuid);
+                if(revceiverGuid == Guid.Empty || string.IsNullOrEmpty(token)) throw new HubException("Wrong data provided");
+                var chat = await chatRepository.ChatExists(revceiverGuid, userId);
+      
+                if(chat == Guid.Empty){
+                    var guid = await chatRepository.CreateChat(revceiverGuid, userId, token);
+                    if(guid == Guid.Empty) throw new HubException("Something went wrong");
+                    chatGuid = guid;
+                }
+                else chatGuid = chat;
 
-            var messages = await messageRepository.GetMessages(chatGuid, userId);
-            await Clients.Caller.SendAsync("GetMessages", messages);
+                await Groups.AddToGroupAsync(Context.ConnectionId, chatGuid.ToString());
+                await cacheService.AddToGroupCache(chatGuid, Context.ConnectionId);
+                var messages = await messageRepository.GetMessages(chatGuid, userId);
+                await Clients.Caller.SendAsync("GetMessages", messages);
+            
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            var chatId = Context.GetHttpContext()?.Request.Query["chatId"].ToString();
-            if(string.IsNullOrEmpty(chatId)) throw new HubException("Please provide a valid chatId");
-            
-            await cacheService.RemoveFromGroupCache(Guid.Parse(chatId), userId, Context.ConnectionId);
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, chatId);
+            var receiverId = Context.GetHttpContext()?.Request.Query["receiverId"];
+            Guid revceiverGuid = Guid.Empty;
+            Guid.TryParse(receiverId, out revceiverGuid);
+            if(revceiverGuid == Guid.Empty) throw new HubException("Please provide a valid receiverId");
+
+            var chat = await chatRepository.ChatExists(revceiverGuid, userId);
+            if(chat == Guid.Empty) throw new HubException("This chat does not exist");
+   
+            await cacheService.RemoveFromGroupCache(chat, userId, Context.ConnectionId);
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, chat.ToString());
         }
         
         public async Task SendMessage(AddMessageDto data){
@@ -58,8 +79,8 @@ namespace MessageService_API.SignalR
             var message = await messageRepository.SendMessage(data);
 
             if(!isOtherMember){
-                //ask userservice if user is online and get his ID
-                //if user is online, send him notification
+                var access_token = Context.GetHttpContext()?.Request.Query["access_token"];
+                if(!string.IsNullOrEmpty(access_token)) await messageRepository.SendUserMessageNotification(data.ReceiverId, data.ChatId, access_token);
             }
 
             await Clients.Group(data.ChatId.ToString()).SendAsync("NewMessage", message);

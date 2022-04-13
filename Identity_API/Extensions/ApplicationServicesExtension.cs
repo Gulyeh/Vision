@@ -4,7 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using HashidsNet;
 using Identity_API.DbContexts;
+using Identity_API.Helpers;
 using Identity_API.Middleware;
+using Identity_API.RabbitMQSender;
 using Identity_API.Repository;
 using Identity_API.Repository.IRepository;
 using Identity_API.Services;
@@ -21,6 +23,8 @@ namespace Identity_API.Extensions
             {
                 opt.UseSqlServer(config.GetConnectionString("Connection"));
             });
+            services.Configure<RabbitMQSettings>(config.GetSection("RabbitMQSettings"));
+            services.AddScoped<IRabbitMQSender, RabbitMQMessageSender>();
             services.AddScoped<IAccountRepository, AccountRepository>();
             services.AddScoped<IAccessRepository, AccessRepository>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
