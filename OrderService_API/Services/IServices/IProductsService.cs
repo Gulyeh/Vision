@@ -1,10 +1,10 @@
 using OrderService_API.Dtos;
+using OrderService_API.Helpers;
 
 namespace OrderService_API.Services.IServices
 {
     public interface IProductsService
     {
-        Task<T?> CheckProductExists<T>(Guid gameId, string Access_Token, Guid? productId = null);
-        Task<GameDto> GetGame(Guid gameId, string Access_Token);
+        Task<T?> CheckProductExists<T>(Guid productId, string Access_Token, OrderType orderType, Guid? gameId = null);
     }
 }

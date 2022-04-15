@@ -10,7 +10,6 @@ namespace ProductsService_API.Dtos
             PhotoUrl = string.Empty;
         }
 
-        [Required]
         public Guid ProductId { get; set; }
         [Required]
         public Guid GameId { get; set; }

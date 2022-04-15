@@ -33,7 +33,7 @@ namespace UsersService_API.RabbitMQConsumer
 
             connection = factory.CreateConnection();
             channel = connection.CreateModel();
-            channel.QueueDeclare(queue: "GamePayment", false, false, false, arguments: null);
+            channel.QueueDeclare(queue: "AccessProductQueue", false, false, false, arguments: null);
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -48,7 +48,7 @@ namespace UsersService_API.RabbitMQConsumer
 
                 channel.BasicAck(args.DeliveryTag, false);
             };
-            channel.BasicConsume("GamePayment", false, consumer);
+            channel.BasicConsume("AccessProductQueue", false, consumer);
 
             return Task.CompletedTask;
         }
@@ -63,7 +63,7 @@ namespace UsersService_API.RabbitMQConsumer
                     var connIds = userCache.GetValueOrDefault(data.userId);
                     if (connIds is not null)
                     {
-                        await hubContext.Clients.Clients(connIds).SendAsync("GamePurchased");
+                        await hubContext.Clients.Clients(connIds).SendAsync("GamePurchased", new{ gameId = data.gameId, productId = data.productId });
                     }
                 }
             }

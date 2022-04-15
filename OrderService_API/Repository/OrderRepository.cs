@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using OrderService_API.DbContexts;
 using OrderService_API.Dtos;
 using OrderService_API.Entities;
+using OrderService_API.Helpers;
 using OrderService_API.Messages;
 using OrderService_API.Repository.IRepository;
 using OrderService_API.Services.IServices;
@@ -14,45 +15,38 @@ namespace OrderService_API.Repository
         private readonly IMapper mapper;
         private readonly ApplicationDbContext db;
         private readonly IProductsService productsService;
+        private readonly ICouponService couponService;
 
-        public OrderRepository(IMapper mapper, ApplicationDbContext db, IProductsService productsService)
+        public OrderRepository(IMapper mapper, ApplicationDbContext db, IProductsService productsService, ICouponService couponService)
         {
             this.mapper = mapper;
             this.db = db;
             this.productsService = productsService;
+            this.couponService = couponService;
         }
 
-        public async Task<PaymentMessage?> CreateOrder(Guid gameId, Guid userId, string Email, string Access_Token, Guid? productId = null)
+        public async Task<PaymentMessage?> CreateOrder<T>(CreateOrderData data) where T : BaseProductData
         {
-            if (!await productsService.CheckProductExists<bool>(gameId, Access_Token, productId)) return null;
+            var product = await productsService.CheckProductExists<T>(data.productId, data.Access_Token, data.orderType, data.gameId);
+            if (product is null) return null;
 
+            int couponDiscount = 0;
+            if(!string.IsNullOrEmpty(data.Coupon)) couponDiscount = await couponService.ApplyCoupon(data.Coupon, data.Access_Token, CodeTypes.Discount);
 
             var newOrder = new Order()
             {
-                GameId = gameId,
-                ProductId = productId,
-                UserId = userId
+                ProductId = data.productId,
+                UserId = data.userId,
+                OrderType = data.orderType,
+                GameId = data.gameId,
+                CuponCode = couponDiscount != 0 ? data.Coupon : string.Empty
             };
 
-            var game = await productsService.GetGame(newOrder.GameId, Access_Token);
-            var message = new PaymentMessage();
-            message.UserId = userId;
-            message.Email = Email;
-
-            if (productId is not null)
-            {
-                var product = game.GameProducts?.FirstOrDefault(x => x.ProductId == productId);
-                if (product is not null)
-                {
-                    message.TotalPrice = product.Price;
-                    message.Title = product.Title;
-                }
-            }
-            else
-            {
-                message.TotalPrice = game.Price;
-                message.Title = game.Title;
-            }
+            var message = new PaymentMessage(product.Price, product.Discount, couponDiscount){
+                UserId = data.userId,
+                Email = data.Email,
+                Title = product.Title        
+            };
 
             await db.Orders.AddAsync(newOrder);
             if (await SaveChangesAsync())
@@ -84,14 +78,8 @@ namespace OrderService_API.Repository
         public async Task<ResponseDto> GetOrders(Guid productId, Guid? userId = null)
         {
             IEnumerable<Order> order;
-            if (userId is null)
-            {
-                order = await db.Orders.Where(x => x.ProductId == productId).ToListAsync();
-            }
-            else
-            {
-                order = await db.Orders.Where(x => x.ProductId == productId && x.UserId == userId).ToListAsync();
-            }
+            if (userId is null) order = await db.Orders.Where(x => x.ProductId == productId).ToListAsync();
+            else order = await db.Orders.Where(x => x.ProductId == productId && x.UserId == userId).ToListAsync();
 
             if (order is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Could not find orders" });
 
@@ -105,6 +93,7 @@ namespace OrderService_API.Repository
             if (order is not null)
             {
                 order.Paid = isPaid;
+                order.PaymentDate = DateTime.UtcNow;
                 await SaveChangesAsync();
             }
         }

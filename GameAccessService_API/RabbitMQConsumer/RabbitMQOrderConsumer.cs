@@ -20,6 +20,10 @@ namespace GameAccessService_API.RabbitMQConsumer
 
         public RabbitMQOrderConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory scopeFactory, IRabbitMQSender rabbitMQSender)
         {
+            using var scope = scopeFactory.CreateScope();
+            accessRepository = scope.ServiceProvider.GetRequiredService<IAccessRepository>();
+            this.rabbitMQSender = rabbitMQSender;
+
             var factory = new ConnectionFactory
             {
                 HostName = options.Value.Hostname,
@@ -30,10 +34,6 @@ namespace GameAccessService_API.RabbitMQConsumer
             connection = factory.CreateConnection();
             channel = connection.CreateModel();
             channel.QueueDeclare(queue: "AccessProductQueue", false, false, false, arguments: null);
-            this.rabbitMQSender = rabbitMQSender;
-
-            using var scope = scopeFactory.CreateScope();
-            accessRepository = scope.ServiceProvider.GetRequiredService<IAccessRepository>();
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -66,7 +66,8 @@ namespace GameAccessService_API.RabbitMQConsumer
                     data.isSuccess = await accessRepository.AddProductOrGame(data.userId, data.gameId);
                 }
 
-                rabbitMQSender.SendMessage(data, "AccessDataQueue");
+                rabbitMQSender.SendMessage(data, "ProductAccessDoneQueue");
+                rabbitMQSender.SendMessage(data, "AccessProductQueue");
             }
         }
     }

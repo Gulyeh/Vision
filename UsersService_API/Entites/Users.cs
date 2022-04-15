@@ -10,6 +10,7 @@ namespace UsersService_API.Entites
             PhotoUrl = "default";
             Nickname = string.Empty;
             PhotoId = string.Empty;
+            CurrencyValue = 0;
         }
 
         [Key]
@@ -26,6 +27,8 @@ namespace UsersService_API.Entites
         public Status Status { get; set; }
         [Required]
         public Status LastOnlineStatus { get; set; }
+        [Required]
+        public int CurrencyValue { get; set; }
         public string? Description { get; set; }
     }
 }

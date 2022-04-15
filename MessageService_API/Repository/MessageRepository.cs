@@ -30,16 +30,12 @@ namespace MessageService_API.Repository
 
         public async Task<bool> DeleteMessage(DeleteMessageDto message)
         {
-            var findChat = await db.Chats
-                .Include(x => x.Messages)
-                .FirstOrDefaultAsync(x => x.Id == message.ChatId && (x.User1 == message.userId || x.User2 == message.userId));
-            if (findChat is null) return false;
-
-            var findMessage = findChat.Messages.FirstOrDefault(x => x.Id == message.MessageId);
-            if (findMessage is null) return false;
+            var findMessage = await FindMessage(message.ChatId, message.MessageId);
+            if(findMessage is null) return false;
 
             if (findMessage.SenderId == message.userId) findMessage.SenderDeleted = true;
             else findMessage.ReceiverDeleted = true;
+
             if (!await SaveChangesAsync()) return false;
 
 
@@ -63,12 +59,8 @@ namespace MessageService_API.Repository
 
         public async Task<bool> EditMessage(EditMessageDto message)
         {
-            var findChat = await db.Chats.Include(x => x.Messages)
-                .FirstOrDefaultAsync(x => x.Id == message.ChatId);
-            if (findChat is null) return false;
-
-            var findMessage = findChat.Messages.FirstOrDefault(x => x.Id == message.MessageId);
-            if (findMessage is null) return false;
+            var findMessage = await FindMessage(message.ChatId, message.MessageId);
+            if(findMessage is null) return false;
 
             findMessage.Content = message.Content;
             findMessage.IsEdited = true;
@@ -106,6 +98,7 @@ namespace MessageService_API.Repository
         {
             var findChat = await db.Chats.FirstOrDefaultAsync(x => x.Id == message.ChatId);
             if (findChat is null) return new MessageDto();
+            
             var mapped = mapper.Map<Message>(message);
 
             if (message.Attachments is not null && message.Attachments.Any())
@@ -144,15 +137,20 @@ namespace MessageService_API.Repository
 
         public async Task<MessageDto> GetMessage(Guid chatId, Guid messageId)
         {
+            var findMessage = await FindMessage(chatId, messageId);
+            return mapper.Map<MessageDto>(findMessage);
+        }
+
+        private async Task<Message?> FindMessage(Guid chatId, Guid messageId){
             var findChat = await db.Chats
                .Include(x => x.Messages)
                .FirstOrDefaultAsync(x => x.Id == chatId);
-            if (findChat is null) return new MessageDto();
+            if (findChat is null) return null;
 
             var findMessage = findChat.Messages.AsQueryable().Include(x => x.Attachments).FirstOrDefault(x => x.Id == messageId);
-            if (findMessage is null) return new MessageDto();
+            if (findMessage is null) return null;
 
-            return mapper.Map<MessageDto>(findMessage);
+            return findMessage;
         }
 
         private async Task<bool> SaveChangesAsync()

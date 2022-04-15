@@ -29,7 +29,10 @@ namespace OrderService_API.Extensions
             services.AddScoped<IProductsService, ProductsService>();
             services.AddHostedService<RabbitMQPaymentConsumer>();
             services.AddHostedService<RabbitMQPaymentCompletedConsumer>();
+            services.AddHostedService<RabbitMQAccessConsumer>();
+            services.AddHostedService<RabbitMQCurrencyConsumer>();
             services.AddScoped<IOrderRepository, OrderRepository>();
+            services.AddScoped<ICouponService, CouponService>();
             services.AddSingleton<IRabbitMQSender, RabbitMQMessageSender>();
             return services;
         }

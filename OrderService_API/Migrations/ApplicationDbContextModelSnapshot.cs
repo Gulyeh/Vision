@@ -31,8 +31,14 @@ namespace OrderService_API.Migrations
                     b.Property<string>("CuponCode")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("GameId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("OrderType")
+                        .HasColumnType("int");
 
                     b.Property<bool>("Paid")
                         .HasColumnType("bit");

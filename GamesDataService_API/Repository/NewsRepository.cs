@@ -58,13 +58,12 @@ namespace GamesDataService_API.Repository
             var news = game.News.FirstOrDefault(x => x.Id == newsId);
             if (news is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "News does not exist" });
 
-            var results = await uploadService.DeletePhoto(news.PhotoId);
-            if (results.Error is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not delete image" });
-
             game.News.Remove(news);
             if (await db.SaveChangesAsync() > 0)
             {
                 await cacheService.TryRemoveFromCache<News>(CacheType.News, news);
+                await uploadService.DeletePhoto(news.PhotoId);
+
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Deleted news successfuly" });
             }
 
@@ -74,6 +73,7 @@ namespace GamesDataService_API.Repository
         public async Task<ResponseDto> EditNews(NewsDto data)
         {
             string oldPhotoId = string.Empty;
+
             var game = await db.Games.Include(x => x.News).FirstOrDefaultAsync(x => x.Id == data.GameId);
             if (game is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game does not exist" });
 
@@ -98,16 +98,16 @@ namespace GamesDataService_API.Repository
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Edited news successfuly" });
             }
 
-            await uploadService.DeletePhoto(news.PhotoId);
+            if (!string.IsNullOrEmpty(oldPhotoId)) await uploadService.DeletePhoto(news.PhotoId);
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not edit news" });
         }
 
         public async Task<ResponseDto> GetGameNews(Guid gameId)
         {
             IEnumerable<News> news = await cacheService.TryGetFromCache<News>(CacheType.News);
-
             IEnumerable<News> gameNews = news.Where(x => x.GameId == gameId).OrderByDescending(x => x.Id).Take(5);
-            return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<NewsDto>>(news));
+
+            return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<NewsDto>>(gameNews));
         }
     }
 }

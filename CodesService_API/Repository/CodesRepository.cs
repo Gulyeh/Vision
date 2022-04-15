@@ -3,6 +3,7 @@ using CodesService_API.DbContexts;
 using CodesService_API.Dtos;
 using CodesService_API.Entites;
 using CodesService_API.Helpers;
+using CodesService_API.RabbitMQSender;
 using CodesService_API.Repository.IRepository;
 using CodesService_API.Services.IServices;
 using Microsoft.EntityFrameworkCore;
@@ -12,14 +13,58 @@ namespace CodesService_API.Repository
     public class CodesRepository : ICodesRepository
     {
         private readonly ApplicationDbContext db;
+        private readonly IGameAccessService gameAccessService;
         private readonly IMapper mapper;
         private readonly ICacheService cacheService;
+        private readonly IRabbitMQSender rabbitMQSender;
 
-        public CodesRepository(ApplicationDbContext db, IMapper mapper, ICacheService cacheService)
+        public CodesRepository(ApplicationDbContext db, IGameAccessService gameAccessService, IMapper mapper, ICacheService cacheService, IRabbitMQSender rabbitMQSender)
         {
             this.db = db;
+            this.gameAccessService = gameAccessService;
             this.mapper = mapper;
             this.cacheService = cacheService;
+            this.rabbitMQSender = rabbitMQSender;
+        }
+
+        public async Task<ResponseDto> ApplyCode(string code, Guid userId, CodeTypes codeType, string Access_Token){
+            IEnumerable<Codes> Codes = await cacheService.TryGetFromCache<Codes>(CacheType.Codes);
+            var checkCode = Codes.FirstOrDefault(c => c.Code == code);
+
+            var validate = await ValidateCode(checkCode, codeType);
+            if(validate.isSuccess == false) return validate;
+
+            var dbcode = await db.Codes.Include(x => x.CodesUsed).FirstOrDefaultAsync(x => x.Code == code);
+            var codeUsed = dbcode?.CodesUsed.FirstOrDefault(x => x.userId == userId);
+            if(codeUsed is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Code has been already used" });      
+
+            if (dbcode?.isLimited == true) dbcode.Uses--;
+
+            if(codeType == CodeTypes.Game) {
+                if(await gameAccessService.CheckAccess(checkCode?.CodeValue, Access_Token)) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "You already have this game" });      
+            }
+            else if(codeType == CodeTypes.Product){
+                if(await gameAccessService.CheckAccess(checkCode?.gameId.ToString(), Access_Token, checkCode?.CodeValue)) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "You already have this product" });
+            } 
+
+            dbcode?.CodesUsed.Add(new CodesUsed(){
+                userId = userId
+            });
+
+            if (await db.SaveChangesAsync() > 0){
+
+                if(codeType == CodeTypes.Game){
+                    rabbitMQSender.SendMessage(new { userId = userId, gameId = checkCode?.CodeValue}, "ProductCuponUsedQueue");
+                }
+                else if(codeType == CodeTypes.Product){
+                    rabbitMQSender.SendMessage(new { userId = userId, gameId = checkCode?.gameId, productId = checkCode?.CodeValue }, "ProductCuponUsedQueue");
+                }
+                else if(codeType == CodeTypes.Currency) rabbitMQSender.SendMessage(new { userId = userId, productId = checkCode?.CodeValue, isCode = true }, "ChangeFundsQueue");
+
+                return new ResponseDto(true, StatusCodes.Status200OK, new { Message = "You have redeemed code successfuly", codeValue = checkCode?.CodeValue });
+            }
+            
+            return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Code does not exist" });
         }
 
         public async Task<ResponseDto> AddCode(AddCodesDto code)
@@ -34,14 +79,15 @@ namespace CodesService_API.Repository
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not add code" });
         }
 
-        public async Task<ResponseDto> CheckCode(string code)
+        public async Task<ResponseDto> CheckCode(string code, CodeTypes codeType)
         {
             IEnumerable<Codes> Codes = await cacheService.TryGetFromCache<Codes>(CacheType.Codes);
             var checkCode = Codes.FirstOrDefault(c => c.Code == code);
-            if (checkCode is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Code does not exist" });
-            if (checkCode.ExpireDate <= DateTime.Now) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Code expired" });
 
-            return new ResponseDto(true, StatusCodes.Status200OK, new { codeValue = checkCode.CodeValue });
+            var validate = await ValidateCode(checkCode, codeType);
+            if(validate.isSuccess == false) return validate;
+
+            return new ResponseDto(true, StatusCodes.Status200OK, new { codeValue = checkCode?.CodeValue });
         }
 
         public async Task<ResponseDto> EditCode(CodesDataDto codeData)
@@ -73,6 +119,14 @@ namespace CodesService_API.Repository
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Code has been deleted successfuly" });
             }
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not delete code" });
+        }
+
+        private Task<ResponseDto> ValidateCode(Codes? checkCode, CodeTypes codeType){
+            if (checkCode is null) return Task.FromResult(new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Code does not exist" }));
+            if (checkCode.ExpireDate <= DateTime.Now) return Task.FromResult(new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Code expired" }));
+            if (checkCode.isLimited == true && checkCode.Uses == 0) return Task.FromResult(new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Code expired" }));
+            if (checkCode?.CodeType != codeType) return Task.FromResult(new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Code does not exist" }));
+            return Task.FromResult(new ResponseDto(true, StatusCodes.Status200OK, new{}));
         }
     }
 }

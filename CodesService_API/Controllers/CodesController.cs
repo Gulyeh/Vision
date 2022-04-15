@@ -1,4 +1,6 @@
 using CodesService_API.Dtos;
+using CodesService_API.Extensions;
+using CodesService_API.Helpers;
 using CodesService_API.Repository.IRepository;
 using CodesService_API.Statics;
 using Microsoft.AspNetCore.Authorization;
@@ -15,13 +17,20 @@ namespace CodesService_API.Controllers
             this.codesRepository = codesRepository;
         }
 
-        [AllowAnonymous]
-        [HttpGet("Validate")]
-        public async Task<ActionResult<ResponseDto>> ValidateCode([FromQuery] string code)
+        [HttpGet("ApplyCode")]
+        public async Task<ActionResult<ResponseDto>> ApplyCode([FromQuery] string code, [FromQuery] CodeTypes codeType){
+            if (string.IsNullOrEmpty(code)) return BadRequest();
+            var token = HttpContext.Request.Headers["Authorization"][0];
+            return CheckActionResult(await codesRepository.ApplyCode(code, User.GetId(), codeType, token));
+        }
+
+        [HttpGet("ValidateCode")]
+        public async Task<ActionResult<ResponseDto>> ValidateCode([FromQuery] string code, [FromQuery] CodeTypes codeType)
         {
             if (string.IsNullOrEmpty(code)) return BadRequest();
-            return CheckActionResult(await codesRepository.CheckCode(code));
+            return CheckActionResult(await codesRepository.CheckCode(code, codeType));
         }
+
 
         [Authorize(Roles = StaticData.AdminRole)]
         [HttpGet]

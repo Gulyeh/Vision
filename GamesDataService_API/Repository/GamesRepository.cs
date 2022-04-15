@@ -56,21 +56,23 @@ namespace GamesDataService_API.Repository
         public async Task<ResponseDto> CheckGame(Guid gameId)
         {
             var game = await db.Games.FirstOrDefaultAsync(x => x.Id == gameId);
+
             if (game is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game does not exist" });
-            return new ResponseDto(true, StatusCodes.Status200OK, true);
+
+            return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<GamesDto>(game));
         }
 
         public async Task<ResponseDto> DeleteGame(Guid gameId)
         {
-            Games game;
-            if (!await GameExists(gameId, out game)) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game does not exists" });
+            var game = await GameExists(gameId);
+            if (game is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game does not exists" });
 
             db.Games.Remove(game);
             if (await db.SaveChangesAsync() > 0)
             {
+                await cacheService.TryRemoveFromCache<Games>(CacheType.Games, game);
                 if (!string.IsNullOrEmpty(game.IconId)) await uploadService.DeletePhoto(game.IconId);
                 if (!string.IsNullOrEmpty(game.CoverId)) await uploadService.DeletePhoto(game.CoverId);
-                await cacheService.TryRemoveFromCache<Games>(CacheType.Games, game);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Deleted game successfuly" });
             }
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not delete game" });
@@ -81,8 +83,8 @@ namespace GamesDataService_API.Repository
             var oldCoverId = string.Empty;
             var oldIconId = string.Empty;
 
-            Games game;
-            if (!await GameExists(data.Id, out game)) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game does not exists" });
+            var game = await GameExists(data.Id);
+            if (game is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game does not exists" });
 
             mapper.Map(data, game);
             if (data.CoverPhoto is not null)
@@ -123,29 +125,17 @@ namespace GamesDataService_API.Repository
             return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<GamesDto>>(games));
         }
 
-        private Task<bool> GameExists(Guid gameId, out Games game)
+        private async Task<Games?> GameExists(Guid gameId)
         {
-
-            IEnumerable<Games> gameExists;
-            if (memoryCache.TryGetValue(CacheType.Games, out gameExists))
-            {
+            IEnumerable<Games> gameExists = await cacheService.TryGetFromCache<Games>(CacheType.Games);
+            if(gameExists is not null){
                 var findGame = gameExists.FirstOrDefault(x => x.Id == gameId);
                 if (findGame is not null)
                 {
-                    game = findGame;
-                    return Task.FromResult(true);
+                    return findGame;
                 }
-            }
-
-            var dbgameExists = db.Games.FirstOrDefault(x => x.Id == gameId);
-            if (dbgameExists is not null)
-            {
-                game = dbgameExists;
-                return Task.FromResult(true);
-            }
-
-            game = new Games();
-            return Task.FromResult(false);
+            }       
+            return null;
         }
     }
 }

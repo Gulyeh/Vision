@@ -50,6 +50,9 @@ namespace UsersService_API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<int>("CurrencyValue")
+                        .HasColumnType("int");
+
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
@@ -83,9 +86,6 @@ namespace UsersService_API.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("BlockedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("FriendsSince")

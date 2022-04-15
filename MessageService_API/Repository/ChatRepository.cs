@@ -25,15 +25,10 @@ namespace MessageService_API.Repository
         {
             Chat? chat;
             var cachedId = await chatCacheService.GetFromChatCache(user1, user2);
-            if (cachedId != Guid.Empty)
-            {
-                chat = await db.Chats.Include(x => x.Messages).FirstOrDefaultAsync(x => x.Id == cachedId);
-            }
-            else
-            {
-                chat = await db.Chats.Include(x => x.Messages).FirstOrDefaultAsync(x => (x.User1 == user1 && x.User2 == user2)
-                || (x.User1 == user2 && x.User2 == user1));
-            }
+            if (cachedId != Guid.Empty) chat = await db.Chats.Include(x => x.Messages).FirstOrDefaultAsync(x => x.Id == cachedId);
+            else chat = await db.Chats.Include(x => x.Messages).FirstOrDefaultAsync(x => (x.User1 == user1 && x.User2 == user2)
+                        || (x.User1 == user2 && x.User2 == user1));
+            
 
             if (chat is not null)
             {

@@ -18,6 +18,7 @@ namespace ProductsService_API.Helpers
         public decimal Price { get; set; }
         [Required]
         public bool IsAvailable { get; set; }
-        public int? Discount { get; set; }
+        [Column(TypeName = "decimal(15,2)")]
+        public decimal? Discount { get; set; }
     }
 }

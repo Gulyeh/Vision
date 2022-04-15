@@ -26,13 +26,16 @@ namespace GameAccessService_API.Repository
         {
             var isBanned = await db.UsersGameAccess.FirstOrDefaultAsync(u => u.UserId == data.UserId && u.GameId == data.GameId && u.ExpireDate > DateTime.Now);
             if (isBanned is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "User is already banned on this game" });
+
             var mapped = mapper.Map<UserAccess>(data);
             var result = await db.UsersGameAccess.AddAsync(mapped);
+
             if (await db.SaveChangesAsync() > 0)
             {
                 await cacheService.TryAddToCache<UserAccess>(CacheType.GameAccess, mapped);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "User has been banned successfuly" });
             }
+            
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not ban a user" });
         }
 
@@ -89,12 +92,14 @@ namespace GameAccessService_API.Repository
         {
             var isBanned = await db.UsersGameAccess.FirstOrDefaultAsync(x => x.UserId == data.UserId && x.GameId == data.GameId);
             if (isBanned is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "User is not banned in this game" });
+
             db.UsersGameAccess.Remove(isBanned);
             if (await db.SaveChangesAsync() > 0)
             {
                 await cacheService.TryRemoveFromCache<UserAccess>(CacheType.GameAccess, isBanned);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "User has been unbanned successfuly" });
             }
+
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not unban a user" });
         }
 

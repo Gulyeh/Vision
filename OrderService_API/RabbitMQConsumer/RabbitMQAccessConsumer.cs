@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using OrderService_API.Builders;
 using OrderService_API.Helpers;
 using OrderService_API.Messages;
 using OrderService_API.RabbitMQSender;
@@ -37,7 +38,7 @@ namespace OrderService_API.RabbitMQConsumer
 
             connection = factory.CreateConnection();
             channel = connection.CreateModel();
-            channel.QueueDeclare(queue: "AccessDataQueue", false, false, false, arguments: null);
+            channel.QueueDeclare(queue: "ProductAccessDoneQueue", false, false, false, arguments: null);
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -51,7 +52,7 @@ namespace OrderService_API.RabbitMQConsumer
                 HandleMessage(access).GetAwaiter().GetResult();
                 channel.BasicAck(args.DeliveryTag, false);
             };
-            channel.BasicConsume("AccessDataQueue", false, consumer);
+            channel.BasicConsume("ProductAccessDoneQueue", false, consumer);
 
             return Task.CompletedTask;
         }
@@ -61,21 +62,18 @@ namespace OrderService_API.RabbitMQConsumer
             if (data is not null)
             {
                 var connIds = await cacheService.TryGetFromCache(data.userId);
-                if (connIds.Count() > 0) await hubContext.Clients.Clients(connIds).SendAsync("PaymentDone", new { isSuccess = data.isSuccess, gameId = data.gameId, productId = data.productId });
+                if (connIds.Count() > 0) await hubContext.Clients.Clients(connIds).SendAsync("ProductPaymentDone", new { isSuccess = data.isSuccess, gameId = data.gameId, productId = data.productId });
                 rabbitMQSender.SendMessage(GenerateEmail(data), "SendEmailQueue");
             }
         }
 
         private SMTPMessage GenerateEmail(UserAccessDto data)
-        {
-            var email = new SMTPMessage()
-            {
-                ReceiverEmail = data.Email,
-                userId = data.userId,
-                EmailType = EmailTypes.Payment,
-            };
-
-            email.Content = "Thank you for your payment";
+        {        
+            var EmailBuilder = new SMTPMessageBuilder();
+            EmailBuilder.SetContent("Thank you for your payment");
+            EmailBuilder.SetUserId(data.userId);
+            EmailBuilder.SetReceiverEmail(data.Email);
+            var email = EmailBuilder.Build();
 
             return email;
         }

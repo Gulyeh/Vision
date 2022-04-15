@@ -11,30 +11,24 @@ namespace OrderService_API.Services
         {
         }
 
-        public async Task<T?> CheckProductExists<T>(Guid gameId, string Access_Token, Guid? productId = null)
+        public async Task<T?> CheckProductExists<T>(Guid productId, string Access_Token, OrderType orderType, Guid? gameId = null)
         {
+            string url = orderType switch{
+                OrderType.Currency => $"{APIUrls.ProductServiceUrl}api/currency/productexists?currencyId={productId}",
+                OrderType.Game => $"{APIUrls.ProductServiceUrl}api/games/getgames?gameId={productId}",
+                OrderType.Product => $"{APIUrls.ProductServiceUrl}api/products/GetProductsInGame?productId={productId}&gameId={gameId}",
+                _ => ""
+            };
+
             var response = await SendAsync<T>(new ApiRequest()
             {
                 apiType = APIType.GET,
-                ApiUrl = $"{APIUrls.ProductServiceUrl}api/games/productexists?gameId={gameId}&productId={productId}",
+                ApiUrl = url,
                 Access_Token = Access_Token
             });
 
             if (response is not null) return response;
             return default(T);
-        }
-
-        public async Task<GameDto> GetGame(Guid gameId, string Access_Token)
-        {
-            var response = await SendAsync<GameDto>(new ApiRequest()
-            {
-                apiType = APIType.GET,
-                ApiUrl = $"{APIUrls.ProductServiceUrl}api/games/GetGame?gameId={gameId}",
-                Access_Token = Access_Token
-            });
-
-            if (response is not null) return response;
-            return new GameDto();
         }
     }
 }

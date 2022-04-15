@@ -23,6 +23,7 @@ namespace UsersService_API.Extensions
             services.AddMemoryCache();
             services.Configure<RabbitMQSettings>(config.GetSection("RabbitMQSettings"));
             services.AddHostedService<RabbitMQIdentityConsumer>();
+            services.AddHostedService<RabbitMQCurrencyConsumer>();
             services.AddHostedService<RabbitMQAccessConsumer>();
             services.AddSingleton<IRabbitMQSender, RabbitMQMessageSender>();
             services.AddScoped<ICacheService, CacheService>();
@@ -30,6 +31,7 @@ namespace UsersService_API.Extensions
             services.AddScoped<IFriendsRepository, FriendsRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUploadService, UploadService>();
+            services.AddScoped<ICurrencyRepository, CurrencyRepository>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<ErrorHandler>();
             return services;

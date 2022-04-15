@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.SignalR;
+using OrderService_API.Dtos;
 using OrderService_API.Extensions;
+using OrderService_API.Helpers;
+using OrderService_API.Messages;
 using OrderService_API.RabbitMQSender;
 using OrderService_API.Repository.IRepository;
 using OrderService_API.Services.IServices;
@@ -26,18 +29,35 @@ namespace OrderService_API.SignalR
         public override async Task OnConnectedAsync()
         {
             await cacheService.TryAddToCache(userId, Context.ConnectionId);
-            var token = Context.GetHttpContext()?.Request.Query["access_token"];
+            string? token = Context.GetHttpContext()?.Request.Headers["Authorization"][0];
+            string? order = Context.GetHttpContext()?.Request.Query["orderType"];
+            string? productId = Context.GetHttpContext()?.Request.Query["productId"];
+            string? gameId = Context.GetHttpContext()?.Request.Query["gameId"];
+            string? coupon = Context.GetHttpContext()?.Request.Query["couponCode"];
 
-            Guid gameId;
-            Guid.TryParse(Context.GetHttpContext()?.Request.Query["gameId"], out gameId);
+            if(string.IsNullOrEmpty(token) || string.IsNullOrEmpty(productId)) throw new HubException("Please provide a token and productId");
 
-            Guid productId;
-            Guid.TryParse(Context.GetHttpContext()?.Request.Query["productId"], out productId);
+            OrderType orderType = order switch{
+                "currency" => OrderType.Currency,
+                "game" => OrderType.Game,
+                "product" => OrderType.Product,
+                _ => throw new HubException("Wrong orderType")
+            };  
 
-            if (string.IsNullOrEmpty(token) || gameId == Guid.Empty) throw new HubException("Please provide valid token and GameId");
-            var paymentMessage = await orderRepository.CreateOrder(gameId, userId, userEmail, token, productId);
+            if(orderType == OrderType.Game && string.IsNullOrEmpty(gameId)) throw new HubException("Please provide a gameId");
 
-            if (paymentMessage is not null) rabbitMQSender.SendMessage(paymentMessage, "CreatePaymentQueue");
+            var orderData = new CreateOrderData(productId, userId, coupon, userEmail, token, orderType, gameId);
+            PaymentMessage? message = null;
+
+            _ = orderType switch
+            {
+                OrderType.Currency => message = await orderRepository.CreateOrder<CurrencyDto>(orderData),
+                OrderType.Game => message = await orderRepository.CreateOrder<GameDto>(orderData),
+                OrderType.Product => message = await orderRepository.CreateOrder<ProductDto>(orderData),
+                _ => null
+            };
+
+            if (message is not null) rabbitMQSender.SendMessage(message, "CreatePaymentQueue");
             else await Clients.Caller.SendAsync("PaymentDone", new { isSuccess = false });
         }
 

@@ -34,6 +34,9 @@ namespace CodesService_API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("CodeType")
+                        .HasColumnType("int");
+
                     b.Property<string>("CodeValue")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -41,9 +44,55 @@ namespace CodesService_API.Migrations
                     b.Property<DateTime>("ExpireDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("Uses")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("gameId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("isLimited")
+                        .HasColumnType("bit");
+
                     b.HasKey("Id");
 
                     b.ToTable("Codes");
+                });
+
+            modelBuilder.Entity("CodesService_API.Entites.CodesUsed", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int>("CodeId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("userId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CodeId");
+
+                    b.ToTable("CodesUsed");
+                });
+
+            modelBuilder.Entity("CodesService_API.Entites.CodesUsed", b =>
+                {
+                    b.HasOne("CodesService_API.Entites.Codes", "Code")
+                        .WithMany("CodesUsed")
+                        .HasForeignKey("CodeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Code");
+                });
+
+            modelBuilder.Entity("CodesService_API.Entites.Codes", b =>
+                {
+                    b.Navigation("CodesUsed");
                 });
 #pragma warning restore 612, 618
         }

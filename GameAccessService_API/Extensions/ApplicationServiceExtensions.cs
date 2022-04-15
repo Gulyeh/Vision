@@ -26,6 +26,7 @@ namespace GameAccessService_API.Extensions
             services.AddScoped<IAccessRepository, AccessRepository>();
             services.Configure<RabbitMQSettings>(config.GetSection("RabbitMQSettings"));
             services.AddHostedService<RabbitMQOrderConsumer>();
+            services.AddHostedService<RabbitMQCouponConsumer>();
             services.AddSingleton<IRabbitMQSender, RabbitMQMessageSender>();
             return services;
         }

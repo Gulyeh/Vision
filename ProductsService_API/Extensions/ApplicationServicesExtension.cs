@@ -25,6 +25,7 @@ namespace ProductsService_API.Extensions
             services.AddScoped<ErrorHandler>();
             services.AddScoped<IUploadService, UploadService>();
             services.AddScoped<IProductsRepository, ProductsRepository>();
+            services.AddScoped<IGamesRepository, GamesRepository>();
             return services;
         }
     }

@@ -67,8 +67,13 @@ namespace OrderService_API.RabbitMQConsumer
                 if (data.isSuccess)
                 {
                     var order = await orderRepository.GetOrder(data.orderId);
-                    await orderRepository.ChangeOrderStatus(data.orderId, true);
-                    rabbitMQSender.SendMessage(new { userId = data.userId, gameId = order.GameId, productId = order.ProductId, Email = data.Email }, "AccessProductQueue");
+                    await orderRepository.ChangeOrderStatus(data.orderId, data.isSuccess);
+                    if(order.OrderType == OrderType.Game || order.OrderType == OrderType.Product) rabbitMQSender.SendMessage(new { userId = data.userId, gameId = order.GameId, productId = order.ProductId, Email = data.Email }, "AccessProductQueue");
+                    else if(order.OrderType == OrderType.Currency) {
+                        //get package amount from products service
+                        var amount = 0;
+                        rabbitMQSender.SendMessage(new { userId = data.userId, amount = amount, Email = data.Email, isCode = false }, "ChangeFundsQueue");    
+                    }
                 }
                 else
                 {

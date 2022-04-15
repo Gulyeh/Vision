@@ -7,6 +7,5 @@ namespace ProductsService_API.Dtos
     {
         [Required]
         public Guid GameId { get; set; }
-        public ICollection<ProductsDto>? GameProducts { get; set; }
     }
 }

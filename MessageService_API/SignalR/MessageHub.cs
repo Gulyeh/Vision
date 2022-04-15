@@ -27,7 +27,7 @@ namespace MessageService_API.SignalR
 
         public override async Task OnConnectedAsync()
         {
-            var token = Context.GetHttpContext()?.Request.Query["access_token"];
+            var token = Context.GetHttpContext()?.Request.Headers["Authorization"][0];
             var receiverId = Context.GetHttpContext()?.Request.Query["receiverId"];
             Guid chatGuid = Guid.Empty;
             Guid revceiverGuid = Guid.Empty;
@@ -78,7 +78,7 @@ namespace MessageService_API.SignalR
 
             if (!isOtherMember)
             {
-                var access_token = Context.GetHttpContext()?.Request.Query["access_token"];
+                var access_token = Context.GetHttpContext()?.Request.Headers["Authorization"][0];
                 if (!string.IsNullOrEmpty(access_token)) await messageRepository.SendUserMessageNotification(data.ReceiverId, data.ChatId, access_token);
             }
 

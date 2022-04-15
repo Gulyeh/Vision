@@ -32,21 +32,13 @@ namespace OrderService_API.Services
             if (!string.IsNullOrEmpty(apiRequest.Access_Token)) client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiRequest.Access_Token);
 
             HttpResponseMessage apiResponse;
-            switch (apiRequest.apiType)
+            request.Method = apiRequest.apiType switch
             {
-                case APIType.GET:
-                    request.Method = HttpMethod.Get;
-                    break;
-                case APIType.POST:
-                    request.Method = HttpMethod.Post;
-                    break;
-                case APIType.DELETE:
-                    request.Method = HttpMethod.Delete;
-                    break;
-                default:
-                    request.Method = HttpMethod.Get;
-                    break;
-            }
+                APIType.GET => HttpMethod.Get,
+                APIType.POST => HttpMethod.Post,
+                APIType.DELETE => HttpMethod.Delete,
+                _ => HttpMethod.Get,
+            };
 
             apiResponse = await client.SendAsync(request);
             var apiContent = await apiResponse.Content.ReadAsStringAsync();

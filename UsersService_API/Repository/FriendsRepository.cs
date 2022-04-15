@@ -90,7 +90,7 @@ namespace UsersService_API.Repository
                 }
             }
 
-            return new ResponseDto(true, StatusCodes.Status200OK, findFriends);
+            return new ResponseDto(true, StatusCodes.Status200OK, friendList);
         }
 
         public async Task<bool> SendFriendRequest(FriendRequestDto data)

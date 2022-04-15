@@ -5,15 +5,15 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using ProductsService_API.DbContexts;
+using PaymentService_API.DbContexts;
 
 #nullable disable
 
-namespace ProductsService_API.Migrations
+namespace PaymentService_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220405133517_ChangeDecimalPrice")]
-    partial class ChangeDecimalPrice
+    [Migration("20220414194558_AddEmailToPaymentTable")]
+    partial class AddEmailToPaymentTable
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -24,39 +24,37 @@ namespace ProductsService_API.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("ProductsService_API.Entites.Products", b =>
+            modelBuilder.Entity("PaymentService_API.Entities.Payment", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("Discount")
-                        .HasColumnType("int");
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("GameId")
+                    b.Property<Guid>("OrderId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("IsAvailable")
-                        .HasColumnType("bit");
+                    b.Property<int>("PaymentStatus")
+                        .HasColumnType("int");
 
-                    b.Property<string>("PhotoId")
-                        .IsRequired()
+                    b.Property<string>("StripeId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PhotoUrl")
-                        .IsRequired()
+                    b.Property<string>("StripeUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("Price")
+                    b.Property<decimal>("TotalPrice")
                         .HasColumnType("decimal(15,2)");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.ToTable("GamesProducts");
+                    b.ToTable("Payments");
                 });
 #pragma warning restore 612, 618
         }

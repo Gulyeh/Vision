@@ -72,6 +72,26 @@ namespace GameAccessService_API.Migrations
 
                     b.ToTable("UsersGames");
                 });
+
+            modelBuilder.Entity("GameAccessService_API.Entites.UserProducts", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("GameId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UsersProducts");
+                });
 #pragma warning restore 612, 618
         }
     }
