@@ -71,8 +71,8 @@ namespace UsersService_API.RabbitMQConsumer
                     if (connIds is not null)
                     {
                         await hubContext.Clients.Clients(connIds).SendAsync("CurrencyPurchased", new CurrencyPurchased { isSuccess = data.isSuccess, Amount = data.Amount});
-                        if(!data.isCode) rabbitMQSender.SendMessage(data, "CurrencyPaymentDoneQueue");
                     }
+                    if(!data.isCode) rabbitMQSender.SendMessage(data, "CurrencyPaymentDoneQueue");
                 }
             }
         }

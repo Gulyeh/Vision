@@ -8,6 +8,6 @@ namespace CodesService_API.Proccessor.Interfaces
 {
     public interface ISender : IResponder
     {
-        void SendRabbitMQMessage(Guid userId, Guid? gameId = null, string? productId= null);
+        void SendRabbitMQMessage(Guid userId, Guid? gameId = null, string? productId = null);
     }
 }
