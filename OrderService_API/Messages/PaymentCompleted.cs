@@ -11,5 +11,6 @@ namespace OrderService_API.Messages
         public Guid userId { get; set; }
         public Guid orderId { get; set; }
         public string Email { get; set; }
+        public string? Access_Token { get; set; }
     }
 }

@@ -36,7 +36,7 @@ namespace GameAccessService_API.Services
         {
             IEnumerable<T> value;
             if (!memoryCache.TryGetValue(type, out value))
-            {
+            {     
                 value = await db.Set<T>().ToListAsync();
                 SetCache<T>(type, value);
             }

@@ -2,13 +2,13 @@ namespace Identity_API.Dtos
 {
     public class UserDto
     {
-        public UserDto(string username, string token, string photoUrl, string description, string email)
+        public UserDto()
         {
-            Username = username;
-            Token = token;
-            PhotoUrl = photoUrl;
-            Description = description;
-            Email = email;
+            Username = string.Empty;
+            Token = string.Empty;
+            PhotoUrl = string.Empty;
+            Description = string.Empty;
+            Email = string.Empty;
         }
 
         public string Email { get; set; }

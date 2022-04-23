@@ -29,12 +29,9 @@ namespace UsersService_API.Repository
 
             db.FriendRequests.Remove(findRequest);
 
-            var newFriends = new UsersFriends()
-            {
-                User1 = SenderId,
-                User2 = userId,
-                FriendsSince = DateTime.Now
-            };
+            var newFriends = new UsersFriends();       
+            newFriends.User1 = SenderId;
+            newFriends.User2 = userId;
 
             await db.UsersFriends.AddAsync(newFriends);
 
@@ -59,7 +56,7 @@ namespace UsersService_API.Repository
             db.UsersFriends.Remove(findFriends);
             if (await SaveChangesAsyncBool())
             {
-                rabbitMQSender.SendMessage(new DeleteChat { User1 = userId, User2 = ToDeleteUserId }, "DeleteChatQueue");
+                rabbitMQSender.SendMessage(new DeleteChat() { User1 = userId, User2 = ToDeleteUserId }, "DeleteChatQueue");
                 return true;
             }
             return false;
@@ -78,14 +75,12 @@ namespace UsersService_API.Repository
 
                 if (data is not null)
                 {
-                    var friendDto = new UserDataDto()
-                    {
-                        UserId = data.UserId,
-                        Nickname = data.Nickname,
-                        PhotoUrl = data.PhotoUrl,
-                        Status = data.Status,
-                        Description = data.Description
-                    };
+                    var friendDto = new UserDataDto();
+                    friendDto.UserId = data.UserId;
+                    friendDto.Nickname = data.Nickname;
+                    friendDto.PhotoUrl = data.PhotoUrl;
+                    friendDto.Status = data.Status;
+                    friendDto.Description = data.Description;
                     friendList.Add(friendDto);
                 }
             }
@@ -111,13 +106,12 @@ namespace UsersService_API.Repository
                 var user = await db.Users.FirstOrDefaultAsync(x => x.UserId == data.Sender);
                 if (user is not null)
                 {
-                    var request = new GetFriendRequestsDto()
-                    {
-                        UserId = user.UserId,
-                        Nickname = user.Nickname,
-                        PhotoUrl = user.PhotoUrl,
-                        Status = user.Status
-                    };
+                    var request = new GetFriendRequestsDto();             
+                    request.UserId = user.UserId;
+                    request.Nickname = user.Nickname;
+                    request.PhotoUrl = user.PhotoUrl;
+                    request.Status = user.Status;
+                    
                     requests.Add(request);
                 }
             }
@@ -135,13 +129,11 @@ namespace UsersService_API.Repository
                 var user = await db.Users.FirstOrDefaultAsync(x => x.UserId == data.Receiver);
                 if (user is not null)
                 {
-                    var request = new GetFriendRequestsDto()
-                    {
-                        UserId = user.UserId,
-                        Nickname = user.Nickname,
-                        PhotoUrl = user.PhotoUrl,
-                        Status = user.Status
-                    };
+                    var request = new GetFriendRequestsDto();
+                    request.UserId = user.UserId;
+                    request.Nickname = user.Nickname;
+                    request.PhotoUrl = user.PhotoUrl;
+                    request.Status = user.Status;             
                     requests.Add(request);
                 }
             }

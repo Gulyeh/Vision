@@ -9,12 +9,12 @@ namespace CodesService_API.Helpers
         {
             Code = string.Empty;
             CodeValue = string.Empty;
+            Title = string.Empty;
         }
 
         [Required]
         public string Code { get; set; }
-        [Required]
-        public string CodeValue { get; set; }
+        public string? CodeValue { get; set; }
         [Required]
         public DateTime ExpireDate { get; set; }
         [Required]
@@ -23,5 +23,6 @@ namespace CodesService_API.Helpers
         public bool isLimited { get; set; }
         public int? Uses { get; set; }
         public Guid? gameId { get; set; }
+        public string Title { get; set; }
     }
 }

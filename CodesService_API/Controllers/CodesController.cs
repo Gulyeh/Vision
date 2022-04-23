@@ -11,9 +11,11 @@ namespace CodesService_API.Controllers
     public class CodesController : BaseApiController
     {
         private readonly ICodesRepository codesRepository;
+        private readonly IServiceScopeFactory scopeFactory;
 
-        public CodesController(ICodesRepository codesRepository)
+        public CodesController(ICodesRepository codesRepository, IServiceScopeFactory scopeFactory)
         {
+            this.scopeFactory = scopeFactory;
             this.codesRepository = codesRepository;
         }
 

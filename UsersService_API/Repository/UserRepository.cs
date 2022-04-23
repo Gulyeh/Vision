@@ -69,14 +69,14 @@ namespace UsersService_API.Repository
             var user = await db.Users.FirstOrDefaultAsync(x => x.UserId == userId);
             if (user is null) return new UserDataDto();
 
-            return new UserDataDto()
-            {
-                UserId = userId,
-                Nickname = user.Nickname,
-                Description = user.Description,
-                PhotoUrl = user.PhotoUrl,
-                Status = user.LastOnlineStatus
-            };
+            var userDto = new UserDataDto();
+            userDto.UserId = userId;
+            userDto.Nickname = user.Nickname;
+            userDto.Description = user.Description;
+            userDto.PhotoUrl = user.PhotoUrl;
+            userDto.Status = user.LastOnlineStatus;
+
+            return userDto;
         }
 
         public async Task<bool> UserOffline(Guid userId, string connectionId)
@@ -161,13 +161,8 @@ namespace UsersService_API.Repository
 
         public async Task CreateUser(Guid userId)
         {
-            var newUser = new Users()
-            {
-                UserId = userId,
-                Nickname = "VisionUser",
-                Status = Status.Offline,
-                LastOnlineStatus = Status.Offline
-            };
+            var newUser = new Users();
+            newUser.UserId = userId;    
 
             await db.Users.AddAsync(newUser);
             await SaveChangesAsync();

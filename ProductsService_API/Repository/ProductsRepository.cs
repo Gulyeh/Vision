@@ -101,7 +101,8 @@ namespace ProductsService_API.Repository
                 var product = game.GameProducts.FirstOrDefault(x => x.Id == productId);
                 return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<ProductsDto>(product));
             }
-            else return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<ProductsDto>(game.GameProducts));
+            
+            else return new ResponseDto(true, StatusCodes.Status200OK, new ProductsDto());
         }
 
         public async Task<ResponseDto> ProductExists(Guid gameId, Guid productId)

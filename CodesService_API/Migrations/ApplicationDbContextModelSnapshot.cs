@@ -38,7 +38,6 @@ namespace CodesService_API.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("CodeValue")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("ExpireDate")

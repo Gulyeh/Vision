@@ -63,7 +63,7 @@ namespace UsersService_API.RabbitMQConsumer
                     var connIds = userCache.GetValueOrDefault(data.userId);
                     if (connIds is not null)
                     {
-                        await hubContext.Clients.Clients(connIds).SendAsync("GamePurchased", new{ gameId = data.gameId, productId = data.productId });
+                        await hubContext.Clients.Clients(connIds).SendAsync("GamePurchased", new GamePurchased { gameId = data.gameId, productId = data.productId });
                     }
                 }
             }

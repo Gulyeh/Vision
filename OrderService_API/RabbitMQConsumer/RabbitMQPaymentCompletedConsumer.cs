@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using OrderService_API.Helpers;
 using OrderService_API.Messages;
+using OrderService_API.Proccessors;
 using OrderService_API.RabbitMQSender;
 using OrderService_API.Repository.IRepository;
 using OrderService_API.Services.IServices;
@@ -22,12 +23,14 @@ namespace OrderService_API.RabbitMQConsumer
         private readonly IHubContext<OrderHub> hubContext;
         private readonly IRabbitMQSender rabbitMQSender;
         private readonly IOrderRepository orderRepository;
+        private readonly IProductsService productService;
 
         public RabbitMQPaymentCompletedConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory serviceScopeFactory, IRabbitMQSender rabbitMQSender)
         {
             using var scope = serviceScopeFactory.CreateScope();
             this.hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<OrderHub>>();
             this.orderRepository = scope.ServiceProvider.GetRequiredService<IOrderRepository>();
+            this.productService = scope.ServiceProvider.GetRequiredService<IProductsService>();
             this.cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
             this.rabbitMQSender = rabbitMQSender;
 
@@ -63,24 +66,29 @@ namespace OrderService_API.RabbitMQConsumer
         private async Task HandleMessage(PaymentCompleted? data)
         {
             if (data is not null)
-            {
+            {           
                 if (data.isSuccess)
                 {
                     var order = await orderRepository.GetOrder(data.orderId);
                     await orderRepository.ChangeOrderStatus(data.orderId, data.isSuccess);
-                    if(order.OrderType == OrderType.Game || order.OrderType == OrderType.Product) rabbitMQSender.SendMessage(new { userId = data.userId, gameId = order.GameId, productId = order.ProductId, Email = data.Email }, "AccessProductQueue");
-                    else if(order.OrderType == OrderType.Currency) {
-                        //get package amount from products service
-                        var amount = 0;
-                        rabbitMQSender.SendMessage(new { userId = data.userId, amount = amount, Email = data.Email, isCode = false }, "ChangeFundsQueue");    
+                    var orderProccessor = new OrderTypeProccessor(order.OrderType, orderRepository, rabbitMQSender, productService).CreateOrder();
+                    if(orderProccessor is null) {
+                        await PaymentNotCompleted(data);
+                        return;
                     }
+                    var completed = await orderProccessor.PaymentCompleted(data, order);
+                    if(!completed) await PaymentNotCompleted(data);
                 }
                 else
                 {
-                    var connIds = await cacheService.TryGetFromCache(data.userId);
-                    if (connIds.Count() > 0) await hubContext.Clients.Clients(connIds).SendAsync("PaymentDone", new { isSuccess = false });
+                    await PaymentNotCompleted(data);
                 }
             }
+        }
+
+        private async Task PaymentNotCompleted(PaymentCompleted data){
+            var connIds = await cacheService.TryGetFromCache(data.userId);
+            if (connIds.Count() > 0) await hubContext.Clients.Clients(connIds).SendAsync("PaymentDone", new { isSuccess = false });
         }
     }
 }

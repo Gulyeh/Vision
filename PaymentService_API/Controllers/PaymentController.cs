@@ -18,7 +18,8 @@ namespace PaymentService_API.Controllers
         [HttpGet("Success")]
         public async Task<ContentResult> PaymentSuccess([FromQuery] string sessionId)
         {
-            await paymentRepository.PaymentCompleted(sessionId, PaymentStatus.Completed);
+            var token = HttpContext.Request.Headers["Authorization"][0];
+            await paymentRepository.PaymentCompleted(sessionId, PaymentStatus.Completed, token);
             return base.Content(@"
                     <body>
                         <script type='text/javascript'>

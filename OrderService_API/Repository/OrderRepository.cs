@@ -33,20 +33,18 @@ namespace OrderService_API.Repository
             int couponDiscount = 0;
             if(!string.IsNullOrEmpty(data.Coupon)) couponDiscount = await couponService.ApplyCoupon(data.Coupon, data.Access_Token, CodeTypes.Discount);
 
-            var newOrder = new Order()
-            {
-                ProductId = data.productId,
-                UserId = data.userId,
-                OrderType = data.orderType,
-                GameId = data.gameId,
-                CuponCode = couponDiscount != 0 ? data.Coupon : string.Empty
-            };
+            var newOrder = new Order();                     
+            newOrder.ProductId = data.productId;
+            newOrder.UserId = data.userId;
+            newOrder.OrderType = data.orderType;
+            newOrder.GameId = data.gameId;
+            newOrder.CuponCode = couponDiscount != 0 ? data.Coupon : string.Empty;
 
-            var message = new PaymentMessage(product.Price, product.Discount, couponDiscount){
-                UserId = data.userId,
-                Email = data.Email,
-                Title = product.Title        
-            };
+            var message = new PaymentMessage(product.Price, product.Discount, couponDiscount);
+            message.UserId = data.userId;
+            message.Email = data.Email;
+            message.Title = product.Title;      
+            
 
             await db.Orders.AddAsync(newOrder);
             if (await SaveChangesAsync())

@@ -41,17 +41,17 @@ namespace GameAccessService_API.Repository
 
         public async Task<bool> CheckUserAccess(Guid gameId, Guid userId)
         {
-            return await CheckCache<UserAccess>(gameId, userId, CacheType.GameAccess);
+            return await checkCache<UserAccess>(gameId, userId, CacheType.GameAccess);
         }
 
         public async Task<bool> CheckUserHasGame(Guid gameId, Guid userId)
         {
-            return await CheckCache<UserGames>(gameId, userId, CacheType.OwnGame);
+            return await checkCache<UserGames>(gameId, userId, CacheType.OwnGame);
         }
 
         public async Task<bool> CheckUserHasProduct(Guid productId, Guid userId)
         {
-            return await CheckCache<UserProducts>(productId, userId, CacheType.OwnProduct);
+            return await checkCache<UserProducts>(productId, userId, CacheType.OwnProduct);
         }
 
         public async Task<bool> AddProductOrGame(Guid userId, Guid gameId, Guid? productId = null)
@@ -61,21 +61,19 @@ namespace GameAccessService_API.Repository
 
             if (productId is not null)
             {
-                product = new UserProducts()
-                {
-                    GameId = gameId,
-                    UserId = userId,
-                    ProductId = (Guid)productId
-                };
+                product = new UserProducts();
+                product.GameId = gameId;
+                product.UserId = userId;
+                product.ProductId = (Guid)productId;
+
                 await db.UsersProducts.AddAsync(product);
             }
             else
             {
-                game = new UserGames()
-                {
-                    GameId = gameId,
-                    UserId = userId
-                };
+                game = new UserGames();
+                game.GameId = gameId;
+                game.UserId = userId;
+
                 await db.UsersGames.AddAsync(game);
             }
 
@@ -103,7 +101,7 @@ namespace GameAccessService_API.Repository
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not unban a user" });
         }
 
-        private async Task<bool> CheckCache<T>(Guid gameId, Guid userId, CacheType type) where T : BaseUser
+        private async Task<bool> checkCache<T>(Guid gameId, Guid userId, CacheType type) where T : BaseUser
         {
             var cache = await cacheService.TryGetFromCache<T>(type, userId);
             var results = cache.FirstOrDefault(x => x.GameId == gameId && x.UserId == userId);

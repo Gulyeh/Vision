@@ -19,6 +19,5 @@ namespace OrderService_API.Dtos
         public DateTime? PaymentDate { get; set; }
         public string? CuponCode { get; set; }
         public Guid? GameId { get; set; }
-
     }
 }

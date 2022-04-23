@@ -7,6 +7,6 @@ namespace PaymentService_API.Repository.IRepository
     {
         Task CreatePayment(PaymentMessage data);
         Task<PaymentUrlData> RequestStripePayment(PaymentMessage data);
-        Task<bool> PaymentCompleted(string sessionId, PaymentStatus status);
+        Task<bool> PaymentCompleted(string sessionId, PaymentStatus status, string? Access_Token = null);
     }
 }

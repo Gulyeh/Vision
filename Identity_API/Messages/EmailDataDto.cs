@@ -1,8 +1,9 @@
 using Identity_API.Helpers;
+using Identity_API.Messages.Interfaces;
 
 namespace Identity_API.Dtos
 {
-    public class EmailDataDto
+    public class EmailDataDto : IEmailDataDto
     {
         public EmailDataDto()
         {

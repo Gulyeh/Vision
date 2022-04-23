@@ -20,15 +20,16 @@ namespace SMTPService_API.Repository
         public async Task InitializeEmail(EmailDataDto data)
         {
             var sent = await emailSerivce.SendEmail(data);
+            if(sent == true){
+                EmailLogs logs = new EmailLogs()
+                {
+                    Email = data.ReceiverEmail,
+                    Log = $"Sent {data.EmailType} email"
+                };
 
-            EmailLogs logs = new EmailLogs()
-            {
-                Email = data.ReceiverEmail,
-                Log = $"Sent {data.EmailType} email"
-            };
-
-            await db.EmailLogs.AddAsync(logs);
-            await db.SaveChangesAsync();
+                await db.EmailLogs.AddAsync(logs);
+                await db.SaveChangesAsync();
+            }
         }
     }
 }

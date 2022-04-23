@@ -63,13 +63,11 @@ namespace Identity_API.Repository
                 BanExpires = isBanned.BanExpires.ToShortDate(),
             });
 
-            return new ResponseDto(true, StatusCodes.Status200OK, new UserDto(
-                username: string.Empty,
-                email: user.Email,
-                token: await tokenService.CreateToken(user),
-                photoUrl: string.Empty,
-                description: string.Empty
-            ));
+            var userDto = new UserDto();
+            userDto.Email = user.Email;
+            userDto.Token = await tokenService.CreateToken(user);
+
+            return new ResponseDto(true, StatusCodes.Status200OK, userDto);
         }
 
         public async Task<ResponseDto> Register(RegisterDto registerData, string baseUri)
@@ -90,13 +88,14 @@ namespace Identity_API.Repository
             var link = $"{baseUri}/ConfirmEmail?userId={user.Id}&token={token}";
 
             rabbitMQSender.SendMessage(new { userId = user.Id }, "CreateUserQueue");
-            rabbitMQSender.SendMessage(new EmailDataDto()
-            {
-                userId = user.Id,
-                Content = $"Confirm your email by entering {link}",
-                ReceiverEmail = user.UserName,
-                EmailType = EmailTypes.Confirmation
-            }, "SendEmailQueue");
+
+            var emailDto = new EmailDataDto();
+            emailDto.Content = $"Confirm your email by entering {link}";
+            emailDto.EmailType = EmailTypes.Confirmation;
+            emailDto.ReceiverEmail = user.UserName;
+            emailDto.userId = user.Id;
+
+            rabbitMQSender.SendMessage(emailDto, "SendEmailQueue");
 
             return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Account has been registered successfuly. Please check your mailbox and confirm your email address" });
         }

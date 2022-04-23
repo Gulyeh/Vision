@@ -8,9 +8,11 @@ namespace UsersService_API.Entites
         public Users()
         {
             PhotoUrl = "default";
-            Nickname = string.Empty;
+            Nickname = "VisionUser";
             PhotoId = string.Empty;
             CurrencyValue = 0;
+            Status = Status.Offline;
+            LastOnlineStatus = Status.Offline;
         }
 
         [Key]
