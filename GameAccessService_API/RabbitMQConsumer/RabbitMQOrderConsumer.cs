@@ -14,14 +14,16 @@ namespace GameAccessService_API.RabbitMQConsumer
     public class RabbitMQOrderConsumer : BackgroundService
     {
         private readonly IAccessRepository accessRepository;
+        private readonly ILogger<RabbitMQOrderConsumer> logger;
         private readonly IRabbitMQSender rabbitMQSender;
         private IConnection connection;
         private IModel channel;
 
-        public RabbitMQOrderConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory scopeFactory, IRabbitMQSender rabbitMQSender)
+        public RabbitMQOrderConsumer(IOptions<RabbitMQSettings> options, ILogger<RabbitMQOrderConsumer> logger, IServiceScopeFactory scopeFactory, IRabbitMQSender rabbitMQSender)
         {
             using var scope = scopeFactory.CreateScope();
             accessRepository = scope.ServiceProvider.GetRequiredService<IAccessRepository>();
+            this.logger = logger;
             this.rabbitMQSender = rabbitMQSender;
 
             var factory = new ConnectionFactory
@@ -42,6 +44,7 @@ namespace GameAccessService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
+                logger.LogInformation("RabbitMQ Consumed request from queue: AccessProductQueue");
                 var content = Encoding.UTF8.GetString(args.Body.ToArray());
                 UserPurchaseDto? gameData = JsonConvert.DeserializeObject<UserPurchaseDto>(content);
                 HandleMessage(gameData).GetAwaiter().GetResult();

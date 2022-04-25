@@ -14,12 +14,14 @@ namespace UsersService_API.Repository
         private readonly ApplicationDbContext db;
         private readonly IMapper mapper;
         private readonly IRabbitMQSender rabbitMQSender;
+        private readonly ILogger<FriendsRepository> logger;
 
-        public FriendsRepository(ApplicationDbContext db, IMapper mapper, IRabbitMQSender rabbitMQSender)
+        public FriendsRepository(ApplicationDbContext db, IMapper mapper, IRabbitMQSender rabbitMQSender, ILogger<FriendsRepository> logger)
         {
             this.db = db;
             this.mapper = mapper;
             this.rabbitMQSender = rabbitMQSender;
+            this.logger = logger;
         }
 
         public async Task<bool> AcceptFriendRequest(Guid userId, Guid SenderId)
@@ -35,7 +37,7 @@ namespace UsersService_API.Repository
 
             await db.UsersFriends.AddAsync(newFriends);
 
-            return await SaveChangesAsyncBool();
+            return await SaveChangesAsync("AcceptFriendRequest");
         }
 
         public async Task<bool> DeclineFriendRequest(Guid userId, Guid SenderId)
@@ -44,7 +46,7 @@ namespace UsersService_API.Repository
             if (findRequest is null) return false;
 
             db.FriendRequests.Remove(findRequest);
-            return await SaveChangesAsyncBool();
+            return await SaveChangesAsync("DeclineFriendRequest");
         }
 
         public async Task<bool> DeleteFriend(Guid userId, Guid ToDeleteUserId)
@@ -54,11 +56,13 @@ namespace UsersService_API.Repository
             if (findFriends is null) return false;
 
             db.UsersFriends.Remove(findFriends);
-            if (await SaveChangesAsyncBool())
+            if (await SaveChangesAsync())
             {
                 rabbitMQSender.SendMessage(new DeleteChat() { User1 = userId, User2 = ToDeleteUserId }, "DeleteChatQueue");
+                logger.LogInformation("User with ID: {userId} has deleted User with ID: {deletedUserId} from friendlist", userId, ToDeleteUserId);
                 return true;
             }
+            logger.LogInformation("Could not delete User with ID: {deleteUserId} from User with ID: {userId} friendlist", ToDeleteUserId, userId);
             return false;
         }
 
@@ -75,12 +79,7 @@ namespace UsersService_API.Repository
 
                 if (data is not null)
                 {
-                    var friendDto = new UserDataDto();
-                    friendDto.UserId = data.UserId;
-                    friendDto.Nickname = data.Nickname;
-                    friendDto.PhotoUrl = data.PhotoUrl;
-                    friendDto.Status = data.Status;
-                    friendDto.Description = data.Description;
+                    var friendDto = mapper.Map<UserDataDto>(data);
                     friendList.Add(friendDto);
                 }
             }
@@ -93,7 +92,7 @@ namespace UsersService_API.Repository
             var mapped = mapper.Map<FriendRequests>(data);
             await db.FriendRequests.AddAsync(mapped);
 
-            return await SaveChangesAsyncBool();
+            return await SaveChangesAsync("SendFriendRequest");
         }
 
         public async Task<ResponseDto> GetFriendRequests(Guid userId)
@@ -106,12 +105,7 @@ namespace UsersService_API.Repository
                 var user = await db.Users.FirstOrDefaultAsync(x => x.UserId == data.Sender);
                 if (user is not null)
                 {
-                    var request = new GetFriendRequestsDto();             
-                    request.UserId = user.UserId;
-                    request.Nickname = user.Nickname;
-                    request.PhotoUrl = user.PhotoUrl;
-                    request.Status = user.Status;
-                    
+                    var request = mapper.Map<GetFriendRequestsDto>(user);             
                     requests.Add(request);
                 }
             }
@@ -129,11 +123,7 @@ namespace UsersService_API.Repository
                 var user = await db.Users.FirstOrDefaultAsync(x => x.UserId == data.Receiver);
                 if (user is not null)
                 {
-                    var request = new GetFriendRequestsDto();
-                    request.UserId = user.UserId;
-                    request.Nickname = user.Nickname;
-                    request.PhotoUrl = user.PhotoUrl;
-                    request.Status = user.Status;             
+                    var request = mapper.Map<GetFriendRequestsDto>(user);             
                     requests.Add(request);
                 }
             }
@@ -141,23 +131,15 @@ namespace UsersService_API.Repository
             return new ResponseDto(true, StatusCodes.Status200OK, findSentRequests);
         }
 
-        private async Task<bool> SaveChangesAsyncBool()
+        private async Task<bool> SaveChangesAsync(string? methodName = null)
         {
-            if (await db.SaveChangesAsync() > 0)
-            {
+            if (await db.SaveChangesAsync() > 0) {
+                if(methodName != null && !string.IsNullOrEmpty(methodName)) logger.LogInformation("Saved data from {methodName} successfully", methodName);
                 return true;
             }
+
+            if(methodName != null && !string.IsNullOrEmpty(methodName)) logger.LogInformation("Could not save data from {methodName}", methodName);
             return false;
         }
-
-        private async Task<ResponseDto> SaveChangesAsync(string message, string errormessage)
-        {
-            if (await db.SaveChangesAsync() > 0)
-            {
-                return new ResponseDto(true, StatusCodes.Status200OK, new[] { message });
-            }
-            return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { errormessage });
-        }
-
     }
 }

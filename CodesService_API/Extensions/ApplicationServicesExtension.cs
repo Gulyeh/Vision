@@ -6,6 +6,7 @@ using CodesService_API.Repository.IRepository;
 using CodesService_API.Services;
 using CodesService_API.Services.IServices;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 namespace CodesService_API.Extensions
 {

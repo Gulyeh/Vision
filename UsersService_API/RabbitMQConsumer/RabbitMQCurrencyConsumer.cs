@@ -21,10 +21,13 @@ namespace UsersService_API.RabbitMQConsumer
         private IConnection connection;
         private IModel channel;
         private readonly IRabbitMQSender rabbitMQSender;
+        private readonly ILogger<RabbitMQCurrencyConsumer> logger;
 
-        public RabbitMQCurrencyConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory serviceScopeFactory, IRabbitMQSender rabbitMQSender)
+        public RabbitMQCurrencyConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory serviceScopeFactory, 
+            IRabbitMQSender rabbitMQSender, ILogger<RabbitMQCurrencyConsumer> logger)
         {
             this.rabbitMQSender = rabbitMQSender;
+            this.logger = logger;
             using var scope = serviceScopeFactory.CreateScope();
             this.hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<UsersHub>>();
             this.currencyRepository = scope.ServiceProvider.GetRequiredService<ICurrencyRepository>();
@@ -48,6 +51,7 @@ namespace UsersService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
+                logger.LogInformation("Received message from queue: ChangeFundsQueue");
                 var content = Encoding.UTF8.GetString(args.Body.ToArray());
                 CurrencyDto? currencyData = JsonConvert.DeserializeObject<CurrencyDto>(content);
                 HandleMessage(currencyData).GetAwaiter().GetResult();

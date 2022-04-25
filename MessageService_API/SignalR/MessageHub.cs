@@ -15,11 +15,14 @@ namespace MessageService_API.SignalR
         private readonly Guid userId;
         private readonly IConnectionsCacheService cacheService;
         private readonly IUsersService usersService;
+        private readonly ILogger<MessageHub> logger;
 
-        public MessageHub(IMessageRepository messageRepository, IChatRepository chatRepository, IConnectionsCacheService cacheService, IUsersService usersService)
+        public MessageHub(IMessageRepository messageRepository, IChatRepository chatRepository, 
+            IConnectionsCacheService cacheService, IUsersService usersService, ILogger<MessageHub> logger)
         {
             this.cacheService = cacheService;
             this.usersService = usersService;
+            this.logger = logger;
             this.messageRepository = messageRepository;
             this.chatRepository = chatRepository;
             userId = Context.User != null ? Context.User.GetId() : Guid.Empty;
@@ -49,6 +52,7 @@ namespace MessageService_API.SignalR
             var messages = await messageRepository.GetMessages(chatGuid, userId);
             await Clients.Caller.SendAsync("GetMessages", messages);
 
+            logger.LogInformation("User with ConnectionId: {connId} has connected to MessageHub", Context.ConnectionId); 
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception)
@@ -63,6 +67,8 @@ namespace MessageService_API.SignalR
 
             await cacheService.RemoveFromGroupCache(chat, userId, Context.ConnectionId);
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, chat.ToString());
+
+            logger.LogInformation("User with ConnectionId: {connId} has disconnected from MessageHub", Context.ConnectionId); 
         }
 
         public async Task SendMessage(AddMessageDto data)

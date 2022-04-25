@@ -16,14 +16,16 @@ namespace PaymentService_API.RabbitMQConsumer
         private IConnection connection;
         private IModel channel;
         private readonly IRabbitMQSender rabbitMQSender;
+        private readonly ILogger<RabbitMQOrderConsumer> logger;
         private readonly IPaymentRepository paymentRepository;
 
-        public RabbitMQOrderConsumer(IOptions<RabbitMQSettings> options, IRabbitMQSender rabbitMQSender, IServiceScopeFactory serviceScopeFactory)
+        public RabbitMQOrderConsumer(IOptions<RabbitMQSettings> options, IRabbitMQSender rabbitMQSender, 
+            IServiceScopeFactory serviceScopeFactory, ILogger<RabbitMQOrderConsumer> logger)
         {
             using var scope = serviceScopeFactory.CreateScope();
             this.paymentRepository = scope.ServiceProvider.GetRequiredService<IPaymentRepository>();
             this.rabbitMQSender = rabbitMQSender;
-
+            this.logger = logger;
             var factory = new ConnectionFactory
             {
                 HostName = options.Value.Hostname,
@@ -42,10 +44,10 @@ namespace PaymentService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
+                logger.LogInformation("Received message from queue: CreatePaymentQueue"); 
                 var content = Encoding.UTF8.GetString(args.Body.ToArray());
                 PaymentMessage? gameData = JsonConvert.DeserializeObject<PaymentMessage>(content);
                 HandleMessage(gameData).GetAwaiter().GetResult();
-
                 channel.BasicAck(args.DeliveryTag, false);
             };
             channel.BasicConsume("CreatePaymentQueue", false, consumer);
@@ -61,10 +63,7 @@ namespace PaymentService_API.RabbitMQConsumer
                 var paymentData = await paymentRepository.RequestStripePayment(data);
                 rabbitMQSender.SendMessage(paymentData, "PaymentUrlQueue");
             }
-            else
-            {
-                rabbitMQSender.SendMessage(null, "PaymentUrlQueue");
-            }
+            else rabbitMQSender.SendMessage(null, "PaymentUrlQueue");        
         }
     }
 }

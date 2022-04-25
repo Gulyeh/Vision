@@ -12,7 +12,7 @@ namespace OrderService_API.Services
 {
     public class CouponService : BaseHttpService, ICouponService
     {
-        public CouponService(IHttpClientFactory httpClientFactory) : base(httpClientFactory)
+        public CouponService(IHttpClientFactory httpClientFactory, ILogger<BaseHttpService> logger) : base(httpClientFactory, logger)
         {
         }
 

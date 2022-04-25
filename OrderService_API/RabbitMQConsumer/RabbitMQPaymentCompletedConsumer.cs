@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using OrderService_API.Helpers;
 using OrderService_API.Messages;
-using OrderService_API.Proccessors;
+using OrderService_API.Processors;
 using OrderService_API.RabbitMQSender;
 using OrderService_API.Repository.IRepository;
 using OrderService_API.Services.IServices;
@@ -22,10 +22,12 @@ namespace OrderService_API.RabbitMQConsumer
         private readonly ICacheService cacheService;
         private readonly IHubContext<OrderHub> hubContext;
         private readonly IRabbitMQSender rabbitMQSender;
+        private readonly ILogger<RabbitMQPaymentCompletedConsumer> logger;
         private readonly IOrderRepository orderRepository;
         private readonly IProductsService productService;
 
-        public RabbitMQPaymentCompletedConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory serviceScopeFactory, IRabbitMQSender rabbitMQSender)
+        public RabbitMQPaymentCompletedConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory serviceScopeFactory, 
+            IRabbitMQSender rabbitMQSender, ILogger<RabbitMQPaymentCompletedConsumer> logger)
         {
             using var scope = serviceScopeFactory.CreateScope();
             this.hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<OrderHub>>();
@@ -33,7 +35,7 @@ namespace OrderService_API.RabbitMQConsumer
             this.productService = scope.ServiceProvider.GetRequiredService<IProductsService>();
             this.cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
             this.rabbitMQSender = rabbitMQSender;
-
+            this.logger = logger;
             var factory = new ConnectionFactory
             {
                 HostName = options.Value.Hostname,
@@ -52,10 +54,10 @@ namespace OrderService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
+                logger.LogInformation("Received data from queue: PaymentQueue");
                 var content = Encoding.UTF8.GetString(args.Body.ToArray());
                 PaymentCompleted? paymentCompleted = JsonConvert.DeserializeObject<PaymentCompleted>(content);
                 HandleMessage(paymentCompleted).GetAwaiter().GetResult();
-
                 channel.BasicAck(args.DeliveryTag, false);
             };
             channel.BasicConsume("PaymentQueue", false, consumer);
@@ -71,7 +73,7 @@ namespace OrderService_API.RabbitMQConsumer
                 {
                     var order = await orderRepository.GetOrder(data.orderId);
                     await orderRepository.ChangeOrderStatus(data.orderId, data.isSuccess);
-                    var orderProccessor = new OrderTypeProccessor(order.OrderType, orderRepository, rabbitMQSender, productService).CreateOrder();
+                    var orderProccessor = new OrderTypeProcessor(order.OrderType, orderRepository, rabbitMQSender, productService).CreateOrder();
                     if(orderProccessor is null) {
                         await PaymentNotCompleted(data);
                         return;

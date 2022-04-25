@@ -18,8 +18,10 @@ namespace OrderService_API.RabbitMQConsumer
         private IModel channel;
         private readonly ICacheService cacheService;
         private readonly IHubContext<OrderHub> hubContext;
+        private readonly ILogger<RabbitMQPaymentConsumer> logger;
 
-        public RabbitMQPaymentConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory serviceScopeFactory)
+        public RabbitMQPaymentConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory serviceScopeFactory,
+            ILogger<RabbitMQPaymentConsumer> logger)
         {
             using var scope = serviceScopeFactory.CreateScope();
             this.hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<OrderHub>>();
@@ -35,6 +37,7 @@ namespace OrderService_API.RabbitMQConsumer
             connection = factory.CreateConnection();
             channel = connection.CreateModel();
             channel.QueueDeclare(queue: "PaymentUrlQueue", false, false, false, arguments: null);
+            this.logger = logger;
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -43,10 +46,10 @@ namespace OrderService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
+                logger.LogInformation("Received data from queue: PaymentUrlQueue");
                 var content = Encoding.UTF8.GetString(args.Body.ToArray());
                 PaymentUrlData? paymentUrl = JsonConvert.DeserializeObject<PaymentUrlData>(content);
                 HandleMessage(paymentUrl).GetAwaiter().GetResult();
-
                 channel.BasicAck(args.DeliveryTag, false);
             };
             channel.BasicConsume("PaymentUrlQueue", false, consumer);

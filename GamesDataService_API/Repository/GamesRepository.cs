@@ -13,14 +13,17 @@ namespace GamesDataService_API.Repository
     public class GamesRepository : IGamesRepository
     {
         private readonly IUploadService uploadService;
+        private readonly ILogger<GamesRepository> logger;
         private readonly ICacheService cacheService;
         private readonly ApplicationDbContext db;
         private readonly IMapper mapper;
         private readonly IMemoryCache memoryCache;
 
-        public GamesRepository(IUploadService uploadService, ICacheService cacheService, ApplicationDbContext db, IMapper mapper, IMemoryCache memoryCache)
+        public GamesRepository(IUploadService uploadService, ILogger<GamesRepository> logger, 
+            ICacheService cacheService, ApplicationDbContext db, IMapper mapper, IMemoryCache memoryCache)
         {
             this.uploadService = uploadService;
+            this.logger = logger;
             this.cacheService = cacheService;
             this.db = db;
             this.mapper = mapper;
@@ -45,18 +48,20 @@ namespace GamesDataService_API.Repository
             if (await db.SaveChangesAsync() > 0)
             {
                 await cacheService.TryAddToCache<Games>(CacheType.Games, mapped);
-                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Added game successfuly" });
+                logger.LogInformation("Added new game successfully");
+                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Added game successfully" });
             }
 
             if (!string.IsNullOrEmpty(mapped.IconId)) await uploadService.DeletePhoto(mapped.IconId);
             if (!string.IsNullOrEmpty(mapped.CoverId)) await uploadService.DeletePhoto(mapped.CoverId);
+            logger.LogError("Could not add game");
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not add game" });
         }
 
         public async Task<ResponseDto> CheckGame(Guid gameId)
         {
-            var game = await db.Games.FirstOrDefaultAsync(x => x.Id == gameId);
-
+            var gameList = await cacheService.TryGetFromCache<Games>(CacheType.Games);
+            var game = gameList.FirstOrDefault(x => x.Id == gameId);
             if (game is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game does not exist" });
 
             return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<GamesDto>(game));
@@ -73,8 +78,11 @@ namespace GamesDataService_API.Repository
                 await cacheService.TryRemoveFromCache<Games>(CacheType.Games, game);
                 if (!string.IsNullOrEmpty(game.IconId)) await uploadService.DeletePhoto(game.IconId);
                 if (!string.IsNullOrEmpty(game.CoverId)) await uploadService.DeletePhoto(game.CoverId);
-                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Deleted game successfuly" });
+                logger.LogInformation("Deleted game with ID: {id} successfully", gameId);
+                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Deleted game successfully" });
             }
+
+            logger.LogError("Could not delete game with ID: {id}", gameId);
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not delete game" });
         }
 
@@ -107,15 +115,19 @@ namespace GamesDataService_API.Repository
                 game.IconUrl = results.SecureUrl.AbsoluteUri;
             }
 
+            db.Games.Update(game);
+
             if (await db.SaveChangesAsync() > 0)
             {
                 if (!string.IsNullOrEmpty(oldIconId)) await uploadService.DeletePhoto(oldIconId);
                 if (!string.IsNullOrEmpty(oldCoverId)) await uploadService.DeletePhoto(oldCoverId);
-                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Game edited successfuly" });
+                logger.LogInformation("Edited game with ID: {id} successfully", data.Id);
+                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Game edited successfully" });
             }
 
             if (!string.IsNullOrEmpty(oldIconId)) await uploadService.DeletePhoto(game.IconId);
             if (!string.IsNullOrEmpty(oldCoverId)) await uploadService.DeletePhoto(game.CoverId);
+            logger.LogError("Could not edit game with ID: {id}", data.Id);
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not edit game" });
         }
 
@@ -135,6 +147,7 @@ namespace GamesDataService_API.Repository
                     return findGame;
                 }
             }       
+            logger.LogError("Game with ID: {id} does not exist", gameId);
             return null;
         }
     }

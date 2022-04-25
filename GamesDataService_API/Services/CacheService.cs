@@ -31,15 +31,15 @@ namespace GamesDataService_API.Services
             return Task.CompletedTask;
         }
 
-        public async Task<IEnumerable<T>> TryGetFromCache<T>(CacheType type) where T : class
+        public Task<IEnumerable<T>> TryGetFromCache<T>(CacheType type) where T : class
         {
             IEnumerable<T> value;
             if (!memoryCache.TryGetValue(type, out value))
             {
-                value = await db.Set<T>().ToListAsync();
+                value = db.Set<T>();
                 SetCache<T>(type, value);
             }
-            return value;
+            return Task.FromResult(value);
         }
 
         public Task TryRemoveFromCache<T>(CacheType type, T data) where T : class

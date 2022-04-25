@@ -11,6 +11,6 @@ namespace UsersService_API.Entites
         [Required]
         public Guid User2 { get; set; }
         [Required]
-        public DateTime FriendsSince { get; init; } = DateTime.Now;
+        public DateTime FriendsSince { get; init; } = DateTime.UtcNow;
     }
 }

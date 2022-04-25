@@ -16,12 +16,15 @@ namespace PaymentService_API.Repository
         private readonly IMapper mapper;
         private readonly IStripeService stripeService;
         private readonly IRabbitMQSender rabbitMQSender;
+        private readonly ILogger<PaymentRepository> logger;
 
-        public PaymentRepository(ApplicationDbContext db, IMapper mapper, IStripeService stripeService, IRabbitMQSender rabbitMQSender)
+        public PaymentRepository(ApplicationDbContext db, IMapper mapper, 
+            IStripeService stripeService, IRabbitMQSender rabbitMQSender, ILogger<PaymentRepository> logger)
         {
             this.mapper = mapper;
             this.stripeService = stripeService;
             this.rabbitMQSender = rabbitMQSender;
+            this.logger = logger;
             this.db = db;
         }
 
@@ -30,6 +33,7 @@ namespace PaymentService_API.Repository
             var mapped = mapper.Map<Payment>(data);
             await db.Payments.AddAsync(mapped);
             await db.SaveChangesAsync();
+            logger.LogInformation("Created Payment for Order with ID: {orderId}", data.OrderId); 
         }
 
         public async Task<bool> PaymentCompleted(string sessionId, PaymentStatus status, string? Access_Token = null)
@@ -45,8 +49,8 @@ namespace PaymentService_API.Repository
             paymentCompletedMessage.isSuccess = status == PaymentStatus.Completed ? true : false;
             paymentCompletedMessage.Access_Token = Access_Token;
             
-            rabbitMQSender.SendMessage(paymentCompletedMessage, "PaymentQueue");
-            
+            rabbitMQSender.SendMessage(paymentCompletedMessage, "PaymentQueue");  
+            logger.LogInformation("Payment has been completed for Order with ID: {orderId}", payment.OrderId); 
             return true;
         }
 
@@ -55,6 +59,7 @@ namespace PaymentService_API.Repository
             var paymentUrlData = new PaymentUrlData();
             paymentUrlData.userId = data.UserId;
             paymentUrlData.PaymentUrl = await stripeService.GeneratePayment(data);
+            logger.LogInformation("Generated payment Url for Order with ID: {orderId}", data.OrderId); 
             return paymentUrlData;
         }
     }

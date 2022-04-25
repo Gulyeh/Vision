@@ -9,17 +9,20 @@ namespace PaymentService_API.RabbitMQSender
     public class RabbitMQMessageSender : IRabbitMQSender
     {
         private readonly IOptions<RabbitMQSettings> options;
+        private readonly ILogger<RabbitMQMessageSender> logger;
         private IConnection? connection;
 
-        public RabbitMQMessageSender(IOptions<RabbitMQSettings> options)
+        public RabbitMQMessageSender(IOptions<RabbitMQSettings> options, ILogger<RabbitMQMessageSender> logger)
         {
             this.options = options;
+            this.logger = logger;
         }
 
         public void SendMessage(object? message, string queueName)
         {
             if (ConnectionExists())
             {
+                logger.LogInformation("RabbitMQ sent message to queue: {queueName}", queueName); 
                 using var channel = connection?.CreateModel();
                 channel?.QueueDeclare(queue: queueName, false, false, false, arguments: null);
                 var json = JsonConvert.SerializeObject(message);

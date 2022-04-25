@@ -7,7 +7,7 @@ namespace OrderService_API.Services
 {
     public class ProductsService : BaseHttpService, IProductsService
     {
-        public ProductsService(IHttpClientFactory httpClientFactory) : base(httpClientFactory)
+        public ProductsService(IHttpClientFactory httpClientFactory, ILogger<BaseHttpService> logger) : base(httpClientFactory, logger)
         {
         }
 

@@ -9,11 +9,13 @@ namespace UsersService_API.RabbitMQSender
     public class RabbitMQMessageSender : IRabbitMQSender
     {
         private readonly IOptions<RabbitMQSettings> options;
+        private readonly ILogger<RabbitMQMessageSender> logger;
         private IConnection? connection;
 
-        public RabbitMQMessageSender(IOptions<RabbitMQSettings> options)
+        public RabbitMQMessageSender(IOptions<RabbitMQSettings> options, ILogger<RabbitMQMessageSender> logger)
         {
             this.options = options;
+            this.logger = logger;
         }
 
         public void SendMessage(object message, string queueName)
@@ -25,6 +27,7 @@ namespace UsersService_API.RabbitMQSender
                 var json = JsonConvert.SerializeObject(message);
                 var body = Encoding.UTF8.GetBytes(json);
                 channel.BasicPublish(exchange: "", routingKey: queueName, basicProperties: null, body: body);
+                logger.LogInformation("RabbitMQ sent message to queue: {queueName}", queueName);
             }
         }
 

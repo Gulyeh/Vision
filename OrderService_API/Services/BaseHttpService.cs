@@ -9,10 +9,12 @@ namespace OrderService_API.Services
     public class BaseHttpService : IBaseHttpService
     {
         private readonly IHttpClientFactory httpClientFactory;
+        private readonly ILogger<BaseHttpService> logger;
 
-        public BaseHttpService(IHttpClientFactory httpClientFactory)
+        public BaseHttpService(IHttpClientFactory httpClientFactory, ILogger<BaseHttpService> logger)
         {
             this.httpClientFactory = httpClientFactory;
+            this.logger = logger;
         }
 
         public void Dispose()
@@ -44,10 +46,13 @@ namespace OrderService_API.Services
             var apiContent = await apiResponse.Content.ReadAsStringAsync();
             if (apiContent is not null)
             {
+                logger.LogInformation("Received data from '{url}'", apiRequest.ApiUrl);
                 var apiResponseDto = JsonConvert.DeserializeObject<T>(apiContent);
                 if (apiResponseDto is not null) return apiResponseDto;
+                logger.LogInformation("Could not parse data from '{url}'", apiRequest.ApiUrl);
             }
 
+            logger.LogInformation("Received data from '{url}' was empty", apiRequest.ApiUrl);
             return default(T);
         }
     }

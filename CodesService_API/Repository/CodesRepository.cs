@@ -1,9 +1,10 @@
 using AutoMapper;
+using CodesService_API.Builders;
 using CodesService_API.DbContexts;
 using CodesService_API.Dtos;
 using CodesService_API.Entites;
 using CodesService_API.Helpers;
-using CodesService_API.Proccessor;
+using CodesService_API.Processor;
 using CodesService_API.RabbitMQSender;
 using CodesService_API.Repository.IRepository;
 using CodesService_API.Services.IServices;
@@ -18,14 +19,16 @@ namespace CodesService_API.Repository
         private readonly IMapper mapper;
         private readonly ICacheService cacheService;
         private readonly IRabbitMQSender rabbitMQSender;
+        private readonly ILogger<CodesRepository> logger;
 
-        public CodesRepository(ApplicationDbContext db, IGameAccessService gameAccessService, IMapper mapper, ICacheService cacheService, IRabbitMQSender rabbitMQSender)
+        public CodesRepository(ApplicationDbContext db, IGameAccessService gameAccessService, IMapper mapper, ICacheService cacheService, IRabbitMQSender rabbitMQSender, ILogger<CodesRepository> logger)
         {
             this.db = db;
             this.gameAccessService = gameAccessService;
             this.mapper = mapper;
             this.cacheService = cacheService;
             this.rabbitMQSender = rabbitMQSender;
+            this.logger = logger;
         }
 
         public async Task<ResponseDto> ApplyCode(string code, Guid userId, CodeTypes codeType, string Access_Token){
@@ -38,7 +41,7 @@ namespace CodesService_API.Repository
             var codeUsed = dbcode.CodesUsed.FirstOrDefault(x => x.userId == userId);
             if(codeUsed is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Code has been already used" });      
 
-            var codeProccessor = new CodeTypeProccessor(gameAccessService, rabbitMQSender);
+            var codeProccessor = new CodeTypeProcessor(gameAccessService, rabbitMQSender);
             var codeAccess = codeProccessor.CreateAccessCode(codeType);
             if(codeAccess is not null && await codeAccess.CheckAccess(dbcode.gameId.ToString(), Access_Token, dbcode.CodeValue)) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "You already own this product" });
  
@@ -52,10 +55,12 @@ namespace CodesService_API.Repository
                 var sender = codeProccessor.CreateSenderCode(codeType);
                 if(sender is not null){
                     sender.SendRabbitMQMessage(userId, dbcode.gameId, dbcode.CodeValue);
+                    logger.LogInformation("User: {userId} has applied code: {code} with a code type: {codeType}", userId, code, codeType);
                     return sender.GetResponse(dbcode);
                 }
             }
-            
+
+            logger.LogError("User: {userId} had error while applying code: {code}", userId, code);
             return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Code does not exist" });
         }
 
@@ -66,8 +71,10 @@ namespace CodesService_API.Repository
             if (await db.SaveChangesAsync() > 0)
             {
                 await cacheService.TryAddToCache<Codes>(CacheType.Codes, mapped);
+                logger.LogInformation("Code: {code} has been added", code.Code);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Code has been added successfuly" });
             }
+            logger.LogError("Code: {code} could not be added", code.Code);
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not add code" });
         }
 
@@ -80,11 +87,12 @@ namespace CodesService_API.Repository
             var validate = await ValidateCode(checkCode, codeType);
             if(validate.isSuccess == false) return validate;
 
-            var codeResponse = new ResponseCode();
-            codeResponse.CodeType = codeType;
-            codeResponse.GameId = checkCode.gameId;
-            codeResponse.ProductId = checkCode.CodeValue;
-            codeResponse.Title = checkCode.Title;
+            var codeResponseBuilder = new ResponseCodeBuilder();
+            codeResponseBuilder.SetCodeType(codeType);
+            codeResponseBuilder.SetGame(checkCode.gameId);
+            codeResponseBuilder.SetProduct(checkCode.CodeValue);
+            codeResponseBuilder.SetTitle(checkCode.Title);
+            var codeResponse = codeResponseBuilder.Build();
 
             return new ResponseDto(true, StatusCodes.Status200OK, codeResponse);
         }
@@ -95,7 +103,12 @@ namespace CodesService_API.Repository
             if (checkCode is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Code does not exist" });
 
             mapper.Map(codeData, checkCode);
-            if (await db.SaveChangesAsync() > 0) return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Code has been modified successfuly" });
+            if (await db.SaveChangesAsync() > 0) {
+                logger.LogInformation("Code: {code} has been modified", codeData.Code);
+                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Code has been modified successfuly" });
+            }
+
+            logger.LogError("Code: {code} could not be modified", codeData.Code);
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not modify code" });
         }
 
@@ -115,8 +128,11 @@ namespace CodesService_API.Repository
             if (await db.SaveChangesAsync() > 0)
             {
                 await cacheService.TryRemoveFromCache<Codes>(CacheType.Codes, checkCode);
+                logger.LogInformation("Code: {code} has been removed", checkCode.Code);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Code has been deleted successfuly" });
             }
+
+            logger.LogInformation("Code: {code} could not be removed", checkCode.Code);
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not delete code" });
         }
 

@@ -18,10 +18,13 @@ namespace ProductsService_API.Repository
         private readonly IMapper mapper;
         private readonly ICacheService cacheService;
         private readonly IGameDataService gameDataService;
+        private readonly ILogger<GamesRepository> logger;
 
-        public GamesRepository(ApplicationDbContext db, IMapper mapper, ICacheService cacheService, IGameDataService gameDataService)
+        public GamesRepository(ApplicationDbContext db, IMapper mapper, ICacheService cacheService, 
+            IGameDataService gameDataService, ILogger<GamesRepository> logger)
         {
             this.gameDataService = gameDataService;
+            this.logger = logger;
             this.db = db;
             this.mapper = mapper;
             this.cacheService = cacheService;
@@ -34,7 +37,12 @@ namespace ProductsService_API.Repository
             var mapped = mapper.Map<Games>(data);
             
             await db.Games.AddAsync(mapped);
-            if(await SaveChangesAsync()) return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Game has been added successfuly" });   
+            if(await SaveChangesAsync()) {
+                logger.LogInformation("Added Game with ID: {gameId} for purchase successfully", data.GameId);
+                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Game has been added successfuly" }); 
+            }  
+
+            logger.LogError("Could not add Game with ID: {gameId} for purchase", data.GameId);
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not add game" });
         }
 
@@ -45,7 +53,12 @@ namespace ProductsService_API.Repository
             
             db.Games.Remove(game);
 
-            if(await SaveChangesAsync()) return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Game has been deleted successfuly" });   
+            if(await SaveChangesAsync()){
+                logger.LogInformation("Deleted Game with ID: {gameId}", gameId);
+                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Game has been deleted successfuly" }); 
+            } 
+
+            logger.LogError("Could not delete Game with ID: {gameId}", gameId);
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not delete game" });
         }
 
@@ -56,7 +69,12 @@ namespace ProductsService_API.Repository
            
             mapper.Map(data, game);
 
-            if(await SaveChangesAsync()) return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Game has been edited successfuly" });   
+            if(await SaveChangesAsync()){
+                logger.LogInformation("Edited Game with ID: {gameId} successfully", data.GameId);
+                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Game has been edited successfuly" }); 
+            }  
+
+            logger.LogError("Could not edit Game with ID: {gameId}", data.GameId);
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not edit game" });
         }
 

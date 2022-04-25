@@ -3,21 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CodesService_API.Helpers;
-using CodesService_API.Proccessor;
-using CodesService_API.Proccessor.Interfaces;
+using CodesService_API.Processor;
+using CodesService_API.Processor.Interfaces;
 using CodesService_API.RabbitMQSender;
 using CodesService_API.Services.IServices;
 
-namespace CodesService_API.Proccessor
+namespace CodesService_API.Processor
 {
-    public class CodeTypeProccessor
+    public class CodeTypeProcessor
     {
         private readonly IGameAccessService gameAccessService;
         private readonly IRabbitMQSender rabbitMQSender;
         private GameType? gameType { get; set; } = null;
         private ProductType? productType { get; set; } = null;
 
-        public CodeTypeProccessor(IGameAccessService gameAccessService, IRabbitMQSender rabbitMQSender)
+        public CodeTypeProcessor(IGameAccessService gameAccessService, IRabbitMQSender rabbitMQSender)
         {
             this.gameAccessService = gameAccessService;
             this.rabbitMQSender = rabbitMQSender;

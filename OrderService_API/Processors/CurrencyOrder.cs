@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 using OrderService_API.Dtos;
 using OrderService_API.Helpers;
 using OrderService_API.Messages;
-using OrderService_API.Proccessors.Interfaces;
+using OrderService_API.Processors.Interfaces;
 using OrderService_API.RabbitMQSender;
 using OrderService_API.Repository.IRepository;
 using OrderService_API.Services.IServices;
 
-namespace OrderService_API.Proccessors
+namespace OrderService_API.Processors
 {
     public class CurrencyOrder : IOrder
     {

@@ -15,13 +15,16 @@ namespace UsersService_API.Repository
         private readonly IMapper mapper;
         private readonly IUploadService uploadService;
         private readonly ICacheService cacheService;
+        private readonly ILogger<UserRepository> logger;
 
-        public UserRepository(ApplicationDbContext db, IMapper mapper, IUploadService uploadService, ICacheService cacheService)
+        public UserRepository(ApplicationDbContext db, IMapper mapper, IUploadService uploadService, 
+            ICacheService cacheService, ILogger<UserRepository> logger)
         {
             this.db = db;
             this.mapper = mapper;
             this.uploadService = uploadService;
             this.cacheService = cacheService;
+            this.logger = logger;
         }
 
         public async Task<string> ChangePhoto(Guid userId, IFormFile file)
@@ -40,9 +43,11 @@ namespace UsersService_API.Repository
             if (await SaveChangesAsync())
             {
                 if (!string.IsNullOrEmpty(oldPhotoId)) await uploadService.DeletePhoto(oldPhotoId);
+                logger.LogInformation("User with ID: {userId} has changed photo successfully", userId);
                 return user.PhotoUrl;
             }
 
+            logger.LogInformation("Could not change photo for User with ID: {userId}", userId);
             if (!string.IsNullOrEmpty(user.PhotoId)) await uploadService.DeletePhoto(user.PhotoId);
             return string.Empty;
         }
@@ -53,7 +58,7 @@ namespace UsersService_API.Repository
             if (user is null) return false;
 
             user.Status = status;
-            return await SaveChangesAsync();
+            return await SaveChangesAsync("ChangeStatus");
         }
 
         public async Task<bool> ChangeUserData(Guid userId, EditableUserDataDto data)
@@ -61,7 +66,7 @@ namespace UsersService_API.Repository
             var user = await db.Users.FirstOrDefaultAsync(x => x.UserId == userId);
             if (user is null) return false;
             mapper.Map(data, user);
-            return await SaveChangesAsync();
+            return await SaveChangesAsync("ChangeUserData");
         }
 
         public async Task<UserDataDto> GetUserData(Guid userId)
@@ -69,11 +74,7 @@ namespace UsersService_API.Repository
             var user = await db.Users.FirstOrDefaultAsync(x => x.UserId == userId);
             if (user is null) return new UserDataDto();
 
-            var userDto = new UserDataDto();
-            userDto.UserId = userId;
-            userDto.Nickname = user.Nickname;
-            userDto.Description = user.Description;
-            userDto.PhotoUrl = user.PhotoUrl;
+            var userDto = mapper.Map<UserDataDto>(user);
             userDto.Status = user.LastOnlineStatus;
 
             return userDto;
@@ -163,14 +164,19 @@ namespace UsersService_API.Repository
         {
             var newUser = new Users();
             newUser.UserId = userId;    
-
+                      
             await db.Users.AddAsync(newUser);
-            await SaveChangesAsync();
+            await SaveChangesAsync("CreateUser");
         }
 
-        private async Task<bool> SaveChangesAsync()
+        private async Task<bool> SaveChangesAsync(string? methodName = null)
         {
-            if (await db.SaveChangesAsync() > 0) return true;
+            if (await db.SaveChangesAsync() > 0) {
+                if(methodName != null && !string.IsNullOrEmpty(methodName)) logger.LogInformation("Saved data from {methodName} successfully", methodName);
+                return true;
+            }
+
+            if(methodName != null && !string.IsNullOrEmpty(methodName)) logger.LogInformation("Could not save data from {methodName}", methodName);
             return false;
         }
     }

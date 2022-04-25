@@ -21,14 +21,16 @@ namespace OrderService_API.RabbitMQConsumer
         private readonly ICacheService cacheService;
         private readonly IHubContext<OrderHub> hubContext;
         private readonly IRabbitMQSender rabbitMQSender;
+        private readonly ILogger<RabbitMQAccessConsumer> logger;
 
-        public RabbitMQAccessConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory serviceScopeFactory, IRabbitMQSender rabbitMQSender)
+        public RabbitMQAccessConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory serviceScopeFactory, 
+            IRabbitMQSender rabbitMQSender, ILogger<RabbitMQAccessConsumer> logger)
         {
             using var scope = serviceScopeFactory.CreateScope();
             this.hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<OrderHub>>();
             this.cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
             this.rabbitMQSender = rabbitMQSender;
-
+            this.logger = logger;
             var factory = new ConnectionFactory
             {
                 HostName = options.Value.Hostname,
@@ -47,6 +49,7 @@ namespace OrderService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
+                logger.LogInformation("Received data from queue: ProductAccessDoneQueue");
                 var content = Encoding.UTF8.GetString(args.Body.ToArray());
                 UserAccessDto? access = JsonConvert.DeserializeObject<UserAccessDto>(content);
                 HandleMessage(access).GetAwaiter().GetResult();
@@ -61,21 +64,11 @@ namespace OrderService_API.RabbitMQConsumer
         {
             if (data is not null)
             {
-                var connIds = await cacheService.TryGetFromCache(data.userId);
+                var connIds = await cacheService.TryGetFromCache(data.UserId);
                 if (connIds.Count() > 0) await hubContext.Clients.Clients(connIds).SendAsync("ProductPaymentDone", new { isSuccess = data.isSuccess, gameId = data.gameId, productId = data.productId });
-                rabbitMQSender.SendMessage(GenerateEmail(data), "SendEmailQueue");
+                var emailGenerator = new EmailGenerator<UserAccessDto>(data);
+                rabbitMQSender.SendMessage(emailGenerator.Generate(), "SendEmailQueue");
             }
-        }
-
-        private SMTPMessage GenerateEmail(UserAccessDto data)
-        {        
-            var EmailBuilder = new SMTPMessageBuilder();
-            EmailBuilder.SetContent("Thank you for your payment");
-            EmailBuilder.SetUserId(data.userId);
-            EmailBuilder.SetReceiverEmail(data.Email);
-            var email = EmailBuilder.Build();
-
-            return email;
         }
     }
 }

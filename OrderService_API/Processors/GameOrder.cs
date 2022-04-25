@@ -5,31 +5,31 @@ using System.Threading.Tasks;
 using OrderService_API.Dtos;
 using OrderService_API.Helpers;
 using OrderService_API.Messages;
-using OrderService_API.Proccessors.Interfaces;
+using OrderService_API.Processors.Interfaces;
 using OrderService_API.RabbitMQSender;
 using OrderService_API.Repository.IRepository;
 
-namespace OrderService_API.Proccessors
+namespace OrderService_API.Processors
 {
-    public class ProductOrder : IOrder
+    public class GameOrder : IOrder
     {
         private readonly IOrderRepository orderRepository;
         private readonly IRabbitMQSender? rabbitMQSender;
 
-        public ProductOrder(IOrderRepository orderRepository, IRabbitMQSender? rabbitMQSender)
+        public GameOrder(IOrderRepository orderRepository, IRabbitMQSender? rabbitMQSender)
         {
-            this.rabbitMQSender = rabbitMQSender;
             this.orderRepository = orderRepository;
+            this.rabbitMQSender = rabbitMQSender;
         }
 
         public async Task<PaymentMessage?> CreateOrder(CreateOrderData data)
         {
-            return await orderRepository.CreateOrder<ProductDto>(data);
+            return await orderRepository.CreateOrder<GameDto>(data);
         }
 
         public OrderType GetOrderType()
         {
-            return OrderType.Product;
+            return OrderType.Game;
         }
 
         public Task<bool> PaymentCompleted(PaymentCompleted data, OrderDto order)

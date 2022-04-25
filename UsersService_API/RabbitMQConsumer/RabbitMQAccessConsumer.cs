@@ -15,10 +15,12 @@ namespace UsersService_API.RabbitMQConsumer
     {
         private readonly ICacheService cacheService;
         private readonly IHubContext<UsersHub> hubContext;
+        private readonly ILogger<RabbitMQAccessConsumer> logger;
         private IConnection connection;
         private IModel channel;
 
-        public RabbitMQAccessConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory serviceScopeFactory)
+        public RabbitMQAccessConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory serviceScopeFactory, 
+            ILogger<RabbitMQAccessConsumer> logger)
         {
             using var scope = serviceScopeFactory.CreateScope();
             this.cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
@@ -34,6 +36,7 @@ namespace UsersService_API.RabbitMQConsumer
             connection = factory.CreateConnection();
             channel = connection.CreateModel();
             channel.QueueDeclare(queue: "AccessProductQueue", false, false, false, arguments: null);
+            this.logger = logger;
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -42,6 +45,7 @@ namespace UsersService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
+                logger.LogInformation("Received message from queue: AccessProductQueue");
                 var content = Encoding.UTF8.GetString(args.Body.ToArray());
                 UserGameDto? gameData = JsonConvert.DeserializeObject<UserGameDto>(content);
                 HandleMessage(gameData).GetAwaiter().GetResult();

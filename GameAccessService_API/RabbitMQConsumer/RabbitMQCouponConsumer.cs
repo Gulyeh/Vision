@@ -14,14 +14,16 @@ namespace GameAccessService_API.RabbitMQConsumer
     public class RabbitMQCouponConsumer : BackgroundService
     {
         private readonly IAccessRepository accessRepository;
+        private readonly ILogger<RabbitMQCouponConsumer> logger;
         private readonly IRabbitMQSender rabbitMQSender;
         private IConnection connection;
         private IModel channel;
 
-        public RabbitMQCouponConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory scopeFactory, IRabbitMQSender rabbitMQSender)
+        public RabbitMQCouponConsumer(IOptions<RabbitMQSettings> options, ILogger<RabbitMQCouponConsumer> logger, IServiceScopeFactory scopeFactory, IRabbitMQSender rabbitMQSender)
         {
             using var scope = scopeFactory.CreateScope();
             accessRepository = scope.ServiceProvider.GetRequiredService<IAccessRepository>();
+            this.logger = logger;
             this.rabbitMQSender = rabbitMQSender;
 
             var factory = new ConnectionFactory
@@ -42,6 +44,7 @@ namespace GameAccessService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
+                logger.LogInformation("RabbitMQ Consumed request from queue: ProductCuponUsedQueue");
                 var content = Encoding.UTF8.GetString(args.Body.ToArray());
                 UserCodeDto? gameData = JsonConvert.DeserializeObject<UserCodeDto>(content);
                 HandleMessage(gameData).GetAwaiter().GetResult();
@@ -63,8 +66,7 @@ namespace GameAccessService_API.RabbitMQConsumer
                     data.isSuccess = await accessRepository.AddProductOrGame(data.userId, data.gameId);
                 }
           
-                rabbitMQSender.SendMessage(data, "AccessProductQueue");
-                
+                rabbitMQSender.SendMessage(data, "AccessProductQueue");        
             }
         }
     }

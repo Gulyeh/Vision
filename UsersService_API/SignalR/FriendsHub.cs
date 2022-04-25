@@ -11,11 +11,13 @@ namespace UsersService_API.SignalR
     {
         private readonly IFriendsRepository friendsRepository;
         private readonly IUserRepository userRepository;
+        private readonly ILogger<FriendsHub> logger;
         private readonly Guid userId;
-        public FriendsHub(IFriendsRepository friendsRepository, IUserRepository userRepository)
+        public FriendsHub(IFriendsRepository friendsRepository, IUserRepository userRepository, ILogger<FriendsHub> logger)
         {
             this.friendsRepository = friendsRepository;
             this.userRepository = userRepository;
+            this.logger = logger;
             userId = Context.User != null ? Context.User.GetId() : Guid.Empty;
         }
 
@@ -24,11 +26,13 @@ namespace UsersService_API.SignalR
             await Clients.Caller.SendAsync("GetFriendsData", await friendsRepository.GetPendingRequests(userId),
                 await friendsRepository.GetFriendRequests(userId),
                 await friendsRepository.GetFriends(userId));
+            logger.LogInformation("User with ID: {userId} has connected to FriendsHub with ID: {connId}", userId, Context.ConnectionId);
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
             await base.OnDisconnectedAsync(exception);
+            logger.LogInformation("User with ID: {userId} has disconnected from FriendsHub", userId);
         }
 
         public async Task AcceptFriendRequest(Guid SenderId)

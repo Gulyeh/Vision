@@ -14,11 +14,14 @@ namespace MessageService_API.Repository
         private readonly ApplicationDbContext db;
         private readonly IUploadService uploadService;
         private readonly IUsersService usersService;
+        private readonly ILogger<MessageRepository> logger;
 
-        public MessageRepository(IMapper mapper, ApplicationDbContext db, IUploadService uploadService, IUsersService usersService)
+        public MessageRepository(IMapper mapper, ApplicationDbContext db, IUploadService uploadService, 
+            IUsersService usersService, ILogger<MessageRepository> logger)
         {
             this.uploadService = uploadService;
             this.usersService = usersService;
+            this.logger = logger;
             this.mapper = mapper;
             this.db = db;
         }
@@ -38,7 +41,6 @@ namespace MessageService_API.Repository
 
             if (!await SaveChangesAsync()) return false;
 
-
             if (findMessage.SenderDeleted && findMessage.ReceiverDeleted)
             {
                 var attachments = findMessage.Attachments;
@@ -53,7 +55,6 @@ namespace MessageService_API.Repository
                     }
                 }
             }
-
             return true;
         }
 
@@ -64,7 +65,10 @@ namespace MessageService_API.Repository
 
             findMessage.Content = message.Content;
             findMessage.IsEdited = true;
-            if (!await SaveChangesAsync()) return false;
+            if (!await SaveChangesAsync()) {
+                logger.LogError("Could not edit message with ID: {messageId} in Chat with ID: {chatId}", message.MessageId, message.ChatId); 
+                return false;
+            }
 
             if (message.DeletedAttachmentsId is not null && message.DeletedAttachmentsId.Any())
             {
@@ -129,6 +133,7 @@ namespace MessageService_API.Repository
                         await uploadService.DeletePhoto(attachment.AttachmentId);
                     }
                 }
+                logger.LogError("Could not send message to Chat with ID: {chatId}", message.ChatId); 
                 return new MessageDto();
             }
 

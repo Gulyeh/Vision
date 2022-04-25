@@ -11,10 +11,12 @@ namespace UsersService_API.SignalR
     public class UsersHub : Hub
     {
         private readonly IUserRepository userRepository;
+        private readonly ILogger<UsersHub> logger;
         private readonly Guid userId;
-        public UsersHub(IUserRepository userRepository)
+        public UsersHub(IUserRepository userRepository, ILogger<UsersHub> logger)
         {
             this.userRepository = userRepository;
+            this.logger = logger;
             userId = Context.User != null ? Context.User.GetId() : Guid.Empty;
         }
 
@@ -25,6 +27,7 @@ namespace UsersService_API.SignalR
             await SendToFriendsOnline(userData, "UserIsOnline");
 
             await Clients.Caller.SendAsync("GetUserData", await userRepository.GetUserData(userId));
+            logger.LogInformation("User with ID: {userId} has connected to UsersHub with ID: {connId}", userId, Context.ConnectionId);
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception)
@@ -32,6 +35,7 @@ namespace UsersService_API.SignalR
             if (!await userRepository.UserOffline(userId, Context.ConnectionId)) throw new HubException();
             await SendToFriendsOnline(userId, "UserIsOffline");
             await base.OnDisconnectedAsync(exception);
+            logger.LogInformation("User with ID: {userId} has disconnected from UsersHub", userId);
         }
 
         public async Task ChangeUserData(EditableUserDataDto data)

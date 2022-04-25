@@ -32,16 +32,16 @@ namespace GameAccessService_API.Services
             return Task.CompletedTask;
         }
 
-        public async Task<IEnumerable<T>> TryGetFromCache<T>(CacheType type, Guid userId) where T : BaseUser
+        public Task<IEnumerable<T>> TryGetFromCache<T>(CacheType type, Guid userId) where T : BaseUser
         {
             IEnumerable<T> value;
             if (!memoryCache.TryGetValue(type, out value))
             {     
-                value = await db.Set<T>().ToListAsync();
+                value = db.Set<T>();
                 SetCache<T>(type, value);
             }
-            value = value.Where(x => x.UserId == userId);
-            return value;
+            value = value.Where(x => x.UserId == userId).ToList();
+            return Task.FromResult(value);
         }
 
         public Task TryRemoveFromCache<T>(CacheType type, T data) where T : BaseUser

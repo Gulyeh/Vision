@@ -6,7 +6,7 @@ namespace MessageService_API.Services
 {
     public class UsersService : BaseHttpService, IUsersService
     {
-        public UsersService(IHttpClientFactory httpClientFactory) : base(httpClientFactory)
+        public UsersService(IHttpClientFactory httpClientFactory, ILogger<BaseHttpService> logger) : base(httpClientFactory, logger)
         {
         }
 

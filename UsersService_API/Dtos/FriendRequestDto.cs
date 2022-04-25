@@ -9,7 +9,5 @@ namespace UsersService_API.Dtos
         public Guid Receiver { get; set; }
         [JsonIgnore]
         public Guid Sender { get; set; }
-        [JsonIgnore]
-        public DateTime RequestDate { get; init; } = DateTime.Now;
     }
 }

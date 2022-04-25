@@ -7,7 +7,7 @@ using OrderService_API.Helpers;
 using OrderService_API.Messages;
 using OrderService_API.RabbitMQSender;
 
-namespace OrderService_API.Proccessors.Interfaces
+namespace OrderService_API.Processors.Interfaces
 {
     public interface IOrder
     {

@@ -11,7 +11,7 @@ namespace CodesService_API.Services
 {
     public class GameAccessService : BaseHttpService, IGameAccessService
     {
-        public GameAccessService(IHttpClientFactory httpClientFactory) : base(httpClientFactory)
+        public GameAccessService(IHttpClientFactory httpClientFactory, ILogger<BaseHttpService> logger) : base(httpClientFactory, logger)
         {
         }
 

@@ -10,10 +10,12 @@ namespace UsersService_API.RabbitMQConsumer
     public class RabbitMQIdentityConsumer : BackgroundService
     {
         private readonly IUserRepository userRepository;
+        private readonly ILogger<RabbitMQIdentityConsumer> logger;
         private IConnection connection;
         private IModel channel;
 
-        public RabbitMQIdentityConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory serviceScopeFactory)
+        public RabbitMQIdentityConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory serviceScopeFactory,
+            ILogger<RabbitMQIdentityConsumer> logger)
         {
             using var scope = serviceScopeFactory.CreateScope();
             this.userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
@@ -28,6 +30,7 @@ namespace UsersService_API.RabbitMQConsumer
             connection = factory.CreateConnection();
             channel = connection.CreateModel();
             channel.QueueDeclare(queue: "CreateUserQueue", false, false, false, arguments: null);
+            this.logger = logger;
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -36,6 +39,7 @@ namespace UsersService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
+                logger.LogInformation("Received message from queue: CreateUserQueue");
                 var content = Encoding.UTF8.GetString(args.Body.ToArray());
                 HandleMessage(content).GetAwaiter().GetResult();
                 channel.BasicAck(args.DeliveryTag, false);

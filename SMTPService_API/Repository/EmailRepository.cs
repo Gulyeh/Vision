@@ -10,11 +10,13 @@ namespace SMTPService_API.Repository
     {
         private readonly ApplicationDbContext db;
         private readonly IEmailService emailSerivce;
+        private readonly ILogger<EmailRepository> logger;
 
-        public EmailRepository(ApplicationDbContext db, IEmailService emailSerivce)
+        public EmailRepository(ApplicationDbContext db, IEmailService emailSerivce, ILogger<EmailRepository> logger)
         {
             this.db = db;
             this.emailSerivce = emailSerivce;
+            this.logger = logger;
         }
 
         public async Task InitializeEmail(EmailDataDto data)
@@ -29,6 +31,7 @@ namespace SMTPService_API.Repository
 
                 await db.EmailLogs.AddAsync(logs);
                 await db.SaveChangesAsync();
+                logger.LogInformation("Sent message to User with ID: {Id} and Email: {email}", data.userId, data.ReceiverEmail); 
             }
         }
     }

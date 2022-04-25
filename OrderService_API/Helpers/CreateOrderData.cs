@@ -7,26 +7,26 @@ namespace OrderService_API.Helpers
 {
     public class CreateOrderData
     {
-        public CreateOrderData(string productId, Guid userId, string? coupon, string email, string access_Token, OrderType orderType, string? GameId)
+        public CreateOrderData(string productId, Guid userId, string? coupon, string email, string access_Token, OrderType orderType, string? gameId)
         {
-            this.productId = Guid.Parse(productId);
-            this.userId = userId;
+            ProductId = Guid.Parse(productId);
+            UserId = userId;
             Coupon = coupon;
             Email = email;
             Access_Token = access_Token;
-            this.orderType = orderType;
+            OrderType = orderType;
 
             Guid _gameId = Guid.Empty;
-            Guid.TryParse(GameId, out _gameId);
-            gameId = _gameId;
+            Guid.TryParse(gameId, out _gameId);
+            GameId = _gameId;
         }
 
-        public Guid productId { get; set; }
-        public Guid userId { get; set; }
-        public string? Coupon { get; set; }
-        public string Email { get; set; }
-        public string Access_Token { get; set; }
-        public OrderType orderType { get; set; }
-        public Guid? gameId { get; set; }
+        public Guid ProductId { get; private set; }
+        public Guid UserId { get; private set; }
+        public string? Coupon { get; private set; }
+        public string Email { get; private set; }
+        public string Access_Token { get; private set; }
+        public OrderType OrderType { get; private set; }
+        public Guid? GameId { get; private set; }
     }
 }

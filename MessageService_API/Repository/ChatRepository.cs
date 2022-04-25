@@ -1,3 +1,4 @@
+using MessageService_API.Builders;
 using MessageService_API.DbContexts;
 using MessageService_API.Entites;
 using MessageService_API.Repository.IRepository;
@@ -10,13 +11,16 @@ namespace MessageService_API.Repository
     {
         private readonly ApplicationDbContext db;
         private readonly IUsersService usersService;
+        private readonly ILogger<ChatRepository> logger;
         private readonly IChatCacheService chatCacheService;
         private readonly IUploadService uploadService;
 
-        public ChatRepository(ApplicationDbContext db, IUsersService usersService, IChatCacheService chatCacheService, IUploadService uploadService)
+        public ChatRepository(ApplicationDbContext db, IUsersService usersService, ILogger<ChatRepository> logger, 
+            IChatCacheService chatCacheService, IUploadService uploadService)
         {
             this.db = db;
             this.usersService = usersService;
+            this.logger = logger;
             this.chatCacheService = chatCacheService;
             this.uploadService = uploadService;
         }
@@ -38,6 +42,9 @@ namespace MessageService_API.Repository
                 {
                     await chatCacheService.RemoveFromChatCache(user1, user2);
                     await RemoveAttachmentsFromCloud(messages);
+                    logger.LogInformation("Deleted chat between User with ID: {Id1} and User with ID: {Id2}", user1, user2); 
+                }else{
+                    logger.LogError("Could not delete chat between User with ID: {Id1} and User with ID: {Id2}", user1, user2); 
                 }
             }
         }
@@ -60,18 +67,20 @@ namespace MessageService_API.Repository
         {
             if (!await usersService.CheckUserExists<bool>(receiverId, Access_Token)) return Guid.Empty;
 
-            var chat = new Chat()
-            {
-                User1 = receiverId,
-                User2 = senderId
-            };
+            var chatBuilder = new ChatBuilder();
+            chatBuilder.SetUser1(receiverId);
+            chatBuilder.SetUser2(senderId);
+            var chat = chatBuilder.Build();
 
             await db.Chats.AddAsync(chat);
             if (await SaveChangesAsync())
             {
                 await chatCacheService.AddToChatCache(chat.Id, receiverId, senderId);
+                logger.LogInformation("Created chat between User with ID: {Id1} and User with ID: {Id2}", receiverId, senderId); 
                 return chat.Id;
             }
+            
+            logger.LogError("Could not create chat between User with ID: {Id1} and User with ID: {Id2}", receiverId, senderId); 
             return Guid.Empty;
         }
 

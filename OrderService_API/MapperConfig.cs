@@ -1,6 +1,7 @@
 using AutoMapper;
 using OrderService_API.Dtos;
 using OrderService_API.Entities;
+using OrderService_API.Helpers;
 
 namespace OrderService_API
 {
@@ -9,6 +10,7 @@ namespace OrderService_API
         public MapperConfig()
         {
             CreateMap<Order, OrderDto>().ReverseMap();
+            CreateMap<CreateOrderData, Order>();
         }
     }
 }

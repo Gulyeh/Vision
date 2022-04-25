@@ -21,14 +21,16 @@ namespace OrderService_API.RabbitMQConsumer
         private readonly ICacheService cacheService;
         private readonly IHubContext<OrderHub> hubContext;
         private readonly IRabbitMQSender rabbitMQSender;
+        private readonly ILogger<RabbitMQCurrencyConsumer> logger;
 
-        public RabbitMQCurrencyConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory serviceScopeFactory, IRabbitMQSender rabbitMQSender)
+        public RabbitMQCurrencyConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory serviceScopeFactory, 
+            IRabbitMQSender rabbitMQSender, ILogger<RabbitMQCurrencyConsumer> logger)
         {
             using var scope = serviceScopeFactory.CreateScope();
             this.hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<OrderHub>>();
             this.cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
             this.rabbitMQSender = rabbitMQSender;
-
+            this.logger = logger;
             var factory = new ConnectionFactory
             {
                 HostName = options.Value.Hostname,
@@ -47,6 +49,7 @@ namespace OrderService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
+                logger.LogInformation("Received data from queue: CurrencyPaymentDoneQueue");
                 var content = Encoding.UTF8.GetString(args.Body.ToArray());
                 CurrencyDoneDto? currencyData = JsonConvert.DeserializeObject<CurrencyDoneDto>(content);
                 HandleMessage(currencyData).GetAwaiter().GetResult();
@@ -63,19 +66,9 @@ namespace OrderService_API.RabbitMQConsumer
             {
                 var connIds = await cacheService.TryGetFromCache(data.UserId);
                 if (connIds.Count() > 0) await hubContext.Clients.Clients(connIds).SendAsync("CurrencyPaymentDone", new { isSuccess = data.isSuccess, amount = data.Amount });
-                rabbitMQSender.SendMessage(GenerateEmail(data), "SendEmailQueue");
+                var emailGenerator = new EmailGenerator<CurrencyDoneDto>(data);
+                rabbitMQSender.SendMessage(emailGenerator.Generate(), "SendEmailQueue");
             }
-        }
-
-        private SMTPMessage GenerateEmail(CurrencyDoneDto data)
-        {        
-            var EmailBuilder = new SMTPMessageBuilder();
-            EmailBuilder.SetContent("Thank you for your payment");
-            EmailBuilder.SetUserId(data.UserId);
-            EmailBuilder.SetReceiverEmail(data.Email);
-            var email = EmailBuilder.Build();
-
-            return email;
         }
     }
 }

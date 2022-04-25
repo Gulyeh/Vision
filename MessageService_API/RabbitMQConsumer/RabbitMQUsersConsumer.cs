@@ -12,10 +12,11 @@ namespace MessageService_API.RabbitMQConsumer
     public class RabbitMQUsersConsumer : BackgroundService
     {
         private readonly IChatRepository chatRepository;
+        private readonly ILogger<RabbitMQUsersConsumer> logger;
         private IConnection connection;
         private IModel channel;
 
-        public RabbitMQUsersConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory scopeFactory)
+        public RabbitMQUsersConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory scopeFactory, ILogger<RabbitMQUsersConsumer> logger)
         {
             var factory = new ConnectionFactory
             {
@@ -30,6 +31,7 @@ namespace MessageService_API.RabbitMQConsumer
 
             using var scope = scopeFactory.CreateScope();
             chatRepository = scope.ServiceProvider.GetRequiredService<IChatRepository>();
+            this.logger = logger;
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -38,10 +40,10 @@ namespace MessageService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
+                logger.LogInformation("Received message from queue: DeleteChatQueue"); 
                 var content = Encoding.UTF8.GetString(args.Body.ToArray());
                 DeleteChat? chatData = JsonConvert.DeserializeObject<DeleteChat>(content);
                 HandleMessage(chatData).GetAwaiter().GetResult();
-
                 channel.BasicAck(args.DeliveryTag, false);
             };
             channel.BasicConsume("DeleteChatQueue", false, consumer);

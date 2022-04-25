@@ -3,7 +3,7 @@ using OrderService_API.Dtos;
 using OrderService_API.Extensions;
 using OrderService_API.Helpers;
 using OrderService_API.Messages;
-using OrderService_API.Proccessors;
+using OrderService_API.Processors;
 using OrderService_API.RabbitMQSender;
 using OrderService_API.Repository.IRepository;
 using OrderService_API.Services.IServices;
@@ -17,11 +17,14 @@ namespace OrderService_API.SignalR
         private readonly string userEmail;
         private readonly IOrderRepository orderRepository;
         private readonly IRabbitMQSender rabbitMQSender;
+        private readonly ILogger<OrderHub> logger;
 
-        public OrderHub(ICacheService cacheService, IOrderRepository orderRepository, IRabbitMQSender rabbitMQSender)
+        public OrderHub(ICacheService cacheService, IOrderRepository orderRepository, IRabbitMQSender rabbitMQSender,
+            ILogger<OrderHub> logger)
         {
             this.orderRepository = orderRepository;
             this.rabbitMQSender = rabbitMQSender;
+            this.logger = logger;
             this.cacheService = cacheService;
             userId = Context.User != null ? Context.User.GetId() : Guid.Empty;
             userEmail = Context.User != null ? Context.User.GetUsername() : string.Empty;
@@ -38,23 +41,25 @@ namespace OrderService_API.SignalR
 
             if(string.IsNullOrEmpty(token) || string.IsNullOrEmpty(productId)) throw new HubException("Please provide valid data");
 
-            var orderCreated = new OrderTypeProccessor(order, orderRepository).CreateOrder();
+            var orderCreated = new OrderTypeProcessor(order, orderRepository).CreateOrder();
             if(orderCreated is null) throw new HubException("Wrong orderType");
             var orderType = orderCreated.GetOrderType();
 
             if(orderType == OrderType.Game && string.IsNullOrEmpty(gameId)) throw new HubException("Please provide a gameId");
 
             var orderData = new CreateOrderData(productId, userId, coupon, userEmail, token, orderType, gameId);
-            PaymentMessage? message = null;
-            message = await orderCreated.CreateOrder(orderData);
+            PaymentMessage? message = await orderCreated.CreateOrder(orderData);
 
             if (message is not null) rabbitMQSender.SendMessage(message, "CreatePaymentQueue");
             else await Clients.Caller.SendAsync("PaymentDone", new { isSuccess = false });
+
+            logger.LogInformation("User with ID: {userId} has connected to OrderHub with ID: {connId}", userId, Context.ConnectionId);
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
             await cacheService.TryRemoveFromCache(userId, Context.ConnectionId);
+            logger.LogInformation("User with ID: {userId} has disconnected from OrderHub", userId);
         }
     }
 }

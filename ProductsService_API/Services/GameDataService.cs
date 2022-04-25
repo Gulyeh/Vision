@@ -7,7 +7,7 @@ namespace ProductsService_API.Services
 {
     public class GameDataService : BaseHttpService, IGameDataService
     {
-        public GameDataService(IHttpClientFactory httpClientFactory) : base(httpClientFactory)
+        public GameDataService(IHttpClientFactory httpClientFactory, ILogger<BaseHttpService> logger) : base(httpClientFactory, logger)
         {
         }
 

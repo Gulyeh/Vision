@@ -11,6 +11,6 @@ namespace UsersService_API.Entites
         [Required]
         public Guid Receiver { get; set; }
         [Required]
-        public DateTime RequestDate { get; set; }
+        public DateTime RequestDate { get; set; } = DateTime.UtcNow;
     }
 }

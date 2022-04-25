@@ -16,32 +16,31 @@ namespace OrderService_API.Repository
         private readonly ApplicationDbContext db;
         private readonly IProductsService productsService;
         private readonly ICouponService couponService;
+        private readonly ILogger<OrderRepository> logger;
 
-        public OrderRepository(IMapper mapper, ApplicationDbContext db, IProductsService productsService, ICouponService couponService)
+        public OrderRepository(IMapper mapper, ApplicationDbContext db, IProductsService productsService, 
+            ICouponService couponService, ILogger<OrderRepository> logger)
         {
             this.mapper = mapper;
             this.db = db;
             this.productsService = productsService;
             this.couponService = couponService;
+            this.logger = logger;
         }
 
         public async Task<PaymentMessage?> CreateOrder<T>(CreateOrderData data) where T : BaseProductData
         {
-            var product = await productsService.CheckProductExists<T>(data.productId, data.Access_Token, data.orderType, data.gameId);
+            var product = await productsService.CheckProductExists<T>(data.ProductId, data.Access_Token, data.OrderType, data.GameId);
             if (product is null) return null;
 
             int couponDiscount = 0;
             if(!string.IsNullOrEmpty(data.Coupon)) couponDiscount = await couponService.ApplyCoupon(data.Coupon, data.Access_Token, CodeTypes.Discount);
 
-            var newOrder = new Order();                     
-            newOrder.ProductId = data.productId;
-            newOrder.UserId = data.userId;
-            newOrder.OrderType = data.orderType;
-            newOrder.GameId = data.gameId;
+            var newOrder = mapper.Map<Order>(data);
             newOrder.CuponCode = couponDiscount != 0 ? data.Coupon : string.Empty;
 
             var message = new PaymentMessage(product.Price, product.Discount, couponDiscount);
-            message.UserId = data.userId;
+            message.UserId = data.UserId;
             message.Email = data.Email;
             message.Title = product.Title;      
             
@@ -50,8 +49,10 @@ namespace OrderService_API.Repository
             if (await SaveChangesAsync())
             {
                 message.OrderId = newOrder.Id;
+                logger.LogInformation("User with ID: {userId} has created Order with ID: {orderId}", data.UserId, newOrder.Id);
                 return message;
             }
+            logger.LogError("Could not create an order for User with ID: {userId}", data.UserId);
             return null;
         }
 
@@ -61,8 +62,11 @@ namespace OrderService_API.Repository
             if (order is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Order not found" });
 
             db.Orders.Remove(order);
-            if (await SaveChangesAsync()) return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Deleted order successfuly" });
-
+            if (await SaveChangesAsync()) {
+                logger.LogInformation("Deleted Order with Id: {orderId} successfully", orderId);
+                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Deleted order successfuly" });
+            }
+            logger.LogInformation("Could not delete an Order with ID: {orderId}", orderId);
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not delete order" });
         }
 

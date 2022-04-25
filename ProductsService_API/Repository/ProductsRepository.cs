@@ -15,15 +15,17 @@ namespace ProductsService_API.Repository
         private readonly IUploadService uploadService;
         private readonly ICacheService cacheService;
         private readonly IGameDataService gameDataService;
+        private readonly ILogger<ProductsRepository> logger;
 
-        public ProductsRepository(ApplicationDbContext db, IMapper mapper,
-            IUploadService uploadService, ICacheService cacheService, IGameDataService gameDataService)
+        public ProductsRepository(ApplicationDbContext db, IMapper mapper, IUploadService uploadService, 
+            ICacheService cacheService, IGameDataService gameDataService, ILogger<ProductsRepository> logger)
         {
             this.db = db;
             this.mapper = mapper;
             this.uploadService = uploadService;
             this.cacheService = cacheService;
             this.gameDataService = gameDataService;
+            this.logger = logger;
         }
 
         public async Task<ResponseDto> AddProduct(AddProductsDto data, string Access_Token)
@@ -44,9 +46,13 @@ namespace ProductsService_API.Repository
 
             game.GameProducts?.Add(mapped);
 
-            if(await SaveChangesAsync()) return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Product has been added successfuly" });
+            if(await SaveChangesAsync()) {
+                logger.LogInformation("Added Product to Game with ID: {gameId} for purchase successfully", data.GameId);
+                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Product has been added successfuly" });
+            }
             
             await uploadService.DeletePhoto(mapped.PhotoId);
+            logger.LogError("Could not add Product to Game with ID: {gameId}", data.GameId);
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not add product" });
         }
 
@@ -59,7 +65,12 @@ namespace ProductsService_API.Repository
             
             game.GameProducts?.Remove(product);
 
-            if(await SaveChangesAsync()) return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Product has been removed successfuly" });
+            if(await SaveChangesAsync()) {
+                logger.LogInformation("Deleted Product with ID: {productId} from Game with ID: {gameId} successfully", productId, gameId);
+                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Product has been removed successfuly" });
+            }
+
+            logger.LogError("Could not delete Product with ID: {productId} from Game with ID: {gameId}", productId, gameId);
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not remove product" });
         }
 
@@ -85,9 +96,11 @@ namespace ProductsService_API.Repository
 
             if(await SaveChangesAsync()){
                 if(!string.IsNullOrEmpty(oldPhotoId)) await uploadService.DeletePhoto(oldPhotoId);
+                logger.LogInformation("Edited Product with ID: {productId} in Game with ID: {gameId} successfully", data.ProductId, data.GameId);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Product has been edited successfuly" });
             }
 
+            logger.LogError("Could not edit Product with ID: {productId} in Game with ID: {gameId}", data.ProductId, data.GameId);
             if(!string.IsNullOrEmpty(oldPhotoId)) await uploadService.DeletePhoto(product.PhotoId);
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not edit product" });
         }

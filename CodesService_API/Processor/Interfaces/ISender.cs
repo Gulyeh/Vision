@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CodesService_API.RabbitMQSender;
 
-namespace CodesService_API.Proccessor.Interfaces
+namespace CodesService_API.Processor.Interfaces
 {
     public interface ISender : IResponder
     {

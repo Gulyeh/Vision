@@ -3,21 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using OrderService_API.Helpers;
-using OrderService_API.Proccessors.Interfaces;
+using OrderService_API.Processors.Interfaces;
 using OrderService_API.RabbitMQSender;
 using OrderService_API.Repository.IRepository;
 using OrderService_API.Services.IServices;
 
-namespace OrderService_API.Proccessors
+namespace OrderService_API.Processors
 {
-    public class OrderTypeProccessor
+    public class OrderTypeProcessor
     {
         private readonly OrderType orderType;
         private readonly IOrderRepository orderRepository;
         private readonly IRabbitMQSender? rabbitMQSender;
         private readonly IProductsService? productsService;
 
-        public OrderTypeProccessor(OrderType orderType, IOrderRepository orderRepository, IRabbitMQSender? rabbitMQSender = null, IProductsService? productsService = null)
+        public OrderTypeProcessor(OrderType orderType, IOrderRepository orderRepository, IRabbitMQSender? rabbitMQSender = null, IProductsService? productsService = null)
         {
             this.rabbitMQSender = rabbitMQSender;
             this.productsService = productsService;

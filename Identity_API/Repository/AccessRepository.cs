@@ -13,12 +13,14 @@ namespace Identity_API.Repository
         private readonly IMapper mapper;
         private readonly UserManager<ApplicationUser> userManager;
         private readonly ApplicationDbContext db;
+        private readonly ILogger<AccessRepository> logger;
 
-        public AccessRepository(IMapper mapper, UserManager<ApplicationUser> userManager, ApplicationDbContext db)
+        public AccessRepository(IMapper mapper, UserManager<ApplicationUser> userManager, ApplicationDbContext db, ILogger<AccessRepository> logger)
         {
             this.mapper = mapper;
             this.userManager = userManager;
             this.db = db;
+            this.logger = logger;
         }
 
         public async Task<ResponseDto> BanUser(BannedUsersDto data)
@@ -31,8 +33,12 @@ namespace Identity_API.Repository
 
             var mapped = mapper.Map<BannedUsers>(data);
             await db.BannedUsers.AddAsync(mapped);
-            if (await db.SaveChangesAsync() > 0) return new ResponseDto(true, StatusCodes.Status200OK, new[] { "User has been banned successfuly" });
+            if (await db.SaveChangesAsync() > 0) {
+                logger.LogInformation("User with ID: {Id} has been banned successfully", data.UserId); 
+                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "User has been banned successfully" });
+            }
 
+            logger.LogError("Could not ban User with ID: {Id}", data.UserId); 
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not ban a user" });
         }
 
@@ -45,8 +51,12 @@ namespace Identity_API.Repository
             if (alreadyBanned is null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "User is not banned" });
 
             db.BannedUsers.Remove(alreadyBanned);
-            if (await db.SaveChangesAsync() > 0) return new ResponseDto(true, StatusCodes.Status200OK, new[] { "User has been unbanned successfuly" });
+            if (await db.SaveChangesAsync() > 0) {
+                logger.LogInformation("User with ID: {Id} has been unbanned successfully", userId); 
+                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "User has been unbanned successfully" });
+            }
 
+            logger.LogError("Could not unban User with ID: {Id}", userId); 
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not unban a user" });
         }
 

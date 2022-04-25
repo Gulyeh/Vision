@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using CodesService_API.Proccessor.Interfaces;
+using CodesService_API.Processor.Interfaces;
 using CodesService_API.Helpers;
 using CodesService_API.RabbitMQSender;
 using CodesService_API.Services.IServices;
@@ -10,7 +10,7 @@ using CodesService_API.Dtos;
 using CodesService_API.Entites;
 using CodesService_API.Messages;
 
-namespace CodesService_API.Proccessor
+namespace CodesService_API.Processor
 {
     public class CurrencyType : ISender
     {
