@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CodesService_API.Builders;
 using CodesService_API.Dtos;
 using CodesService_API.Entites;
 using CodesService_API.Helpers;
@@ -30,12 +31,14 @@ namespace CodesService_API.Processor
 
         public ResponseDto GetResponse(Codes data)
         {
-            var responseData = new ResponseCode();
-            responseData.GameId = data.gameId;
-            responseData.CodeType = CodeTypes.Game;
-            responseData.Title = data.Title;
+            var codeResponseBuilder = new ResponseCodeBuilder();
+            codeResponseBuilder.SetCodeType(data.CodeType);
+            codeResponseBuilder.SetGame(data.gameId);
+            codeResponseBuilder.SetProduct(data.CodeValue);
+            codeResponseBuilder.SetTitle(data.Title);
+            var codeResponse = codeResponseBuilder.Build();
 
-            return new ResponseDto(true, StatusCodes.Status200OK, responseData);
+            return new ResponseDto(true, StatusCodes.Status200OK, codeResponse);
         }
 
         public void SendRabbitMQMessage(Guid userId, Guid? gameId = null, string? productId= null)

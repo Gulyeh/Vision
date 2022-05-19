@@ -1,0 +1,188 @@
+﻿<UserControl x:Class="VisionClient.Views.HomeDetailsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:VisionClient.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="1000" d:DesignWidth="1000"
+             Background="#0c3c60">
+    <UserControl.Resources>
+        <Style TargetType="Button" x:Key="ArrowButton">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border">
+                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Hidden" CanContentScroll="False">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="300"/>
+                <RowDefinition MinHeight="250"/>
+                <RowDefinition Height="260"/>
+            </Grid.RowDefinitions>
+
+            <Button Name="BackButton" Foreground="White"
+                    Style="{StaticResource ArrowButton}"
+                    Command="{Binding GoHomeCommand}"
+                    BorderThickness="0" 
+                    Background="Transparent"
+                    FontSize="45" 
+                    Width="20"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Margin="20,20,0,0"
+                    Panel.ZIndex="1">
+                <Image Source="pack://application:,,,/Images/LeftArrow.png" Height="20"/>
+            </Button>
+            <Image Grid.Row="0" Source="{Binding GameDetails.PhotoUrl, Mode=OneWay}" 
+                   HorizontalAlignment="Center" Margin="-20,0,0,0">
+                <Image.OpacityMask>
+                    <RadialGradientBrush RadiusY="3">
+                        <GradientStop Color="#00000000" Offset="1"/>
+                        <GradientStop Color="Black" Offset="0.5"/>
+                    </RadialGradientBrush>
+                </Image.OpacityMask>
+            </Image>
+            <Grid Grid.Row="1" Width="800">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="300"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Vertical" Grid.Column="0" MinHeight="200" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding GameDetails.Title, Mode=OneWay}" FontSize="20" Foreground="White" Margin="0,0,0,20"
+                           HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                    <TextBlock Text="{Binding GameDetails.Description, Mode=OneWay}" FontSize="14" Foreground="Gray" TextWrapping="Wrap" Width="400"
+                           HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Vertical" Grid.Column="1"
+                            HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,20,0,0">
+                    <TextBlock Text="PRODUCT INFO" Foreground="White" FontSize="15" 
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"/>
+                    <Border Background="#4a4e50" Margin="0,10,0,0" Width="300">
+                        <StackPanel Margin="0,0,0,20">
+                            <TextBlock FontSize="15" Margin="20,20,0,0" TextWrapping="Wrap">
+                                <Run Text="Genre: " Foreground="White"/>
+                                <Run Text="{Binding GameDetails.ProductInfo.Genre, Mode=OneWay}" Foreground="LightGray"/>
+                            </TextBlock>
+                            <TextBlock FontSize="15" Margin="20,20,0,0" TextWrapping="Wrap">
+                                <Run Text="Developer: " Foreground="White"/>
+                                <Run Text="{Binding GameDetails.ProductInfo.Developer, Mode=OneWay}" Foreground="LightGray"/>
+                            </TextBlock>
+                            <TextBlock FontSize="15" Margin="20,20,0,0" TextWrapping="Wrap">
+                                <Run Text="Publisher: " Foreground="White"/>
+                                <Run Text="{Binding GameDetails.ProductInfo.Publisher, Mode=OneWay}" Foreground="LightGray"/>
+                            </TextBlock>
+                            <TextBlock FontSize="15" Margin="20,20,0,0" TextWrapping="Wrap">
+                                <Run Text="Language: " Foreground="White"/>
+                                <Run Text="{Binding GameDetails.ProductInfo.Language, Mode=OneWay}" Foreground="LightGray"/>
+                            </TextBlock>
+                        </StackPanel>
+                        <Border.Effect>
+                            <DropShadowEffect Color="Black"
+                                          ShadowDepth="1"
+                                          BlurRadius="10"
+                                          Direction="180"/>
+                        </Border.Effect>
+                    </Border>
+                </StackPanel>
+
+            </Grid>
+            <StackPanel Orientation="Vertical" Grid.Row="2" Width="800"
+                        Margin="0,30,0,0">
+                <TextBlock Text="SYSTEM REQUIREMENTS" 
+                           Foreground="White" FontSize="15" 
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Top"/>
+                <Border BorderThickness="0" 
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Center" 
+                        Background="#4a4e50" 
+                        Grid.Row="2" 
+                        Height="170" 
+                        Width="800" 
+                        Margin="0,10,0,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Orientation="Horizontal">
+                            <StackPanel Width="200">
+                                <TextBlock Text="MINIMUM" FontSize="15" Margin="20,20,0,0" Foreground="LightGray"/>
+                                <TextBlock FontSize="12" Margin="20,20,0,0" TextWrapping="Wrap">
+                                <Run Text="OS: " Foreground="White"/>
+                                <Run Text="{Binding GameDetails.Requirements.OsMinimum, Mode=OneWay}" Foreground="LightGray"/>
+                                </TextBlock>
+                                <TextBlock FontSize="12" Margin="20,20,0,0" TextWrapping="Wrap">
+                                <Run Text="Memory: " Foreground="White"/>
+                                <Run Text="{Binding GameDetails.Requirements.MemoryMinimum, Mode=OneWay}" Foreground="LightGray"/>
+                                </TextBlock>
+                                <TextBlock FontSize="12" Margin="20,20,0,0" TextWrapping="Wrap">
+                                <Run Text="CPU: " Foreground="White"/>
+                                <Run Text="{Binding GameDetails.Requirements.CpuMinimum, Mode=OneWay}" Foreground="LightGray"/>
+                                </TextBlock>
+                            </StackPanel>
+                            <StackPanel Width="200">
+                                <TextBlock FontSize="12" Margin="20,60,0,0" TextWrapping="Wrap">
+                                <Run Text="GPU: " Foreground="White"/>
+                                <Run Text="{Binding GameDetails.Requirements.GpuMinimum, Mode=OneWay}" Foreground="LightGray"/>
+                                </TextBlock>
+                                <TextBlock FontSize="12" Margin="20,20,0,0" TextWrapping="Wrap">
+                                <Run Text="Storage: " Foreground="White"/>
+                                <Run Text="{Binding GameDetails.Requirements.StorageMinimum, Mode=OneWay}" Foreground="LightGray"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left">
+                            <StackPanel Width="200">
+                                <TextBlock Text="RECOMMENDED" FontSize="15" Margin="20,20,0,0" Foreground="LightGray"/>
+                                <TextBlock FontSize="12" Margin="20,20,0,0" TextWrapping="Wrap">
+                                <Run Text="OS: " Foreground="White"/>
+                                <Run Text="{Binding GameDetails.Requirements.OsRecommended, Mode=OneWay}" Foreground="LightGray"/>
+                                </TextBlock>
+                                <TextBlock FontSize="12" Margin="20,20,0,0" TextWrapping="Wrap">
+                                <Run Text="Memory: " Foreground="White"/>
+                                <Run Text="{Binding GameDetails.Requirements.MemoryRecommended, Mode=OneWay}" Foreground="LightGray"/>
+                                </TextBlock>
+                                <TextBlock FontSize="12" Margin="20,20,0,0" TextWrapping="Wrap">
+                                <Run Text="CPU: " Foreground="White"/>
+                                <Run Text="{Binding GameDetails.Requirements.CpuRecommended, Mode=OneWay}" Foreground="LightGray"/>
+                                </TextBlock>
+                            </StackPanel>
+                            <StackPanel Width="200">
+                                <TextBlock FontSize="12" Margin="20,60,0,0" TextWrapping="Wrap">
+                                <Run Text="GPU: " Foreground="White"/>
+                                <Run Text="{Binding GameDetails.Requirements.GpuRecommended, Mode=OneWay}" Foreground="LightGray"/>
+                                </TextBlock>
+                                <TextBlock FontSize="12" Margin="20,20,0,0" TextWrapping="Wrap">
+                                <Run Text="Storage: " Foreground="White"/>
+                                <Run Text="{Binding GameDetails.Requirements.StorageRecommended, Mode=OneWay}" Foreground="LightGray"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                    <Border.Effect>
+                        <DropShadowEffect Color="Black"
+                                          ShadowDepth="1"
+                                          BlurRadius="10"/>
+                    </Border.Effect>
+                </Border>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

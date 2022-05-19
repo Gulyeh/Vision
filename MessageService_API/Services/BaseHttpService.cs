@@ -6,7 +6,7 @@ using System.Text;
 
 namespace MessageService_API.Services
 {
-    public class BaseHttpService : IBaseHttpService
+    public abstract class BaseHttpService
     {
         private readonly IHttpClientFactory httpClientFactory;
         private readonly ILogger<BaseHttpService> logger;

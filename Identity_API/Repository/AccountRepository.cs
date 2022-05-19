@@ -75,6 +75,13 @@ namespace Identity_API.Repository
                 });
             }
 
+            if (user.TwoFactorEnabled == true && string.IsNullOrEmpty(loginData.TFACode)) return new ResponseDto(true, StatusCodes.Status401Unauthorized, new { IsTFAEnabled = true });
+            else if (user.TwoFactorEnabled == true && !string.IsNullOrEmpty(loginData.TFACode))
+            {
+                var TFAResults = await userManager.VerifyTwoFactorTokenAsync(user, userManager.Options.Tokens.AuthenticatorTokenProvider ,loginData.TFACode);
+                if(!TFAResults) return new ResponseDto(true, StatusCodes.Status400BadRequest, new[] { "Provided code is wrong" });
+            }
+
             var userDtoBuilder = new UserDtoBuilder(tokenService, user);
             userDtoBuilder.SetEmail();
             await userDtoBuilder.SetToken();
@@ -139,5 +146,6 @@ namespace Identity_API.Repository
             logger.LogInformation("Resetted password for User with ID: {userId}", data.userId); 
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Password has been set successfully" });
         }
+
     }
 }

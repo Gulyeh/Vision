@@ -6,7 +6,7 @@ using System.Text;
 
 namespace CodesService_API.Services
 {
-    public class BaseHttpService : IBaseHttpService
+    public abstract class BaseHttpService
     {
         private readonly IHttpClientFactory httpClientFactory;
         private readonly ILogger<BaseHttpService> logger;
@@ -15,11 +15,6 @@ namespace CodesService_API.Services
         {
             this.httpClientFactory = httpClientFactory;
             this.logger = logger;
-        }
-
-        public void Dispose()
-        {
-            GC.SuppressFinalize(true);
         }
 
         public async Task<T?> SendAsync<T>(ApiRequest apiRequest)

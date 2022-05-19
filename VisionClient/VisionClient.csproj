@@ -1,0 +1,62 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <PackageIcon>Vision.png</PackageIcon>
+    <ApplicationIcon>Vision.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Images\Add.png" />
+    <None Remove="Images\AddGame.png" />
+    <None Remove="Images\Exit.png" />
+    <None Remove="Images\Facebook.png" />
+    <None Remove="Images\Google.png" />
+    <None Remove="Images\LeftArrow.png" />
+    <None Remove="Images\Maximize.png" />
+    <None Remove="Images\Minimize.png" />
+    <None Remove="Images\NotFound.png" />
+    <None Remove="Images\RightArrow.png" />
+    <None Remove="Images\SendMessage.png" />
+    <None Remove="Images\VisionLogo.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Images\Google.png" />
+    <Content Include="Vision.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Prism.Unity" Version="8.1.97" />
+    <PackageReference Include="Prism.Wpf" Version="8.1.97" />
+    <PackageReference Include="Syncfusion.Shared.WPF" Version="20.1.0.51" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\VisionClient.Core\VisionClient.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Images\Add.png" />
+    <Resource Include="Images\AddGame.png" />
+    <Resource Include="Images\Exit.png" />
+    <Resource Include="Images\Facebook.png" />
+    <Resource Include="Images\LeftArrow.png" />
+    <Resource Include="Images\Maximize.png" />
+    <Resource Include="Images\Minimize.png" />
+    <Resource Include="Images\NotFound.png" />
+    <Resource Include="Images\RightArrow.png" />
+    <Resource Include="Images\SendMessage.png" />
+    <Resource Include="Images\VisionLogo.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Commands\" />
+    <Folder Include="Views\AdminPanel\AddControls\" />
+    <Folder Include="Views\AdminPanel\ManageControls\" />
+  </ItemGroup>
+
+</Project>

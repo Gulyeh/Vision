@@ -1,0 +1,39 @@
+﻿using Prism.Commands;
+using Prism.Mvvm;
+using Prism.Regions;
+using Prism.Services.Dialogs;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace VisionClient.ViewModels
+{
+    internal class SettingsControlViewModel : BindableBase
+    {
+        public DelegateCommand<string> SettingsContentCommand { get; set; }
+        public DelegateCommand<string> ButtonPressedCommand { get; set; }
+        private readonly IRegionManager regionManager;
+        private readonly IDialogService dialogService;
+
+        public SettingsControlViewModel(IRegionManager regionManager, IDialogService dialogService)
+        {
+            SettingsContentCommand = new DelegateCommand<string>(SelectContent);
+            ButtonPressedCommand = new DelegateCommand<string>(ShowDialog);
+            regionManager.RegisterViewWithRegion("SettingsRegion", "ProfileControl");
+            this.regionManager = regionManager;
+            this.dialogService = dialogService;
+        }
+
+        private void ShowDialog(string parameter)
+        {
+            dialogService.ShowDialog(parameter);
+        }
+
+        private void SelectContent(string name)
+        {
+            regionManager.RequestNavigate("SettingsRegion", name);
+        }
+    }
+}

@@ -9,6 +9,7 @@ using CodesService_API.Services.IServices;
 using CodesService_API.Dtos;
 using CodesService_API.Entites;
 using CodesService_API.Messages;
+using CodesService_API.Builders;
 
 namespace CodesService_API.Processor
 {
@@ -30,12 +31,13 @@ namespace CodesService_API.Processor
 
         public ResponseDto GetResponse(Codes data)
         {
-            var responseData = new ResponseCode();
-            responseData.ProductId = data.CodeValue;
-            responseData.CodeType = CodeTypes.Currency;
-            responseData.Title = $"{data.CodeValue} Visions";
+            var codeResponseBuilder = new ResponseCodeBuilder();
+            codeResponseBuilder.SetCodeType(data.CodeType);
+            codeResponseBuilder.SetProduct(data.CodeValue);
+            codeResponseBuilder.SetTitle($"{data.CodeValue} Visions");
+            var codeResponse = codeResponseBuilder.Build();
 
-            return new ResponseDto(true, StatusCodes.Status200OK, responseData);
+            return new ResponseDto(true, StatusCodes.Status200OK, codeResponse);
         }
     }
 }

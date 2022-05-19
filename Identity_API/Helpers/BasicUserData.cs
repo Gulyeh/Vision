@@ -11,7 +11,7 @@ namespace Identity_API.Helpers
         }
 
         [Required(ErrorMessage = "Password is required")]
-        [StringLength(maximumLength: 15, MinimumLength = 8, ErrorMessage = "Password must be at least 8 characters and maximum 15 characters long")]
+        [StringLength(maximumLength: 15, MinimumLength = 8, ErrorMessage = "Password must have at least 8 characters and maximum of 15 characters")]
         public string Password { get; set; }
         [Required(ErrorMessage = "Email is required")]
         [EmailAddress(ErrorMessage = "Wrong email format")]

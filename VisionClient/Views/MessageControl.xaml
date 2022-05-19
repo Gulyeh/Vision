@@ -1,0 +1,316 @@
+﻿<UserControl x:Class="VisionClient.Views.MessageControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:VisionClient.Views"
+             xmlns:Converters="clr-namespace:VisionClient.Converters"
+             mc:Ignorable="d" 
+             xmlns:prism="http://prismlibrary.com/"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             d:DesignHeight="450" d:DesignWidth="800"
+             Background="#164971">
+    <UserControl.Resources>
+        <Converters:StatusToColorConverter x:Key="StatusToColor"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <Converters:HorizontalChatConverter x:Key="IdToHorizontal"/>
+        <Converters:NegationHorizontalConverter x:Key="NegationHorizontal"/>
+        <Converters:UserIdToVisibilityConverter x:Key="IdToVis"/>
+        <Converters:CountToVisibilityCovnerter x:Key="CountToVis"/>
+        <Converters:NegationUserIdToVisibilityConverter x:Key="IdToVisNegation"/>
+        <Style TargetType="Button" x:Key="ArrowButton">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border">
+                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="{x:Type MenuItem}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type MenuItem}">
+                        <Border Background="{TemplateBinding Background}" Margin="5,5,5,5" Height="30" Width="120">
+                            <ContentPresenter Content="{TemplateBinding Header}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter Property="Background" Value="#0f3452"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="{x:Type ContextMenu}">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ContextMenu}">
+                        <Border Name="Border" Background="#0AA1DD"
+                                BorderThickness="1" BorderBrush="DarkBlue"
+                                CornerRadius="2">
+                            <StackPanel ClipToBounds="True" 
+                                        Orientation="Vertical" 
+                                        IsItemsHost="True" 
+                                        HorizontalAlignment="Left"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    <Grid Name="MessageGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="80"/>
+            <RowDefinition/>
+            <RowDefinition Height="70" MaxHeight="350"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" 
+                    HorizontalAlignment="Left" 
+                    VerticalAlignment="Top"
+                    Width="20" Height="20"
+                    Margin="10,10,0,0">
+            <Button Foreground="White"
+                    Style="{StaticResource ArrowButton}"
+                    BorderThickness="0"
+                    FontSize="45" 
+                    Height="20"
+                    Background="Transparent"
+                    Command="{Binding BackwardCommand}">
+                <Image Source="pack://application:,,,/Images/LeftArrow.png" Height="20"/>
+            </Button>
+        </StackPanel>
+        <StackPanel Grid.Row="0" Orientation="Vertical" 
+                    VerticalAlignment="Center" 
+                    HorizontalAlignment="Center">
+            <DockPanel HorizontalAlignment="Center" 
+                           Height="40" Width="40">
+                <Ellipse RenderOptions.BitmapScalingMode="HighQuality" 
+                             Height="40" Width="40" 
+                             Panel.ZIndex="0">
+                    <Ellipse.Fill>
+                        <ImageBrush Stretch="UniformToFill" 
+                                    ImageSource="{Binding SelectedUser.PhotoUrl}"/>
+                    </Ellipse.Fill>
+                </Ellipse>
+                <Ellipse Panel.ZIndex="1" Fill="{Binding SelectedUser.Status, Converter={StaticResource StatusToColor}}" 
+                         VerticalAlignment="Bottom"
+                         Height="10" Width="10" Margin="-10,0,0,0"/>
+            </DockPanel>
+            <DockPanel Margin="0,20,0,0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock Text="{Binding SelectedUser.UserName}" Width="240" TextTrimming="CharacterEllipsis"
+                       Foreground="White" FontSize="15" TextAlignment="Center" DockPanel.Dock="Top" Margin="0,-20,0,0"/>
+            </DockPanel>
+        </StackPanel>
+
+        <DockPanel Grid.Row="1"
+                    VerticalAlignment="Stretch" 
+                    HorizontalAlignment="Stretch"
+                    Margin="20,0,20,0"
+                    Background="#0f3452">
+            <ListView Background="Transparent"
+                      Name="MessagesListView"
+                      BorderThickness="0"
+                      PreviewMouseLeftButtonDown="Deselect_Item"
+                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                      ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                      ScrollViewer.CanContentScroll="False"
+                      ItemsSource="{Binding MessagesList}"
+                      SelectionMode="Single"
+                      Focusable="False"
+                      VerticalAlignment="Bottom"
+                      SizeChanged="Messages_FocusLastMessage">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="Margin" Value="0,15,0,15"/>
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                    <ContentPresenter />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Border Background="#313F5F" CornerRadius="4"
+                                Name="MainMessageBorder"
+                                HorizontalAlignment="{Binding User.Id, Converter={StaticResource IdToHorizontal}}" 
+                                Margin="10,0,10,0"
+                                VerticalAlignment="Bottom"
+                                Tag="{Binding DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}">
+                            <DockPanel HorizontalAlignment="Left" Margin="5,5,0,5">
+                                <TextBlock Text="{Binding DateSent, StringFormat='{}{0:dd/MM/yyyy hh:MM:ss}'}" Foreground="Gray" FontSize="8" 
+                                           Margin="25,0,5,0" DockPanel.Dock="Top" 
+                                           HorizontalAlignment="{Binding ElementName=MainMessageBorder, Path=HorizontalAlignment}"/>
+                                <ListView HorizontalAlignment="{Binding ElementName=MainMessageBorder, Path=HorizontalAlignment}" 
+                                          DockPanel.Dock="Bottom" 
+                                          Background="Transparent"
+                                          BorderThickness="0"
+                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                          ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                                          SelectionMode="Single"
+                                          PreviewMouseWheel="HandlePreviewMouseWheel"
+                                          SelectedItem="{Binding DataContext.SelectedAttachment, ElementName=MessagesListView, Mode=OneWayToSource}"
+                                          Visibility="{Binding Attachments.Count, Converter={StaticResource CountToVis}}" 
+                                          Margin="0,5,0,0"
+                                          Focusable="False"
+                                          PreviewMouseLeftButtonDown="Deselect_Item"
+                                          ItemsSource="{Binding Attachments}">
+                                    <ListView.ItemContainerStyle>
+                                        <Style TargetType="ListViewItem">
+                                            <Setter Property="Background" Value="Transparent" />
+                                            <Setter Property="Margin" Value="5,5,10,10"/>
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                                        <ContentPresenter />
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="true">
+                                                                <Setter Property="Opacity" Value="0.5"/>
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </ListView.ItemContainerStyle>
+                                    <ListView.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal"/>
+                                        </ItemsPanelTemplate>
+                                    </ListView.ItemsPanel>
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate>
+                                            <DockPanel>
+                                                <Image Source="{Binding PhotoUrl}" Height="150" Margin="0,-20,0,0"/>
+                                            </DockPanel>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+                                <Ellipse RenderOptions.BitmapScalingMode="HighQuality" 
+                                         Height="20" Width="20" DockPanel.Dock="Left"
+                                         Visibility="{Binding User.Id, Converter={StaticResource IdToVis}}"
+                                         VerticalAlignment="Top">
+                                    <Ellipse.Fill>
+                                        <ImageBrush Stretch="UniformToFill" 
+                                                    ImageSource="{Binding User.PhotoUrl}"/>
+                                    </Ellipse.Fill>
+                                </Ellipse>
+                                <TextBlock Text="(Edited)" Foreground="Gray" FontSize="7" 
+                                           Margin="5,0,5,0" DockPanel.Dock="Bottom" 
+                                           Visibility="{Binding IsEdited, Converter={StaticResource BoolToVis}}"
+                                           HorizontalAlignment="{Binding ElementName=MainMessageBorder, Path=HorizontalAlignment, Converter={StaticResource NegationHorizontal}}"/>
+                                <TextBox Text="{Binding Content}" FontSize="12"
+                                         IsHitTestVisible="False"
+                                         Background="Transparent"
+                                         BorderThickness="0"
+                                         Margin="5,0,5,0"
+                                         Foreground="White"
+                                         TextWrapping="Wrap"
+                                         MaxWidth="{Binding ActualWidth}"/>           
+                            </DockPanel>
+                            <Border.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Delete" Command="{Binding PlacementTarget.Tag.DeleteMessageCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}" 
+                                              CommandParameter="{Binding}"/>
+                                    <MenuItem Header="Edit" Visibility="{Binding User.Id, Converter={StaticResource IdToVisNegation}}" 
+                                              Command="{Binding PlacementTarget.Tag.EditMessageCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}" 
+                                              CommandParameter="{Binding}"/>
+                                </ContextMenu>
+                            </Border.ContextMenu>
+                        </Border>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <DockPanel.Effect>
+                <DropShadowEffect Color="Black"
+                                  Direction="150"
+                                  BlurRadius="20"/>
+            </DockPanel.Effect>
+        </DockPanel>
+
+        <DockPanel Grid.Row="2" 
+                   HorizontalAlignment="Stretch" 
+                   VerticalAlignment="Center">
+            <ListView DockPanel.Dock="Top"
+                      Name="AttachmentList"
+                      HorizontalAlignment="Left"
+                      Margin="20,10,0,10"
+                      SizeChanged="AttachmentList_SizeChanged"
+                      ItemsSource="{Binding NewMessageAttachments}"
+                      Visibility="{Binding NewMessageAttachments.Count, Converter={StaticResource CountToVis}}">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                    <ContentPresenter />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <DockPanel>
+                            <Button DockPanel.Dock="Top" HorizontalAlignment="Right" Height="20" Width="20" Panel.ZIndex="1"
+                                                        Style="{StaticResource ArrowButton}" Content="X" FontSize="15" Foreground="DarkRed"/>
+                            <Image Source="{Binding PhotoUrl}" Height="100" Margin="0,-20,0,0"/>
+                        </DockPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <Border Background="#0f3452"
+                    Name="MsgBorder"
+                    BorderThickness="0"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Center" 
+                    Margin="20,0,20,0">
+                <DockPanel>
+                    <Button FontSize="19"
+                            Width="30"
+                            Height="30"
+                            VerticalAlignment="Top"
+                            Style="{StaticResource ArrowButton}">
+                        <Image Source="pack://application:,,,/Images/Add.png" Height="15"/>
+                    </Button>
+                    <TextBox Text="{Binding MessageContent}"
+                             SizeChanged="MessageBox_SizeChanged"
+                             KeyDown="Message_KeyPressed"
+                             Name="MessageBox"
+                             FontSize="15" TextWrapping="Wrap"
+                             MaxLength="2000"
+                             MinHeight="20"
+                             MaxHeight="200"
+                             Margin="0,5,10,5"
+                             BorderThickness="0"
+                             VerticalAlignment="Center"
+                             HorizontalAlignment="Stretch"
+                             Foreground="White"
+                             Background="Transparent"/>
+                </DockPanel>
+            </Border>
+        </DockPanel>
+    </Grid>
+</UserControl>
