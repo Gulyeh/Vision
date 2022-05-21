@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using Prism.Unity;
+using System.Windows;
 
 namespace VisionClient
 {
@@ -9,6 +10,7 @@ namespace VisionClient
     {
         protected override void OnStartup(StartupEventArgs e)
         {
+            PrismContainerExtension.Init();
             base.OnStartup(e);
             var bs = new LoginBootstrapper();
             bs.Run();

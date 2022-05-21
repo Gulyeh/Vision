@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using Identity_API.DbContexts;
 using Identity_API.Dtos;
 using Identity_API.Helpers;
@@ -24,7 +25,8 @@ namespace Identity_API.Processors
         }
 
         private async Task<string> GenerateToken(string baseUri){
-            var token = Encoding.UTF8.GetBytes(await userManager.GeneratePasswordResetTokenAsync(user));
+            var tokenBytes = Encoding.UTF8.GetBytes(await userManager.GeneratePasswordResetTokenAsync(user));
+            var token = HttpUtility.UrlEncode(Encoding.UTF8.GetString(tokenBytes));
             return $"{baseUri}/ResetPassword?userId={user.Id}&token={token}";
         }
 

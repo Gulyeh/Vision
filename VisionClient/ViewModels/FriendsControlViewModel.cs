@@ -84,7 +84,7 @@ namespace VisionClient.ViewModels
             //TEST
             var user = new UserModel()
             {
-                Id = 1,
+                Id = new Guid(),
                 UserName = "TestUserasdasdasdasdasdadasdadadasd",
                 Description = "Test Descriptionasdasdadadsadadadasdada",
                 IsBlocked = false,
@@ -93,7 +93,7 @@ namespace VisionClient.ViewModels
             };
             var user1 = new UserModel()
             {
-                Id = 2,
+                Id = new Guid(),
                 UserName = "TestUser1",
                 IsBlocked = true,
                 PhotoUrl = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__340.png",
@@ -102,7 +102,7 @@ namespace VisionClient.ViewModels
 
             var user3 = new UserModel()
             {
-                Id = 2,
+                Id = new Guid(),
                 UserName = "TestUserasdasdasdasdasdadasdadadasd",
                 IsBlocked = false,
                 PhotoUrl = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__340.png",
@@ -127,8 +127,10 @@ namespace VisionClient.ViewModels
             this.regionManager = regionManager;
             this.eventAggregator = eventAggregator;
             this.dialogService = dialogService;
-            FriendsListOnline = new ObservableCollection<UserModel>(FriendsList.Where(x => x.Status != Status.Invisible && x.Status != Status.Offline).OrderBy(x => x.UserName));
-            FriendsListOffline = new ObservableCollection<UserModel>(FriendsList.Where(x => x.Status != Status.Online && x.Status != Status.Away).OrderBy(x => x.UserName));
+            FriendsListOnline = new ObservableCollection<UserModel>(FriendsList.Where(x => x.Status != Status.Invisible && x.Status != Status.Offline)
+                .OrderBy(x => x.UserName));
+            FriendsListOffline = new ObservableCollection<UserModel>(FriendsList.Where(x => x.Status != Status.Online && x.Status != Status.Away)
+                .OrderBy(x => x.UserName));
             OnlineCount = FriendsListOnline.Count();
             OfflineCount = FriendsListOffline.Count();
         }

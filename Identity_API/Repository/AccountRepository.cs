@@ -12,6 +12,7 @@ using Identity_API.Statics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
+using System.Web;
 
 namespace Identity_API.Repository
 {
@@ -45,9 +46,10 @@ namespace Identity_API.Repository
             var user = await userManager.Users.FirstOrDefaultAsync(x => x.Id == userId);
             if (user is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "User does not exist" });
 
-            var result = await userManager.ConfirmEmailAsync(user, token);
+            var decodedToken = HttpUtility.UrlDecode(token).Replace(" ", "+");
+            var result = await userManager.ConfirmEmailAsync(user, decodedToken);
             if (!result.Succeeded) {
-                logger.LogError("Could not confirm email of User with ID: {Id}", userId); 
+                logger.LogError("Could not confirm email of User with ID: {Id} and Token: {token}", userId, decodedToken);  
                 return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not confirm email address" });
             }
 
@@ -67,19 +69,22 @@ namespace Identity_API.Repository
             if (isBanned is not null) 
             {
                 logger.LogInformation("User with ID: {Id} is banned from logging in", user.Id); 
-                return new ResponseDto(false, StatusCodes.Status401Unauthorized, new
+                return new ResponseDto(false, StatusCodes.Status403Forbidden, new
                 {
-                    Message = "Your account has been banned",
                     Reason = isBanned.Reason,
-                    BanExpires = isBanned.BanExpires.ToShortDate(),
+                    BanExpires = isBanned.BanExpires,
+                    BanDate = isBanned.BanDate
                 });
             }
 
-            if (user.TwoFactorEnabled == true && string.IsNullOrEmpty(loginData.TFACode)) return new ResponseDto(true, StatusCodes.Status401Unauthorized, new { IsTFAEnabled = true });
-            else if (user.TwoFactorEnabled == true && !string.IsNullOrEmpty(loginData.TFACode))
+            if (user.TwoFactorEnabled && string.IsNullOrEmpty(loginData.AuthCode)) return new ResponseDto(false, StatusCodes.Status200OK, new { IsTFAEnabled = true });
+            else if (user.TwoFactorEnabled && !string.IsNullOrEmpty(loginData.AuthCode))
             {
-                var TFAResults = await userManager.VerifyTwoFactorTokenAsync(user, userManager.Options.Tokens.AuthenticatorTokenProvider ,loginData.TFACode);
-                if(!TFAResults) return new ResponseDto(true, StatusCodes.Status400BadRequest, new[] { "Provided code is wrong" });
+                var TFAResults = await userManager.VerifyTwoFactorTokenAsync(user, userManager.Options.Tokens.AuthenticatorTokenProvider, loginData.AuthCode);
+                if(!TFAResults) 
+                {
+                    return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Provided code is wrong" });
+                }
             }
 
             var userDtoBuilder = new UserDtoBuilder(tokenService, user);
@@ -129,15 +134,16 @@ namespace Identity_API.Repository
             rabbitMQSender.SendMessage(emailDto, "SendEmailQueue");
 
             logger.LogInformation("User with Email: {email} requested reset password", Email); 
-            return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Please check your inbox to your reset password" });
+            return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Please check your inbox to reset password" });
         }
 
-        public async Task<ResponseDto> ResetPassword(ResetPasswordData data)
+        public async Task<ResponseDto> ResetPassword(ResetPasswordDto data)
         {
             var user = await userManager.Users.FirstOrDefaultAsync(x => x.Id == data.userId);
             if (user is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "User does not exist" });
             
-            var result = await userManager.ResetPasswordAsync(user, data.Token, data.NewPassword);
+            var decodedToken = HttpUtility.UrlDecode(data.Token).Replace(" ", "+");
+            var result = await userManager.ResetPasswordAsync(user, decodedToken, data.NewPassword);
             if(!result.Succeeded) {
                 logger.LogError("Could not reset password for User with ID: {userId}", data.userId); 
                 return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not reset password" });

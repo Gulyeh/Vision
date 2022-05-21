@@ -50,7 +50,7 @@ namespace PaymentService_API.RabbitMQConsumer
                 HandleMessage(gameData).GetAwaiter().GetResult();
                 channel.BasicAck(args.DeliveryTag, false);
             };
-            channel.BasicConsume("CreatePaymentQueue", false, consumer);
+            channel.BasicConsume("CreatePaymentQueue", true, consumer);
 
             return Task.CompletedTask;
         }

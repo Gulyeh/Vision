@@ -55,7 +55,7 @@ namespace OrderService_API.RabbitMQConsumer
                 HandleMessage(access).GetAwaiter().GetResult();
                 channel.BasicAck(args.DeliveryTag, false);
             };
-            channel.BasicConsume("ProductAccessDoneQueue", false, consumer);
+            channel.BasicConsume("ProductAccessDoneQueue", true, consumer);
 
             return Task.CompletedTask;
         }

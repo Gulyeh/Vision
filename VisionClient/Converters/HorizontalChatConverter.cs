@@ -14,12 +14,12 @@ namespace VisionClient.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return (int)value != StaticData.UserData.Id ? HorizontalAlignment.Left : HorizontalAlignment.Right;
+            return (Guid)value != StaticData.UserData.Id ? HorizontalAlignment.Left : HorizontalAlignment.Right;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return (int)value != StaticData.UserData.Id ? HorizontalAlignment.Left : HorizontalAlignment.Right;
+            return (Guid)value != StaticData.UserData.Id ? HorizontalAlignment.Left : HorizontalAlignment.Right;
         }
     }
 }

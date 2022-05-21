@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using VisionClient.Core.Events;
 using VisionClient.Helpers;
 
@@ -19,12 +20,10 @@ namespace VisionClient.ViewModels
             set {  SetProperty(ref loadingValue, value); }
         }
 
-        private readonly IEventAggregator eventAggregator;
-
-        public LoadingWindowViewModel(IEventAggregator eventAggregator)
+        public Window? tempWindow { get; set; } = null;
+        public LoadingWindowViewModel()
         {
             Initialization();
-            this.eventAggregator = eventAggregator;
         }
 
         private async void Initialization()
@@ -40,7 +39,7 @@ namespace VisionClient.ViewModels
             await Task.Delay(1000);
             var bs = new Bootstrapper();
             bs.Run();
-            eventAggregator.GetEvent<SendEvent<string>>().Publish("CloseLoading");
+            tempWindow?.Close();
         }
     }
 }

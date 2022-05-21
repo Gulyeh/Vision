@@ -55,7 +55,7 @@ namespace OrderService_API.RabbitMQConsumer
                 HandleMessage(currencyData).GetAwaiter().GetResult();
                 channel.BasicAck(args.DeliveryTag, false);
             };
-            channel.BasicConsume("CurrencyPaymentDoneQueue", false, consumer);
+            channel.BasicConsume("CurrencyPaymentDoneQueue", true, consumer);
 
             return Task.CompletedTask;
         }

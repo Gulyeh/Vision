@@ -4,11 +4,11 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Identity_API.Helpers
+namespace Identity_API.Dtos
 {
-    public class ResetPasswordData
+    public class ResetPasswordDto
     {
-        public ResetPasswordData()
+        public ResetPasswordDto()
         {
             Token = string.Empty;
             NewPassword = string.Empty;

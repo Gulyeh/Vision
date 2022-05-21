@@ -9,6 +9,6 @@ namespace Identity_API.Repository.IRepository
         Task<ResponseDto> Login(LoginDto loginData);
         Task<ResponseDto> ConfirmEmail(Guid userId, string token);
         Task<ResponseDto> RequestResetPassword(string Email, string baseUri);
-        Task<ResponseDto> ResetPassword(ResetPasswordData data);
+        Task<ResponseDto> ResetPassword(ResetPasswordDto data);
     }
 }

@@ -115,19 +115,23 @@
         </StackPanel>
 
         <StackPanel Grid.Row="1" HorizontalAlignment="Center" 
+                    Orientation="Vertical"
                     VerticalAlignment="Center">
             <TextBlock Text="Enter Authenticator Code:" 
                        HorizontalAlignment="Center"
                        FontSize="9" Foreground="Gray"/>
-            <TextBox Text="{Binding TFACode}"/>
+            <TextBox Text="{Binding AuthCode, Mode=TwoWay}"/>
+            <TextBlock Text="{Binding Content}"
+                       Margin="0,5,0,0"
+                       HorizontalAlignment="Center"
+                       FontSize="9" Foreground="Red"/>
         </StackPanel>
 
         <DockPanel Grid.Row="2" 
                    HorizontalAlignment="Center" VerticalAlignment="Top">
             <Button Content="Login"
                     Style="{StaticResource ButtonTemplate}"
-                    Command="{Binding CloseDialogCommand}"
-                    CommandParameter="true"
+                    Command="{Binding ExecuteCommand}"
                     Margin="0,0,80,0"/>
             <Button Content="Cancel"
                     Style="{StaticResource ButtonTemplate}"

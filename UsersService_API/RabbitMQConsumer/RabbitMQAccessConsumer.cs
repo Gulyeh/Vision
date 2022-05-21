@@ -13,8 +13,7 @@ namespace UsersService_API.RabbitMQConsumer
 {
     public class RabbitMQAccessConsumer : BackgroundService
     {
-        private readonly ICacheService cacheService;
-        private readonly IHubContext<UsersHub> hubContext;
+        private readonly IServiceScopeFactory serviceScopeFactory;
         private readonly ILogger<RabbitMQAccessConsumer> logger;
         private IConnection connection;
         private IModel channel;
@@ -22,10 +21,6 @@ namespace UsersService_API.RabbitMQConsumer
         public RabbitMQAccessConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory serviceScopeFactory, 
             ILogger<RabbitMQAccessConsumer> logger)
         {
-            using var scope = serviceScopeFactory.CreateScope();
-            this.cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
-            this.hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<UsersHub>>();
-
             var factory = new ConnectionFactory
             {
                 HostName = options.Value.Hostname,
@@ -36,6 +31,7 @@ namespace UsersService_API.RabbitMQConsumer
             connection = factory.CreateConnection();
             channel = connection.CreateModel();
             channel.QueueDeclare(queue: "AccessProductQueue", false, false, false, arguments: null);
+            this.serviceScopeFactory = serviceScopeFactory;
             this.logger = logger;
         }
 
@@ -61,12 +57,16 @@ namespace UsersService_API.RabbitMQConsumer
         {
             if (data is not null)
             {
+                using var scope = serviceScopeFactory.CreateScope();
+                var cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
+
                 var userCache = await cacheService.TryGetFromCache();
                 if (userCache.ContainsKey(data.userId))
                 {
                     var connIds = userCache.GetValueOrDefault(data.userId);
                     if (connIds is not null)
                     {
+                        var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<UsersHub>>();
                         await hubContext.Clients.Clients(connIds).SendAsync("GamePurchased", new GamePurchased { gameId = data.gameId, productId = data.productId });
                     }
                 }

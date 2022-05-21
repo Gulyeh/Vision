@@ -14,5 +14,4 @@ app.UseCors(x => x
     .AllowAnyOrigin()
     .AllowAnyMethod()
     .AllowAnyHeader());
-app.UseSerilogRequestLogging();
 app.Run();

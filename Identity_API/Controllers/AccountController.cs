@@ -10,19 +10,26 @@ namespace Identity_API.Controllers
     public class AccountController : BaseControllerApi
     {
         private readonly IAccountRepository accountRepository;
-        private string BaseUri { get; init; }
-
+        
         public AccountController(IAccountRepository accountRepository)
         {
             this.accountRepository = accountRepository;
-            BaseUri = Url.Content("~/");
+        }
+
+        private string GetBaseUrl()
+        {
+            var request = HttpContext.Request;
+
+            var baseUrl = $"{request.Scheme}://{request.Host}:{request.PathBase.ToUriComponent().Replace(":","")}";
+
+            return baseUrl;
         }
 
         [HttpPost("Register")]
         public async Task<ActionResult<ResponseDto>> RegisterUser(RegisterDto data)
         {
             if (!ModelState.IsValid) return BadRequest(new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Wrong model data" }));
-            return CheckActionResult(await accountRepository.Register(data, BaseUri));
+            return CheckActionResult(await accountRepository.Register(data, GetBaseUrl()));
         }
 
         [HttpPost("Login")]
@@ -42,11 +49,11 @@ namespace Identity_API.Controllers
         [HttpGet("RequestResetPassword")]
         public async Task<ActionResult<ResponseDto>> RequestResetPassword([FromQuery] string Email){
             if(string.IsNullOrEmpty(Email)) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Please provide an email address" });
-            return CheckActionResult(await accountRepository.RequestResetPassword(Email, BaseUri));
+            return CheckActionResult(await accountRepository.RequestResetPassword(Email, GetBaseUrl()));
         }
 
         [HttpPost("ResetPassword")]
-        public async Task<ActionResult<ResponseDto>> ResetPassword([FromBody] ResetPasswordData data){
+        public async Task<ActionResult<ResponseDto>> ResetPassword([FromBody] ResetPasswordDto data){
             if (!ModelState.IsValid) return BadRequest(new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Wrong data" }));
             return CheckActionResult(await accountRepository.ResetPassword(data));
         }

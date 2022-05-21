@@ -11,16 +11,13 @@ namespace SMTPService_API.RabbitMQConsumer
 {
     public class RabbitMQMessageConsumer : BackgroundService
     {
-        private readonly IEmailRepository emailRepository;
+        private readonly IServiceScopeFactory serviceScopeFactory;
         private readonly ILogger<RabbitMQMessageConsumer> logger;
         private IConnection connection;
         private IModel channel;
 
         public RabbitMQMessageConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory serviceScopeFactory, ILogger<RabbitMQMessageConsumer> logger)
         {
-            using var scope = serviceScopeFactory.CreateScope();
-            this.emailRepository = scope.ServiceProvider.GetRequiredService<IEmailRepository>();
-
             var factory = new ConnectionFactory
             {
                 HostName = options.Value.Hostname,
@@ -31,6 +28,7 @@ namespace SMTPService_API.RabbitMQConsumer
             connection = factory.CreateConnection();
             channel = connection.CreateModel();
             channel.QueueDeclare(queue: "SendEmailQueue", false, false, false, arguments: null);
+            this.serviceScopeFactory = serviceScopeFactory;
             this.logger = logger;
         }
 
@@ -39,7 +37,7 @@ namespace SMTPService_API.RabbitMQConsumer
             stoppingToken.ThrowIfCancellationRequested();
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
-            {
+            {          
                 logger.LogInformation("Received message from queue: SendEmailQueue"); 
                 var content = Encoding.UTF8.GetString(args.Body.ToArray());
                 EmailDataDto? emailData = JsonConvert.DeserializeObject<EmailDataDto>(content);
@@ -53,7 +51,11 @@ namespace SMTPService_API.RabbitMQConsumer
 
         private async Task HandleMessage(EmailDataDto? data)
         {
-            if (data is not null) await emailRepository.InitializeEmail(data);
+            if (data is not null) {
+                using var scope = serviceScopeFactory.CreateScope();
+                var emailRepository = scope.ServiceProvider.GetRequiredService<IEmailRepository>();
+                await emailRepository.InitializeEmail(data);
+            }
         }
     }
 }

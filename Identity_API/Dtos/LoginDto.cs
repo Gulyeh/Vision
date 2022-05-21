@@ -4,6 +4,6 @@ namespace Identity_API.Dtos
 {
     public class LoginDto : BasicUserData
     {
-        public string? TFACode { get; set; }
+        public string? AuthCode { get; set; }
     }
 }

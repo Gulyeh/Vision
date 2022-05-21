@@ -25,10 +25,8 @@ namespace VisionClient.Views
         public LoadingWindow(IEventAggregator eventAggregator)
         {
             InitializeComponent();
-            eventAggregator.GetEvent<SendEvent<string>>().Subscribe(x =>
-            {
-                this.Close();
-            }, ThreadOption.PublisherThread, false, x => x == "CloseLoading");
+            LoadingWindowViewModel? vm = this.DataContext as LoadingWindowViewModel;
+            if(vm is not null) vm.tempWindow = this;
         }
     }
 }

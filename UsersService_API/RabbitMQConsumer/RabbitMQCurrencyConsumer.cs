@@ -15,23 +15,18 @@ namespace UsersService_API.RabbitMQConsumer
 {
     public class RabbitMQCurrencyConsumer : BackgroundService
     {
-        private readonly IHubContext<UsersHub> hubContext;
-        private readonly ICacheService cacheService;
-        private readonly ICurrencyRepository currencyRepository;
         private IConnection connection;
         private IModel channel;
+        private readonly IServiceScopeFactory serviceScopeFactory;
         private readonly IRabbitMQSender rabbitMQSender;
         private readonly ILogger<RabbitMQCurrencyConsumer> logger;
 
         public RabbitMQCurrencyConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory serviceScopeFactory, 
             IRabbitMQSender rabbitMQSender, ILogger<RabbitMQCurrencyConsumer> logger)
         {
+            this.serviceScopeFactory = serviceScopeFactory;
             this.rabbitMQSender = rabbitMQSender;
             this.logger = logger;
-            using var scope = serviceScopeFactory.CreateScope();
-            this.hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<UsersHub>>();
-            this.currencyRepository = scope.ServiceProvider.GetRequiredService<ICurrencyRepository>();
-            this.cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
 
             var factory = new ConnectionFactory
             {
@@ -67,6 +62,10 @@ namespace UsersService_API.RabbitMQConsumer
         {
             if (data is not null)
             {
+                using var scope = serviceScopeFactory.CreateScope();
+                var currencyRepository = scope.ServiceProvider.GetRequiredService<ICurrencyRepository>();
+                var cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
+
                 data.isSuccess = await currencyRepository.ChangeFunds(data);
                 var userCache = await cacheService.TryGetFromCache();
                 if (userCache.ContainsKey(data.UserId))
@@ -74,6 +73,7 @@ namespace UsersService_API.RabbitMQConsumer
                     var connIds = userCache.GetValueOrDefault(data.UserId);
                     if (connIds is not null)
                     {
+                        var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<UsersHub>>();
                         await hubContext.Clients.Clients(connIds).SendAsync("CurrencyPurchased", new CurrencyPurchased { isSuccess = data.isSuccess, Amount = data.Amount});
                     }
                     if(!data.isCode) rabbitMQSender.SendMessage(data, "CurrencyPaymentDoneQueue");

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using Identity_API.DbContexts;
 using Identity_API.Dtos;
 using Identity_API.Helpers;
@@ -24,13 +25,14 @@ namespace Identity_API.Processors
         }
 
         private async Task<string> GenerateToken(string baseUri){
-            var token = Encoding.UTF8.GetBytes(await userManager.GenerateEmailConfirmationTokenAsync(user));
-            return $"{baseUri}/ConfirmEmail?userId={user.Id}&token={token}";
+            var tokenBytes = Encoding.UTF8.GetBytes(await userManager.GenerateEmailConfirmationTokenAsync(user));
+            var token = HttpUtility.UrlEncode(Encoding.UTF8.GetString(tokenBytes));
+            return $"{baseUri}/api/account/ConfirmEmail?userId={user.Id}&token={token}";
         }
 
         public async Task GenerateEmailData(string baseUri){
             string link = await GenerateToken(baseUri);
-            email.Content = $"Confirm Email by clicking {link}";
+            email.Content = $"Confirm Email by <a href='{link}'>clicking this link</a>";
             email.EmailType = EmailTypes.Confirmation;
             email.ReceiverEmail = user.UserName;
             email.userId = user.Id;

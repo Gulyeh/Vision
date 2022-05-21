@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:VisionClient.Views.Dialogs"
-             xmlns:Helpers="clr-namespace:VisionClient.Helpers"
              xmlns:prism="http://prismlibrary.com/"
              mc:Ignorable="d" 
              Background="#0f3452"
@@ -124,8 +123,7 @@
             <TextBlock Text="Current Password" 
                        HorizontalAlignment="Center"
                        FontSize="9" Foreground="Gray"/>
-            <PasswordBox Helpers:PasswordBoxAssistant.BindPassword="True"
-                         Helpers:PasswordBoxAssistant.BoundPassword="{Binding Path=Password}"/>
+            <PasswordBox/>
         </StackPanel>
         
         <DockPanel Grid.Row="2" 

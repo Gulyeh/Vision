@@ -8,7 +8,7 @@
              Name="LoginControlName"
              xmlns:prism="http://prismlibrary.com/"
              prism:ViewModelLocator.AutoWireViewModel="True"
-             d:DesignHeight="370" d:DesignWidth="390"
+             d:DesignHeight="320" d:DesignWidth="390"
              Background="#143a58">
     <UserControl.Resources>
         <Style TargetType="CheckBox">
@@ -94,67 +94,59 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition/>
-            <RowDefinition Height="90"/>
-            <RowDefinition Height="80"/>
+            <RowDefinition Height="100"/>
         </Grid.RowDefinitions>
 
-        <DockPanel Grid.Row="0" Margin="10">
+        <DockPanel Grid.Row="0" VerticalAlignment="Bottom">
             <StackPanel Grid.Row="1" HorizontalAlignment="Stretch" 
-                    DockPanel.Dock="Top" Margin="0,20,0,0">
+                    DockPanel.Dock="Top" Margin="0,10,0,0">
                 <TextBlock Text="Email:" 
                        HorizontalAlignment="Center"
                        FontSize="9" Foreground="Gray"/>
-                <TextBox/>
+                <TextBox Text="{Binding Email}"/>
+                <TextBlock Text="{Binding Email_ErrorText}" FontSize="10" Foreground="Red"
+                       HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
             </StackPanel>
             <StackPanel Grid.Row="1" HorizontalAlignment="Center" 
-                    DockPanel.Dock="Top">
+                    DockPanel.Dock="Top"
+                        Margin="0,20,0,0">
                 <TextBlock Text="Password:" 
-                           Margin="0,30,0,0"
                        HorizontalAlignment="Center"
                        FontSize="9" Foreground="Gray"/>
-                <TextBox/>
+                <TextBox Text="{Binding Password}" FontFamily="/Resources/#password"/>
+                <TextBlock Text="{Binding Password_ErrorText}" FontSize="10" Foreground="Red"
+                       HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
             </StackPanel>
-            <CheckBox Content="Remember me" VerticalAlignment="Top" 
+            <CheckBox Content="Keep me logged in" DockPanel.Dock="Top" 
                       FontSize="11" Foreground="White"
-                      HorizontalAlignment="Center" Margin="-160,10,0,0"/>
+                      IsChecked="{Binding KeepLogged}"
+                      HorizontalAlignment="Center" Margin="-140,5,0,0"/>
+            <TextBlock Text="{Binding ErrorText}"
+                       FontSize="10" Foreground="Red"
+                       Margin="0,10,0,0"
+                       HorizontalAlignment="Center" />
         </DockPanel>
-        <DockPanel Grid.Row="1">
-            <Button Height="30" Width="160" Background="#164971"
-                    HorizontalAlignment="Center" DockPanel.Dock="Top" 
-                    Style="{StaticResource ButtonTemplate}">
-                <DockPanel>
-                    <Image Source="pack://application:,,,/Images/Google.png" Height="20"
-                           HorizontalAlignment="Left"/>
-                    <TextBlock Text="Sign in with Google" 
-                       VerticalAlignment="Center" Margin="10,0,0,0"
-                       FontSize="12" Foreground="White"/>
-                </DockPanel>
-            </Button>
-            <Button Height="30" Width="180" Background="#164971" 
-                    HorizontalAlignment="Center"
-                    Style="{StaticResource ButtonTemplate}">
-                <DockPanel>
-                    <Image Source="pack://application:,,,/Images/Facebook.png" Height="25"
-                           HorizontalAlignment="Left"/>
-                    <TextBlock Text="Sign in with Facebook" 
-                       VerticalAlignment="Center" Margin="10,0,0,0"
-                       FontSize="12" Foreground="White"/>
-                </DockPanel>
-            </Button>
-        </DockPanel>
+
         <DockPanel Grid.Row="2" VerticalAlignment="Center">
             <Button Content="Login"
                     Style="{StaticResource ButtonTemplate}"
                     HorizontalAlignment="Center" DockPanel.Dock="Top"
                     Command="{Binding LoginCommand}"
                     CommandParameter="{Binding ElementName=LoginControlName}"/>
-            <Button Background="Transparent" BorderThickness="0" 
+            <DockPanel VerticalAlignment="Top" 
+                    HorizontalAlignment="Center" Margin="0,10,0,0" >
+                <Button Background="Transparent" BorderThickness="0" 
                     Content="Not registered yet? Register now!"
                     Foreground="gray" FontSize="9" 
-                    VerticalAlignment="Top" 
-                    HorizontalAlignment="Center"
+                        DockPanel.Dock="Top"
                     Command="{Binding RegisterCommand}"
-                    Margin="0,10,0,0" Style="{StaticResource RegisterButton}"/>
+                    Style="{StaticResource RegisterButton}"/>
+                <Button Background="Transparent" BorderThickness="0" 
+                    Content="Forgot password?" Margin="0,5,0,0"
+                    Foreground="gray" FontSize="9" 
+                    Command="{Binding ForgotPasswordCommand}"
+                    Style="{StaticResource RegisterButton}"/>
+            </DockPanel>
         </DockPanel>
     </Grid>
 </UserControl>

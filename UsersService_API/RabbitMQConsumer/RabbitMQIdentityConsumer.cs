@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
@@ -9,7 +10,12 @@ namespace UsersService_API.RabbitMQConsumer
 {
     public class RabbitMQIdentityConsumer : BackgroundService
     {
-        private readonly IUserRepository userRepository;
+        private class Message
+        {
+            public string? userId { get; set; }
+        }
+
+        private readonly IServiceScopeFactory serviceScopeFactory;
         private readonly ILogger<RabbitMQIdentityConsumer> logger;
         private IConnection connection;
         private IModel channel;
@@ -17,9 +23,6 @@ namespace UsersService_API.RabbitMQConsumer
         public RabbitMQIdentityConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory serviceScopeFactory,
             ILogger<RabbitMQIdentityConsumer> logger)
         {
-            using var scope = serviceScopeFactory.CreateScope();
-            this.userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
-
             var factory = new ConnectionFactory
             {
                 HostName = options.Value.Hostname,
@@ -30,6 +33,7 @@ namespace UsersService_API.RabbitMQConsumer
             connection = factory.CreateConnection();
             channel = connection.CreateModel();
             channel.QueueDeclare(queue: "CreateUserQueue", false, false, false, arguments: null);
+            this.serviceScopeFactory = serviceScopeFactory;
             this.logger = logger;
         }
 
@@ -41,7 +45,8 @@ namespace UsersService_API.RabbitMQConsumer
             {
                 logger.LogInformation("Received message from queue: CreateUserQueue");
                 var content = Encoding.UTF8.GetString(args.Body.ToArray());
-                HandleMessage(content).GetAwaiter().GetResult();
+                Message? userId = JsonConvert.DeserializeObject<Message>(content);
+                HandleMessage(userId).GetAwaiter().GetResult();
                 channel.BasicAck(args.DeliveryTag, false);
             };
             channel.BasicConsume("CreateUserQueue", false, consumer);
@@ -49,11 +54,19 @@ namespace UsersService_API.RabbitMQConsumer
             return Task.CompletedTask;
         }
 
-        private async Task HandleMessage(string userId)
+        private async Task HandleMessage(Message? data)
         {
-            Guid Id;
-            Guid.TryParse(userId, out Id);
-            if (Id != Guid.Empty) await userRepository.CreateUser(Id);
+            if(data is not null)
+            {
+                Guid Id;
+                Guid.TryParse(data.userId, out Id);
+                if (Id != Guid.Empty) 
+                {
+                    using var scope = serviceScopeFactory.CreateScope();
+                    var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+                    await userRepository.CreateUser(Id);
+                }
+            }
         }
     }
 }

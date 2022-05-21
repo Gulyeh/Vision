@@ -29,6 +29,7 @@ namespace Identity_API.Extensions
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddCookie(IdentityConstants.TwoFactorRememberMeScheme)
                 .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, opts =>
                 {
                     opts.RequireHttpsMetadata = true;

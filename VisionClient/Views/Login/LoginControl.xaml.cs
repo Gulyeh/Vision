@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using VisionClient.ViewModels;
 
 namespace VisionClient.Views.Login
 {
@@ -23,6 +24,8 @@ namespace VisionClient.Views.Login
         public LoginControl()
         {
             InitializeComponent();
+            LoginControlViewModel? model = this.DataContext as LoginControlViewModel;
+            if (model is not null) model.tempControl = this;
         }
     }
 }

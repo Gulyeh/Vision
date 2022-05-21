@@ -14,7 +14,13 @@ namespace Identity_API.Dtos
         public string? Reason { get; set; }
         [JsonIgnore]
         public DateTime BanDate { get; set; } = DateTime.Now;
+        [JsonIgnore]
+        private DateTime banExpires;
         [Required]
-        public DateTime BanExpires { get; set; }
+        public DateTime BanExpires 
+        { 
+            get => banExpires; 
+            set => banExpires = value.ToUniversalTime();
+        }
     }
 }

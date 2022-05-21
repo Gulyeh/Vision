@@ -24,5 +24,6 @@ namespace VisionClient.Views.Login
         {
             InitializeComponent();
         }
+
     }
 }

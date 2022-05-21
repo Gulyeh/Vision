@@ -7,7 +7,7 @@
              mc:Ignorable="d" 
              xmlns:prism="http://prismlibrary.com/"
              prism:ViewModelLocator.AutoWireViewModel="True"
-             d:DesignHeight="370" d:DesignWidth="390"
+             d:DesignHeight="320" d:DesignWidth="390"
              Background="#143a58">
     <UserControl.Resources>
         <Style TargetType="TextBox">
@@ -49,39 +49,58 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition/>
-            <RowDefinition Height="80"/>
+            <RowDefinition Height="70"/>
         </Grid.RowDefinitions>
 
-        <DockPanel Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,20,0,0">
+        <DockPanel Grid.Row="0" VerticalAlignment="Center" 
+                   HorizontalAlignment="Center" Margin="0,20,0,0">
             <StackPanel Grid.Row="1" HorizontalAlignment="Stretch" 
-                    DockPanel.Dock="Top" Margin="0,20,0,0">
+                    DockPanel.Dock="Top">
                 <TextBlock Text="Email:" 
                        HorizontalAlignment="Center"
                        FontSize="9" Foreground="Gray"/>
-                <TextBox/>
+                <TextBox Text="{Binding Email, Mode=TwoWay}"/>
+                <TextBlock Text="{Binding Email_ErrorText}" 
+                           FontSize="10" Foreground="Red"
+                           HorizontalAlignment="Center" 
+                           VerticalAlignment="Bottom"/>
             </StackPanel>
             <StackPanel Grid.Row="1" HorizontalAlignment="Center" 
                     DockPanel.Dock="Top">
                 <TextBlock Text="Password:" 
-                           Margin="0,30,0,0"
+                           Margin="0,10,0,0"
                        HorizontalAlignment="Center"
                        FontSize="9" Foreground="Gray"/>
-                <TextBox/>
+                <TextBox Text="{Binding Password, Mode=TwoWay}" FontFamily="/Resources/#password"/>
+                <TextBlock Text="{Binding Password_ErrorText}" 
+                           FontSize="10" Foreground="Red"
+                           HorizontalAlignment="Center" 
+                           VerticalAlignment="Bottom"/>
             </StackPanel>
             <StackPanel Grid.Row="1" HorizontalAlignment="Center" 
                     DockPanel.Dock="Top">
                 <TextBlock Text="Repeat Password:" 
-                           Margin="0,30,0,0"
+                           Margin="0,10,0,0"
                        HorizontalAlignment="Center"
                        FontSize="9" Foreground="Gray"/>
-                <TextBox/>
+                <TextBox Text="{Binding RepeatPassword, Mode=TwoWay}" FontFamily="/Resources/#password"/>
+                <TextBlock Text="{Binding RepeatPassword_ErrorText}" 
+                           FontSize="10" Foreground="Red"
+                           HorizontalAlignment="Center" 
+                           VerticalAlignment="Bottom"/>
             </StackPanel>
+            <TextBlock Text="{Binding ErrorText}" 
+                       Margin="0,10,0,0"
+                       FontSize="10" Foreground="Red"
+                       HorizontalAlignment="Center" 
+                       VerticalAlignment="Top"/>
         </DockPanel>
-        <DockPanel Grid.Row="1" VerticalAlignment="Top" 
+        <DockPanel Grid.Row="2" VerticalAlignment="Center" 
                    HorizontalAlignment="Center">
             <Button Content="Register"
                     Margin="0,0,50,0"
                     Style="{StaticResource ButtonTemplate}"
+                    Command="{Binding RegisterCommand}"
                     HorizontalAlignment="Center"/>
             <Button Content="Cancel"
                     Background="DarkRed"

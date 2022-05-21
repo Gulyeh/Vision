@@ -39,6 +39,7 @@ namespace SMTPService_API.Services
                 }
 
                 using var emailClient = new SmtpClient();
+                emailClient.ServerCertificateValidationCallback = (s, c, h, e) => true;
                 await emailClient.ConnectAsync(config["SMTPServer"], int.Parse(config["SMTPPort"]), MailKit.Security.SecureSocketOptions.StartTls);
                 await emailClient.AuthenticateAsync(config["SenderEmail"], config["SenderPassword"]);
                 await emailClient.SendAsync(emailToSend);

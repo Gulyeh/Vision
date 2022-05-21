@@ -51,7 +51,7 @@ namespace GameAccessService_API.RabbitMQConsumer
 
                 channel.BasicAck(args.DeliveryTag, false);
             };
-            channel.BasicConsume("AccessProductQueue", false, consumer);
+            channel.BasicConsume("AccessProductQueue", true, consumer);
 
             return Task.CompletedTask;
         }

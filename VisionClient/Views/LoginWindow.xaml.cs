@@ -34,22 +34,6 @@ namespace VisionClient.Views
             WindowState = WindowState.Minimized;
         }
 
-        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            switch (e.Key)
-            {
-                case Key.Left:
-                case Key.Right:
-                case Key.Up:
-                case Key.Down:
-                case Key.Tab:
-                    e.Handled = true;
-                    break;
-                default:
-                    break;
-            }
-        }
-
         private void Dockpanel_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ClickCount == 1) DragMove();

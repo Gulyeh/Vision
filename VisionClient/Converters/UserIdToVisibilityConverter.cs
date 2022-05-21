@@ -14,12 +14,12 @@ namespace VisionClient.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return (int)value != StaticData.UserData.Id ? Visibility.Visible : Visibility.Collapsed;
+            return (Guid)value != StaticData.UserData.Id ? Visibility.Visible : Visibility.Collapsed;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return (int)value != StaticData.UserData.Id ? Visibility.Visible : Visibility.Collapsed;
+            return (Guid)value != StaticData.UserData.Id ? Visibility.Visible : Visibility.Collapsed;
         }
     }
 }

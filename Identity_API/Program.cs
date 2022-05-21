@@ -60,7 +60,6 @@ app.UseCors(x => x
     .AllowAnyMethod()
     .AllowAnyHeader());
 app.UseHttpsRedirection();
-app.UseSerilogRequestLogging();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

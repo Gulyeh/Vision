@@ -60,7 +60,7 @@ namespace OrderService_API.RabbitMQConsumer
                 HandleMessage(paymentCompleted).GetAwaiter().GetResult();
                 channel.BasicAck(args.DeliveryTag, false);
             };
-            channel.BasicConsume("PaymentQueue", false, consumer);
+            channel.BasicConsume("PaymentQueue", true, consumer);
 
             return Task.CompletedTask;
         }

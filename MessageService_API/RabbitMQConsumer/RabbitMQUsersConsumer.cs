@@ -46,7 +46,7 @@ namespace MessageService_API.RabbitMQConsumer
                 HandleMessage(chatData).GetAwaiter().GetResult();
                 channel.BasicAck(args.DeliveryTag, false);
             };
-            channel.BasicConsume("DeleteChatQueue", false, consumer);
+            channel.BasicConsume("DeleteChatQueue", true, consumer);
 
             return Task.CompletedTask;
         }

@@ -14,22 +14,22 @@ namespace VisionClient.Helpers
 {
     internal abstract class DialogHelper : BindableBase, IDialogAware
     {
-        private string _message = string.Empty;
-        public string Message
+        private string? _message;
+        public string? Message
         {
             get { return _message; }
             set { SetProperty(ref _message, value); }
         }
 
-        private string _title = string.Empty;
-        public string Title
+        private string? _title;
+        public string? Title
         {
             get { return _title; }
             set { SetProperty(ref _title, value); }
         }
 
-        private object? content;
-        public object? Content
+        private string? content;
+        public string? Content
         {
             get { return content; }
             set { SetProperty(ref content, value); }
@@ -43,7 +43,7 @@ namespace VisionClient.Helpers
         public DialogHelper(IEventAggregator eventAggregator)
         {
             CloseDialogCommand = new DelegateCommand<string>(CloseDialog);
-            ExecuteCommand = new DelegateCommand<object>(Execute);
+            ExecuteCommand = new DelegateCommand<object?>(Execute);
             this.eventAggregator = eventAggregator;
         }
 
@@ -69,7 +69,7 @@ namespace VisionClient.Helpers
             return true;
         }
 
-        public void OnDialogClosed()
+        public virtual void OnDialogClosed()
         {
             eventAggregator.GetEvent<SendEvent<Visibility>>().Publish(Visibility.Hidden);
         }

@@ -31,7 +31,7 @@ namespace Identity_API.Repository
             var alreadyBanned = await db.BannedUsers.FirstOrDefaultAsync(x => x.UserId == data.UserId);
             if (alreadyBanned is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "User has beed already banned" });
 
-            var mapped = mapper.Map<BannedUsers>(data);
+            var mapped = mapper.Map<BannedUsers>(data);           
             await db.BannedUsers.AddAsync(mapped);
             if (await db.SaveChangesAsync() > 0) {
                 logger.LogInformation("User with ID: {Id} has been banned successfully", data.UserId); 
