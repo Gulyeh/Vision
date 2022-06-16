@@ -14,7 +14,7 @@ jobs:
     runs-on: windows-latest
     defaults:
          run:
-          working-directory: 'WebClient'
+          working-directory: 'Vision-WebClient'
     strategy:
       matrix:
         node-version: [16.x]
@@ -26,7 +26,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-        cache-dependency-path: './WebClient/package-lock.json'
+        cache-dependency-path: './Vision-WebClient/package-lock.json'
     - run: npm ci
     - run: npm run build --if-present
     - run: npm test
