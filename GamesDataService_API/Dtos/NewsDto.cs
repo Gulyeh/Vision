@@ -8,5 +8,7 @@ namespace GamesDataService_API.Dtos
         [Required]
         public Guid Id { get; set; }
         public IFormFile? Photo { get; set; }
+        [Required]
+        public DateTime CreatedDate { get; set; }
     }
 }

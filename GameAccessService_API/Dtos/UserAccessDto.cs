@@ -7,16 +7,13 @@ namespace GameAccessService_API.Dtos
         public UserAccessDto()
         {
             Reason = string.Empty;
-            BlockedBy = string.Empty;
         }
 
         [Required]
         public Guid UserId { get; set; }
         [Required]
         public Guid GameId { get; set; }
-        public string? Reason { get; set; }
-        [Required]
-        public string BlockedBy { get; set; }
+        public string Reason { get; set; }
         [Required]
         public DateTime ExpireDate { get; set; }
     }

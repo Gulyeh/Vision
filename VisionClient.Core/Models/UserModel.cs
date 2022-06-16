@@ -1,28 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using VisionClient.Core.Enums;
-
-namespace VisionClient.Core.Models
+﻿namespace VisionClient.Core.Models
 {
-    public class UserModel
+    public class UserModel : BaseUserModel
     {
-        public UserModel()
+        private bool hasUnreadMessages;
+        public bool HasUnreadMessages
         {
-            UserName = string.Empty;
-            PhotoUrl = string.Empty;
-            EmailAddress = string.Empty;
+            get { return hasUnreadMessages; }
+            set
+            {
+                hasUnreadMessages = value;
+                OnPropertyChanged();
+            }
         }
 
-        public Guid Id { get; set; }
-        public string UserName { get; set; }
-        public string? Description { get; set; }
-        public string EmailAddress { get; set; }
-        public string PhotoUrl { get; set; }
-        public Status Status { get; set; }
-        public bool IsBlocked { get; set; }
+        private bool isBlocked;
+        public bool IsBlocked
+        {
+            get => isBlocked;
+            set
+            {
+                isBlocked = value;
+                OnPropertyChanged();
+            }
+        }
     }
 }

@@ -4,15 +4,25 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:VisionClient.Views"
+             xmlns:Static="clr-namespace:VisionClient.Core;assembly=VisionClient.Core"
              mc:Ignorable="d" 
              xmlns:prism="http://prismlibrary.com/"
              prism:ViewModelLocator.AutoWireViewModel="True"
              xmlns:Converter="clr-namespace:VisionClient.Converters"
+             xmlns:FriendsConverter="clr-namespace:VisionClient.Converters.FriendsConverters" 
              d:DesignHeight="450" d:DesignWidth="250" Background="#0c3c60">
     <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         <Converter:StatusToColorConverter x:Key="StatusToColor"/>
         <Converter:IsBlockedConverter x:Key="BlockedConverter"/>
         <Converter:StatusToOpacityConverter x:Key="StatusToOpacity"/>
+        <Converter:RoleToVisibilityConverter x:Key="RoleToVis"/>
+        <FriendsConverter:GetOfflineFriendsConverter x:Key="GetOfflineFriends"/>
+        <FriendsConverter:GetOnlineFriendsConverter x:Key="GetOnlineFriends"/>
+        <FriendsConverter:CountOfflineFriendsConverter x:Key="CountOfflineFriends"/>
+        <FriendsConverter:CountOnlineFriendsConverter x:Key="CountOnlineFriends"/>
+        <CollectionViewSource x:Key="FriendsList" Source="{Binding StaticData.FriendsList}"/>
+        <Static:StaticData x:Key="StaticData"/>
         <Style TargetType="ListView">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -50,15 +60,23 @@
                                          Height="40" Width="40" 
                                          Panel.ZIndex="0">
                         <Ellipse.Fill>
-                            <ImageBrush Stretch="UniformToFill" ImageSource="{Binding PhotoUrl}"/>
+                            <ImageBrush Stretch="UniformToFill" ImageSource="{Binding PhotoUrl, IsAsync=True}"/>
                         </Ellipse.Fill>
                     </Ellipse>
+                    <Grid Panel.ZIndex="1" Margin="-15,-5,-4,0"
+                          VerticalAlignment="Top"
+                          HorizontalAlignment="Right"
+                          Visibility="{Binding HasUnreadMessages, Converter={StaticResource BoolToVis}}">
+                          <Ellipse  Fill="Red" Height="15" Width="15"/>
+                          <TextBlock Text="!" FontSize="11" Foreground="White" FontWeight="Bold" 
+                                     HorizontalAlignment="Center" Margin="1,-1,0,0"/>
+                    </Grid>
                     <Ellipse Panel.ZIndex="1" Fill="{Binding Status, Converter={StaticResource StatusToColor}}" 
                                          VerticalAlignment="Bottom"
                                          Height="12" Width="12" Margin="-14,0,0,0"/>
                 </DockPanel>
                 <DockPanel Margin="5,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <TextBlock Text="{Binding UserName}" Width="180" TextTrimming="CharacterEllipsis"
+                    <TextBlock Text="{Binding Username}" Width="180" TextTrimming="CharacterEllipsis"
                                            Foreground="White" FontSize="15" 
                                            TextAlignment="Left" DockPanel.Dock="Top"/>
                     <TextBlock Text="{Binding Description}"
@@ -146,10 +164,10 @@
                          Height="40" Width="40" 
                          Panel.ZIndex="0">
                         <Ellipse.Fill>
-                            <ImageBrush Stretch="UniformToFill" ImageSource="{Binding User.PhotoUrl, Mode=TwoWay}"/>
+                            <ImageBrush Stretch="UniformToFill" ImageSource="{Binding StaticData.UserData.PhotoUrl, IsAsync=True}"/>
                         </Ellipse.Fill>
                     </Ellipse>
-                    <Ellipse Panel.ZIndex="1" Fill="{Binding User.Status, Converter={StaticResource StatusToColor}}" 
+                    <Ellipse Panel.ZIndex="1" Fill="{Binding StaticData.UserData.Status, Converter={StaticResource StatusToColor}}" 
                          VerticalAlignment="Bottom"
                          Height="10" Width="10" Margin="-10,0,0,0"/>
                     <DockPanel.ContextMenu>
@@ -164,12 +182,12 @@
                     </DockPanel.ContextMenu>
                 </DockPanel>
                 <DockPanel Margin="0,20,0,0" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <TextBlock Text="{Binding User.UserName, UpdateSourceTrigger=PropertyChanged}" Width="240" TextTrimming="CharacterEllipsis"
+                    <TextBlock Text="{Binding StaticData.UserData.Username}" Width="240" TextTrimming="CharacterEllipsis"
                        Foreground="White" FontSize="15" TextAlignment="Center" DockPanel.Dock="Top" Margin="0,-20,0,0"/>
-                    <TextBlock Text="{Binding User.Description}"
+                    <TextBlock Text="{Binding StaticData.UserData.Description}"
                                TextAlignment="Center"
                                TextTrimming="CharacterEllipsis"
-                               Width="240"
+                               Width="230"
                                Foreground="Gray" FontSize="10" 
                                VerticalAlignment="Top"/>
                 </DockPanel>
@@ -192,6 +210,7 @@
                     Foreground="White"
                     FontSize="12" 
                     Margin="0,0,10,0"
+                    Visibility="{Binding StaticData.UserData.Role, Converter={StaticResource RoleToVis}}"
                     Command="{Binding OpenControlCommand}"
                     CommandParameter="AdminPanelControl"/>
 
@@ -203,30 +222,55 @@
                             Orientation="Vertical" HorizontalAlignment="Left">
                     <TextBlock FontSize="12" Foreground="Gray" Margin="10,0,0,0">
                     <Run Text="Online -"/>
-                    <Run Text="{Binding OnlineCount}"/>
+                    <Run>
+                        <Run.Text>
+                            <MultiBinding Converter="{StaticResource CountOnlineFriends}" ConverterParameter="{StaticResource FriendsList}">
+                                <Binding Path="Count" Mode="OneWay" Source="{StaticResource FriendsList}"/>
+                                <Binding Path="Status" Source="{StaticResource FriendsList}"/>
+                            </MultiBinding>
+                        </Run.Text>                      
+                    </Run>
                     </TextBlock>
-
                     <ListView PreviewMouseRightButtonDown="ListView_DisableRightClickSelection"
                               PreviewMouseWheel="HandlePreviewMouseWheel"
-                              ItemsSource="{Binding FriendsListOnline}"
                               SelectedItem="{Binding SelectedUser}"
                               ItemTemplate="{StaticResource FriendsTemplate}"
-                              ItemContainerStyle="{StaticResource FriendsContainerStyle}"/>
+                              ItemContainerStyle="{StaticResource FriendsContainerStyle}">
+                        <ListView.ItemsSource>
+                            <MultiBinding  Converter="{StaticResource GetOnlineFriends}" ConverterParameter="{StaticResource FriendsList}">
+                                <Binding Path="Count" Mode="OneWay" Source="{StaticResource FriendsList}"/>
+                                <Binding Path="Status" Source="{StaticResource FriendsList}"/>
+                            </MultiBinding>
+                        </ListView.ItemsSource>
+                    </ListView>
                 </StackPanel>
 
                 <StackPanel VerticalAlignment="Top" Margin="0,5,0,0" 
                             Orientation="Vertical" HorizontalAlignment="Left">
                     <TextBlock FontSize="12" Foreground="Gray" Margin="10,0,0,0">
-                    <Run Text="Offline -"/>
-                    <Run Text="{Binding OfflineCount}"/>
+                        <Run Text="Offline -"/>
+                        <Run>
+                            <Run.Text>
+                                <MultiBinding Converter="{StaticResource CountOfflineFriends}" ConverterParameter="{StaticResource FriendsList}">
+                                    <Binding Path="Count" Mode="OneWay" Source="{StaticResource FriendsList}"/>
+                                    <Binding Path="Status" Source="{StaticResource FriendsList}"/>
+                                </MultiBinding>
+                            </Run.Text>
+                        </Run>
                     </TextBlock>
 
                     <ListView PreviewMouseRightButtonDown="ListView_DisableRightClickSelection"
                               PreviewMouseWheel="HandlePreviewMouseWheel"
-                              ItemsSource="{Binding FriendsListOffline}"
                               SelectedItem="{Binding SelectedUser}"
                               ItemTemplate="{StaticResource FriendsTemplate}"
-                              ItemContainerStyle="{StaticResource FriendsContainerStyle}"/>
+                              ItemContainerStyle="{StaticResource FriendsContainerStyle}">
+                        <ListView.ItemsSource>
+                            <MultiBinding Converter="{StaticResource GetOfflineFriends}" ConverterParameter="{StaticResource FriendsList}">
+                                <Binding Path="Count" Source="{StaticResource FriendsList}"/>
+                                <Binding Path="Status" Source="{StaticResource FriendsList}"/>
+                            </MultiBinding>
+                        </ListView.ItemsSource>
+                    </ListView>
                 </StackPanel>
             </DockPanel>
         </ScrollViewer>

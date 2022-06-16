@@ -5,10 +5,10 @@ namespace UsersService_API.Dtos
         public EditableUserDataDto()
         {
             Description = string.Empty;
-            Nickname = string.Empty;
+            Username = string.Empty;
         }
 
         public string Description { get; set; }
-        public string Nickname { get; set; }
+        public string Username { get; set; }
     }
 }

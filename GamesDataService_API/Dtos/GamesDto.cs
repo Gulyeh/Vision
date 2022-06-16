@@ -9,5 +9,10 @@ namespace GamesDataService_API.Dtos
         public Guid Id { get; set; }
         public IFormFile? CoverPhoto { get; set; }
         public IFormFile? IconPhoto { get; set; }
+        public IFormFile? BannerPhoto { get; set; }
+        [Required]
+        public InformationsDto? Informations { get; set; }
+        [Required]
+        public RequirementsDto? Requirements { get; set; }
     }
 }

@@ -8,5 +8,7 @@ namespace GameAccessService_API.Entites
     {
         [Key]
         public int Id { get; set; }
+        [Required]
+        public Guid GameId { get; set; }
     }
 }

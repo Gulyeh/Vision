@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using OrderService_API.Dtos;
 using OrderService_API.Helpers;
 using OrderService_API.Messages;
@@ -16,9 +12,9 @@ namespace OrderService_API.Processors
     {
         private readonly IOrderRepository orderRepository;
         private readonly IRabbitMQSender? rabbitMQSender;
-        private readonly IProductsService? productsService;
+        private readonly IProductsService productsService;
 
-        public CurrencyOrder(IOrderRepository orderRepository, IRabbitMQSender? rabbitMQSender, IProductsService? productsService)
+        public CurrencyOrder(IOrderRepository orderRepository, IRabbitMQSender? rabbitMQSender, IProductsService productsService)
         {
             this.productsService = productsService;
             this.orderRepository = orderRepository;
@@ -27,7 +23,12 @@ namespace OrderService_API.Processors
 
         public async Task<PaymentMessage?> CreateOrder(CreateOrderData data)
         {
-            return await orderRepository.CreateOrder<CurrencyDto>(data);
+            var productList = await productsService.CheckProductExists<IEnumerable<CurrencyDto>>(data.ProductId, data.Access_Token, data.OrderType, data.GameId);
+            if (productList is null) return null;
+            var product = productList.FirstOrDefault(x => x.Id == data.ProductId);
+            if (product is null || !product.IsAvailable) return null;
+
+            return await orderRepository.CreateOrder<CurrencyDto>(data, product);
         }
 
         public OrderType GetOrderType()
@@ -37,10 +38,12 @@ namespace OrderService_API.Processors
 
         public async Task<bool> PaymentCompleted(PaymentCompleted data, OrderDto order)
         {
-            if(rabbitMQSender is null || productsService is null || string.IsNullOrEmpty(data.Access_Token)) return false;
+            if (rabbitMQSender is null) return false;
 
-            var product = await productsService.CheckProductExists<CurrencyDto>(order.ProductId, data.Access_Token, order.OrderType);
-            if(product is null) return false;
+            var productsList = await productsService.CheckProductExists<IEnumerable<CurrencyDto>>(order.ProductId, data.Access_Token, order.OrderType);
+            if (productsList is null) return false;
+            var product = productsList.FirstOrDefault(x => x.Id == order.ProductId);
+            if (product is null) return false;
 
             rabbitMQSender.SendMessage(new UpdateFunds() { userId = order.UserId, Amount = product.Amount, Email = data.Email, isCode = false }, "ChangeFundsQueue");
             return true;

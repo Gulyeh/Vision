@@ -4,12 +4,16 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:VisionClient.Views"
+             xmlns:Static="clr-namespace:VisionClient.Core;assembly=VisionClient.Core"
+             xmlns:Converter="clr-namespace:VisionClient.Converters"
              mc:Ignorable="d" 
              Background="#164971"
              xmlns:prism="http://prismlibrary.com/" 
              prism:ViewModelLocator.AutoWireViewModel="True"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
+        <Converter:StatusToColorConverter x:Key="StatusToColor"/>
+        <Static:StaticData x:Key="StaticData"/>
         <Style TargetType="Button">
             <Setter Property="BorderBrush" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -46,6 +50,7 @@
     <Grid>
         <ListView Background="Transparent"
                   VerticalAlignment="Top"
+                  Name="RequestList"
                       BorderThickness="0"
                       VirtualizingPanel.ScrollUnit="Pixel"
                       ScrollViewer.HorizontalScrollBarVisibility="Disabled" 
@@ -54,7 +59,7 @@
                       SelectionMode="Single"
                       Focusable="False"
                       ScrollViewer.CanContentScroll="False"
-                      ItemsSource="{Binding RequestsList}"
+                      ItemsSource="{Binding StaticData.FriendRequestsList}"
                       Margin="20,10,20,20">
             <ListView.ItemsPanel>
                 <ItemsPanelTemplate>
@@ -79,22 +84,32 @@
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <DockPanel VerticalAlignment="Center" HorizontalAlignment="Stretch">
-                        <Ellipse RenderOptions.BitmapScalingMode="HighQuality" 
-                                     Height="40" Width="40">
-                            <Ellipse.Fill>
-                                <ImageBrush Stretch="UniformToFill" ImageSource="{Binding User.PhotoUrl}"/>
-                            </Ellipse.Fill>
-                        </Ellipse>
-                        <TextBlock Text="{Binding User.UserName}" FontSize="12" Foreground="White"
-                                       VerticalAlignment="Center" Margin="5,0,0,0"/>
+                        <DockPanel HorizontalAlignment="Center" Height="40" Width="40">
+                            <Ellipse RenderOptions.BitmapScalingMode="HighQuality" 
+                                     Height="40" Width="40" 
+                                     Panel.ZIndex="0">
+                                <Ellipse.Fill>
+                                    <ImageBrush Stretch="UniformToFill" ImageSource="{Binding PhotoUrl, IsAsync=True}"/>
+                                </Ellipse.Fill>
+                            </Ellipse>
+                        </DockPanel>
+                        <DockPanel Margin="5,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Username}" TextTrimming="CharacterEllipsis"
+                                           Foreground="White" FontSize="15" 
+                                           TextAlignment="Left" DockPanel.Dock="Top"/>
+                            <TextBlock Text="{Binding Description}"
+                                           TextAlignment="Left"
+                                           TextTrimming="CharacterEllipsis"
+                                           Foreground="Gray" FontSize="10" VerticalAlignment="Top"/>
+                        </DockPanel>
                         <Button Content="Accept" 
                                 Margin="10,0,0,0"
-                                Command="{Binding AcceptRequestCommand}"
+                                Command="{Binding ElementName=RequestList, Path=DataContext.AcceptRequestCommand}"
                                 CommandParameter="{Binding}"
                                 DockPanel.Dock="Right"/>
                         <Button Content="Decline" 
                                 Background="DarkRed" 
-                                Command="{Binding DeclineRequestCommand}"
+                                Command="{Binding ElementName=RequestList, Path=DataContext.DeclineRequestCommand}"
                                 CommandParameter="{Binding}"
                                 HorizontalAlignment="Right"/>
                     </DockPanel>

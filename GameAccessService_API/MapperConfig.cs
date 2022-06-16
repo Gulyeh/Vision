@@ -9,6 +9,7 @@ namespace GameAccessService_API
         public MapperConfig()
         {
             CreateMap<UserAccess, UserAccessDto>().ReverseMap();
+            CreateMap<UserAccess, BanModelDto>();
         }
     }
 }

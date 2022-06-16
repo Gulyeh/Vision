@@ -18,14 +18,12 @@ namespace OrderService_API.Services
         public Task TryAddToCache(Guid userId, string connId)
         {
             List<string> value;
-            if (memoryCache.TryGetValue(userId, out value))
-            {
-                lock (value)
-                {
-                    value.Add(connId);
-                    SetCache(userId, value);
-                }
-            }
+            memoryCache.TryGetValue(userId, out value);
+            if (value is null) value = new();
+
+            value.Add(connId);
+            SetCache(userId, value);
+
             return Task.CompletedTask;
         }
 
@@ -33,21 +31,23 @@ namespace OrderService_API.Services
         {
             List<string> value;
             memoryCache.TryGetValue(userId, out value);
+            if (value is null) value = new();
+
             return Task.FromResult(value);
         }
 
         public Task TryRemoveFromCache(Guid userId, string connId)
         {
             List<string> value;
-            if (memoryCache.TryGetValue(userId, out value))
+            memoryCache.TryGetValue(userId, out value);
+
+            if (value.Count > 0)
             {
-                lock (value)
-                {
-                    value.Remove(connId);
-                    if (value.Count() == 0) memoryCache.Remove(userId);
-                    else SetCache(userId, value);
-                }
+                value.Remove(connId);
+                if (value.Count() == 0) memoryCache.Remove(userId);
+                else SetCache(userId, value);
             }
+
             return Task.CompletedTask;
         }
 

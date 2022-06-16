@@ -9,9 +9,13 @@ namespace GamesDataService_API.DbContexts
         {
             Games = Set<Games>();
             News = Set<News>();
+            Informations = Set<Informations>();
+            Requirements = Set<Requirements>();
         }
 
         public DbSet<Games> Games { get; set; }
         public DbSet<News> News { get; set; }
+        public DbSet<Informations> Informations { get; set; }
+        public DbSet<Requirements> Requirements { get; set; }
     }
 }

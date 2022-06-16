@@ -49,7 +49,6 @@ if (app.Environment.IsDevelopment())
 }
 app.UseMiddleware<ErrorHandler>();
 app.UseHttpsRedirection();
-app.UseSerilogRequestLogging();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

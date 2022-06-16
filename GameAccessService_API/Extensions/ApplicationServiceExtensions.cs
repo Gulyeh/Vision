@@ -1,6 +1,7 @@
 using GameAccessService_API.DbContexts;
 using GameAccessService_API.Helpers;
 using GameAccessService_API.Middleware;
+using GameAccessService_API.Processors;
 using GameAccessService_API.RabbitMQConsumer;
 using GameAccessService_API.RabbitMQSender;
 using GameAccessService_API.Repository;
@@ -28,6 +29,7 @@ namespace GameAccessService_API.Extensions
             services.AddHostedService<RabbitMQOrderConsumer>();
             services.AddHostedService<RabbitMQCouponConsumer>();
             services.AddSingleton<IRabbitMQSender, RabbitMQMessageSender>();
+            services.AddScoped<IAddProductProcessor, AddProductProcessor>();
             return services;
         }
     }

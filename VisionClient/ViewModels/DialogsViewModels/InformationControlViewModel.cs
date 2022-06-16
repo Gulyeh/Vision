@@ -1,11 +1,4 @@
 ﻿using Prism.Events;
-using Prism.Regions;
-using Prism.Services.Dialogs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VisionClient.Helpers;
 
 namespace VisionClient.ViewModels.DialogsViewModels
@@ -17,7 +10,8 @@ namespace VisionClient.ViewModels.DialogsViewModels
         {
         }
 
-        public override void Execute(object? data)
+
+        protected override void Execute(object? data)
         {
 
         }

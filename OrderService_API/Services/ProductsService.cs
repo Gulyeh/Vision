@@ -1,22 +1,24 @@
-using OrderService_API.Dtos;
 using OrderService_API.Helpers;
 using OrderService_API.Services.IServices;
-using OrderService_API.Statics;
 
 namespace OrderService_API.Services
 {
     public class ProductsService : BaseHttpService, IProductsService
     {
-        public ProductsService(IHttpClientFactory httpClientFactory, ILogger<BaseHttpService> logger) : base(httpClientFactory, logger)
+        private readonly string ProductServiceUrl;
+
+        public ProductsService(IHttpClientFactory httpClientFactory, ILogger<BaseHttpService> logger, IConfiguration config) : base(httpClientFactory, logger)
         {
+            ProductServiceUrl = config.GetValue<string>("ProductServiceUrl");
         }
 
         public async Task<T?> CheckProductExists<T>(Guid productId, string Access_Token, OrderType orderType, Guid? gameId = null)
         {
-            string url = orderType switch{
-                OrderType.Currency => $"{APIUrls.ProductServiceUrl}api/currency/productexists?currencyId={productId}",
-                OrderType.Game => $"{APIUrls.ProductServiceUrl}api/games/getgames?gameId={productId}",
-                OrderType.Product => $"{APIUrls.ProductServiceUrl}api/products/GetProductsInGame?productId={productId}&gameId={gameId}",
+            string url = orderType switch
+            {
+                OrderType.Currency => $"{ProductServiceUrl}api/currency/getpackages",
+                OrderType.Game => $"{ProductServiceUrl}api/games/GetProductGame?gameId={productId}",
+                OrderType.Product => $"{ProductServiceUrl}api/products/GetGameProducts?productId={productId}&gameId={gameId}",
                 _ => ""
             };
 
@@ -30,6 +32,6 @@ namespace OrderService_API.Services
             if (response is not null) return response;
             return default(T);
         }
-        
+
     }
 }

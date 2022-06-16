@@ -71,6 +71,12 @@
                    Grid.Row="1" 
                    Grid.RowSpan="2" 
                    Opacity="0.7"
+                   Panel.ZIndex="2"
+                   Visibility="{Binding ShadowVisibility, Mode=OneWay}"/>
+        <Border Background="Black" 
+                   Grid.Row="1" 
+                   Grid.RowSpan="2" 
+                   Opacity="0.7"
                    Panel.ZIndex="1"
                    Visibility="{Binding LoadingVisibility, Mode=OneWay}">
             <Image Source="pack://application:,,,/Images/VisionLogo.png" HorizontalAlignment="Center"
@@ -114,6 +120,7 @@
                 </Image.Style>
             </Image>
         </Border>
-        <ContentControl Focusable="False" Grid.Row="2" prism:RegionManager.RegionName="LoginContent"/>
+        <ContentControl Focusable="False" Grid.Row="2" 
+                        prism:RegionManager.RegionName="LoginContent"/>
     </Grid>
 </Window>

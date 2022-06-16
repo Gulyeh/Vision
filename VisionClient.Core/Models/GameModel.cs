@@ -4,17 +4,22 @@
     {
         public GameModel()
         {
-            Title = string.Empty;
+            Name = string.Empty;
             IconUrl = string.Empty;
-            PhotoUrl = string.Empty;
+            CoverUrl = string.Empty;
+            BannerUrl = string.Empty;
+            ClientVersion = string.Empty;
+            Requirements = new();
+            Informations = new();
         }
 
-        public int Id { get; set; }
-        public string Title { get; set; }
+        public Guid Id { get; set; }
+        public string Name { get; set; }
         public string IconUrl { get; set; }
-        public string PhotoUrl { get; set; }
-        public bool IsPurchased { get; set; }
-        public IEnumerable<NewsModel>? News { get; set; }
-        public IEnumerable<ProductsModel>? Products { get; set; }
+        public string CoverUrl { get; set; }
+        public string BannerUrl { get; set; }
+        public string ClientVersion { get; set; }
+        public RequirementsModel Requirements { get; set; }
+        public ProductInfoModel Informations { get; set; }
     }
 }

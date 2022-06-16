@@ -1,5 +1,6 @@
 using GamesDataService_API.Helpers;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace GamesDataService_API.Entities
 {
@@ -9,7 +10,7 @@ namespace GamesDataService_API.Entities
         {
             CoverId = string.Empty;
             IconId = string.Empty;
-            News = new List<News>();
+            BannerId = string.Empty;
         }
 
         [Key]
@@ -18,6 +19,14 @@ namespace GamesDataService_API.Entities
         public string IconId { get; set; }
         [Required]
         public string CoverId { get; set; }
-        public ICollection<News> News { get; set; }
+        [Required]
+        public string BannerId { get; set; }
+        public ICollection<News>? News { get; set; }
+        [Required]
+        [NotNull]
+        public Informations? Informations { get; set; }
+        [Required]
+        [NotNull]
+        public Requirements? Requirements { get; set; }
     }
 }

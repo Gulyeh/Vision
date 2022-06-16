@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Web;
 
 namespace PaymentService_API.Messages
 {
@@ -14,8 +11,14 @@ namespace PaymentService_API.Messages
 
         public bool isSuccess { get; set; }
         public Guid userId { get; set; }
+        public Guid PaymentId { get; set; }
         public string Email { get; set; }
-        public Guid OrderId {get; set; }
-        public string? Access_Token { get; set; }
+        public Guid OrderId { get; set; }
+        private string access_Token = string.Empty;
+        public string Access_Token
+        {
+            get => access_Token;
+            set => access_Token = $"Bearer {HttpUtility.UrlDecode(value)}";
+        }
     }
 }

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Identity_API.Controllers
 {
-    [Authorize(Policy = "HasAdminRole")]
+    [Authorize]
     public class AccessController : BaseControllerApi
     {
         private readonly IAccessRepository accessRepository;
@@ -17,6 +17,7 @@ namespace Identity_API.Controllers
         }
 
         [HttpPost("BanUser")]
+        [Authorize(Policy = "HasAdminRole")]
         public async Task<ActionResult<ResponseDto>> BanUserAccount([FromBody] BannedUsersDto data)
         {
             if (!ModelState.IsValid) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Wrong data" });
@@ -24,11 +25,20 @@ namespace Identity_API.Controllers
             return CheckActionResult(await accessRepository.BanUser(data));
         }
 
-        [HttpPost("UnbanUser")]
+        [HttpDelete("UnbanUser")]
+        [Authorize(Policy = "HasAdminRole")]
         public async Task<ActionResult<ResponseDto>> UnbanUserAccount([FromQuery] Guid userId)
         {
             if (userId == Guid.Empty) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Wrong data" });
             return CheckActionResult(await accessRepository.UnbanUser(userId));
+        }
+
+
+        [HttpGet("GetServerData")]
+        public async Task<ActionResult<ResponseDto>> GetServerData([FromQuery] Guid sessionToken)
+        {
+            var userId = HttpContext.User.GetId();
+            return CheckActionResult(await accessRepository.GetServerData(sessionToken, userId));
         }
     }
 }

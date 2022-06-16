@@ -19,5 +19,6 @@ namespace GamesDataService_API.Helpers
         public string Content { get; set; }
         [Required]
         public Guid GameId { get; set; }
+
     }
 }

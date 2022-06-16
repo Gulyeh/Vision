@@ -4,11 +4,15 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:VisionClient.Views"
+             xmlns:Static="clr-namespace:VisionClient.Core;assembly=VisionClient.Core"
              xmlns:prism="http://prismlibrary.com/"
+             xmlns:Converter="clr-namespace:VisionClient.Converters"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
+        <Converter:CountToVisibilityCovnerter x:Key="CountToVis"/>
+        <Static:StaticData x:Key="StaticData"/>
         <Style TargetType="RadioButton" BasedOn="{StaticResource {x:Type ToggleButton}}" x:Key="ToggleNavigation">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="White"/>
@@ -68,18 +72,28 @@
             </Button>
             <RadioButton Content="Search User" 
                          IsChecked="True"
+                         GroupName="SearchButtons"
                          Margin="10,0,0,0"
                          Style="{StaticResource ToggleNavigation}"
                          Command="{Binding SwitchPanelCommand}"
                          CommandParameter="SearchControl"/>
-            <RadioButton Content="Friend Requests" 
-                         Style="{StaticResource ToggleNavigation}"
-                         Command="{Binding SwitchPanelCommand}"
-                         CommandParameter="RequestsControl"/>
-            <RadioButton Content="Pending" 
+            <DockPanel HorizontalAlignment="Left">
+                <RadioButton Content="Friend Requests" 
+                             GroupName="SearchButtons"
+                             Style="{StaticResource ToggleNavigation}"
+                             Command="{Binding SwitchPanelCommand}"
+                             CommandParameter="RequestsControl"/>
+                <Ellipse Fill="Red" DockPanel.Dock="Top"
+                         Height="10" Width="10" Margin="0,-20,0,0"
+                         Visibility="{Binding StaticData.FriendRequestsList.Count, Converter={StaticResource CountToVis}}"/>
+            </DockPanel>
+            <DockPanel HorizontalAlignment="Left">
+                <RadioButton Content="Pending" 
+                             GroupName="SearchButtons"
                          Style="{StaticResource ToggleNavigation}"
                          Command="{Binding SwitchPanelCommand}"
                          CommandParameter="PendingControl"/>
+            </DockPanel>
         </DockPanel>
 
         <ContentControl prism:RegionManager.RegionName="SearchUserContent" Grid.Row="1"/>

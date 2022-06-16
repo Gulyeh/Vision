@@ -1,10 +1,17 @@
-using System.ComponentModel.DataAnnotations;
 using OrderService_API.Helpers;
+using System.ComponentModel.DataAnnotations;
 
 namespace OrderService_API.Dtos
 {
     public class OrderDto
     {
+        public OrderDto()
+        {
+            Title = string.Empty;
+        }
+
+        [Required]
+        public Guid Id { get; set; }
         [Required]
         public Guid ProductId { get; set; }
         [Required]
@@ -13,11 +20,14 @@ namespace OrderService_API.Dtos
         public Guid UserId { get; set; }
         public Guid? PaymentId { get; set; }
         [Required]
-        public bool Paid { get; set; } = false;
+        public bool Paid { get; set; }
         [Required]
-        public DateTime OrderDate { get; set; } = DateTime.UtcNow;
+        public DateTime OrderDate { get; set; }
+        [Required]
+        public string Title { get; set; }
         public DateTime? PaymentDate { get; set; }
         public string? CuponCode { get; set; }
         public Guid? GameId { get; set; }
+
     }
 }

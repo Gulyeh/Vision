@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using System.Text.RegularExpressions;
 
 namespace VisionClient.Extensions
 {
@@ -18,6 +13,11 @@ namespace VisionClient.Extensions
         {
             Regex regex = new Regex(@"^.{8,15}$");
             return regex.IsMatch(data);
+        }
+        internal static bool PasswordMatch(this string data, string RepeatPassword)
+        {
+            if (data.Equals(RepeatPassword)) return true;
+            return false;
         }
     }
 }

@@ -22,7 +22,8 @@ namespace SMTPService_API.Repository
         public async Task InitializeEmail(EmailDataDto data)
         {
             var sent = await emailSerivce.SendEmail(data);
-            if(sent == true){
+            if (sent == true)
+            {
                 EmailLogs logs = new EmailLogs()
                 {
                     Email = data.ReceiverEmail,
@@ -31,7 +32,7 @@ namespace SMTPService_API.Repository
 
                 await db.EmailLogs.AddAsync(logs);
                 await db.SaveChangesAsync();
-                logger.LogInformation("Sent message to User with ID: {Id} and Email: {email}", data.userId, data.ReceiverEmail); 
+                logger.LogInformation("Sent message to User with ID: {Id} and Email: {email}", data.UserId, data.ReceiverEmail);
             }
         }
     }

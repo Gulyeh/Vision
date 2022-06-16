@@ -1,7 +1,6 @@
 using GameAccessService_API.DbContexts;
 using GameAccessService_API.Helpers;
 using GameAccessService_API.Services.IServices;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using System.Data;
 
@@ -21,25 +20,25 @@ namespace GameAccessService_API.Services
         public Task TryAddToCache<T>(CacheType type, T data) where T : BaseUser
         {
             List<T> value;
-            if (memoryCache.TryGetValue(type, out value))
-            {
-                lock (value)
-                {
-                    value.Add(data);
-                    SetCache<T>(type, value);
-                }
-            }
+            memoryCache.TryGetValue(type, out value);
+            if (value is null) value = new List<T>();
+
+            value.Add(data);
+            SetCache<T>(type, value);
+
             return Task.CompletedTask;
         }
 
         public Task<IEnumerable<T>> TryGetFromCache<T>(CacheType type, Guid userId) where T : BaseUser
         {
             IEnumerable<T> value;
-            if (!memoryCache.TryGetValue(type, out value))
-            {     
-                value = db.Set<T>();
+            memoryCache.TryGetValue(type, out value);
+            if (value is null)
+            {
+                value = db.Set<T>().ToList();
                 SetCache<T>(type, value);
             }
+
             value = value.Where(x => x.UserId == userId).ToList();
             return Task.FromResult(value);
         }
@@ -49,11 +48,8 @@ namespace GameAccessService_API.Services
             List<T> value;
             if (memoryCache.TryGetValue(type, out value))
             {
-                lock (value)
-                {
-                    value.Remove(data);
-                    SetCache<T>(type, value);
-                }
+                value.Remove(data);
+                SetCache<T>(type, value);
             }
             return Task.CompletedTask;
         }

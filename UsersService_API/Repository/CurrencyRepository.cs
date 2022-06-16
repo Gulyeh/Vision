@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using UsersService_API.DbContexts;
 using UsersService_API.Messages;
@@ -23,14 +19,15 @@ namespace UsersService_API.Repository
         public async Task<bool> ChangeFunds(CurrencyDto data)
         {
             var user = await db.Users.FirstOrDefaultAsync(x => x.UserId == data.UserId);
-            if(user is null) return false;
+            if (user is null) return false;
             user.CurrencyValue += data.Amount;
-            if(await db.SaveChangesAsync() > 0) {
+            if (await db.SaveChangesAsync() > 0)
+            {
                 logger.LogInformation("Increased currency for User with ID: {userId} by {amount}", data.UserId, data.Amount);
                 return true;
             }
             logger.LogError("Could not increase currency for User with ID: {userId}", data.UserId);
-            return false; 
+            return false;
         }
     }
 }

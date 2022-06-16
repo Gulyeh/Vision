@@ -4,10 +4,6 @@ using Prism.Mvvm;
 using Prism.Regions;
 using Prism.Services.Dialogs;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VisionClient.Core.Repository.IRepository;
 using VisionClient.Extensions;
 using VisionClient.Helpers;
@@ -37,29 +33,29 @@ namespace VisionClient.ViewModels
             set { SetProperty(ref repeatPassword, value); }
         }
 
-        private string? email_errorText;
-        public string? Email_ErrorText
+        private string email_errorText = string.Empty;
+        public string Email_ErrorText
         {
             get { return email_errorText; }
             set { SetProperty(ref email_errorText, value); }
         }
 
-        private string? password_errorText;
-        public string? Password_ErrorText
+        private string password_errorText = string.Empty;
+        public string Password_ErrorText
         {
             get { return password_errorText; }
             set { SetProperty(ref password_errorText, value); }
         }
 
-        private string? repeatPassword_errorText;
-        public string? RepeatPassword_ErrorText
+        private string repeatPassword_errorText = string.Empty;
+        public string RepeatPassword_ErrorText
         {
             get { return repeatPassword_errorText; }
             set { SetProperty(ref repeatPassword_errorText, value); }
         }
 
-        private string? errorText;
-        public string? ErrorText
+        private string errorText = string.Empty;
+        public string ErrorText
         {
             get { return errorText; }
             set { SetProperty(ref errorText, value); }
@@ -70,8 +66,9 @@ namespace VisionClient.ViewModels
         private readonly IDialogService dialogService;
         private readonly IEventAggregator eventAggregator;
 
-        public DelegateCommand GoBackwardCommand { get; set; }
-        public DelegateCommand RegisterCommand { get; set; }
+        public DelegateCommand GoBackwardCommand { get; }
+        public DelegateCommand RegisterCommand { get; }
+        public DelegateCommand ResendEmailCommand { get; }
         public RegisterControlViewModel(IRegionManager regionManager, IAccountRepository accountRepository,
             IDialogService dialogService, IEventAggregator eventAggregator)
         {
@@ -81,14 +78,14 @@ namespace VisionClient.ViewModels
             this.eventAggregator = eventAggregator;
             GoBackwardCommand = new DelegateCommand(GoBackward);
             RegisterCommand = new DelegateCommand(RegisterExecute);
+            ResendEmailCommand = new DelegateCommand(ResendEmail);
         }
+
+        private void ResendEmail() => dialogService.ShowDialog("ResendEmailControl");
 
         private bool Validators()
         {
-            Email_ErrorText = string.Empty;
-            Password_ErrorText = string.Empty;
-            RepeatPassword_ErrorText = string.Empty;
-            ErrorText = string.Empty;
+            ResetErrors();
 
             if (!Email.ValidateEmailAddress())
             {
@@ -100,9 +97,9 @@ namespace VisionClient.ViewModels
                 Password_ErrorText = "Password requires minimum of 8 and maximum of 15 characters";
             }
 
-            if(Password != RepeatPassword)
+            if (!Password.PasswordMatch(RepeatPassword))
             {
-                RepeatPassword_ErrorText = "Passwords do not match";
+                RepeatPassword_ErrorText = "Password does not match";
             }
 
             return string.IsNullOrEmpty(Password_ErrorText) && string.IsNullOrEmpty(Email_ErrorText) && string.IsNullOrEmpty(RepeatPassword_ErrorText);
@@ -119,7 +116,7 @@ namespace VisionClient.ViewModels
                 (bool IsSuccess, string? response) = await accountRepository.RegisterUser(Email, Password, RepeatPassword);
                 if (!IsSuccess)
                 {
-                    ErrorText = response;
+                    ErrorText = string.IsNullOrEmpty(response) ? string.Empty : response;
                     loginVis.IsLoadingVisible(false);
                     return;
                 }
@@ -140,15 +137,20 @@ namespace VisionClient.ViewModels
             }
         }
 
+        private void ResetErrors()
+        {
+            Email_ErrorText = string.Empty;
+            Password_ErrorText = string.Empty;
+            RepeatPassword_ErrorText = string.Empty;
+            ErrorText = string.Empty;
+        }
+
         private void ResetVariables()
         {
             Email = string.Empty;
             Password = string.Empty;
             RepeatPassword = string.Empty;
-            ErrorText = string.Empty;
-            Email_ErrorText = string.Empty;
-            Password_ErrorText = string.Empty;
-            RepeatPassword_ErrorText = string.Empty;
+            ResetErrors();
         }
 
         private void GoBackward()

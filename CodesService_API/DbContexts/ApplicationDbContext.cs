@@ -11,6 +11,12 @@ namespace CodesService_API.DbContexts
             CodesUsed = Set<CodesUsed>();
         }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<Codes>().HasIndex(x => x.Code).IsUnique();
+        }
+
         public DbSet<Codes> Codes { get; set; }
         public DbSet<CodesUsed> CodesUsed { get; set; }
     }

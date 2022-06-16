@@ -6,12 +6,17 @@ namespace CodesService_API.Helpers
         {
             Data = new();
             ApiUrl = string.Empty;
-            Access_Token = string.Empty;
+            access_token = string.Empty;
         }
 
         public APIType apiType { get; set; }
         public object Data { get; set; }
         public string ApiUrl { get; set; }
-        public string Access_Token { get; set; }
+        private string access_token;
+        public string Access_Token
+        {
+            get => access_token;
+            set => access_token = value.Replace("Bearer ", "");
+        }
     }
 }

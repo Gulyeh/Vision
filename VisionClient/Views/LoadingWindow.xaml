@@ -15,7 +15,30 @@
         Background="#143a58"
         WindowStartupLocation="CenterScreen"
         BorderThickness="4" BorderBrush="#0f3452">
-    
+    <Window.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border" 
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Background="{TemplateBinding Background}">
+                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Opacity" Value="0.8"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
     <Grid>
         <DockPanel HorizontalAlignment="Center" VerticalAlignment="Center">
             <Image Source="pack://application:,,,/Images/VisionLogo.png" HorizontalAlignment="Center"
@@ -40,7 +63,7 @@
                                                      RepeatBehavior="Forever">
                                                 <DoubleAnimation.EasingFunction>
                                                     <ExponentialEase EasingMode="EaseOut" Exponent="5"/>
-                                                </DoubleAnimation.EasingFunction>
+                                                </DoubleAnimation.EasingFunction> 
                                             </DoubleAnimation>
                                             <DoubleAnimation Duration="0:0:2" BeginTime="0:0:1"
                                                      Storyboard.TargetProperty="Opacity"
@@ -58,12 +81,15 @@
                     </Style>
                 </Image.Style>
             </Image>
-            <TextBlock Text="Loading Interface..." 
+            <TextBlock Text="{Binding ProgressText}" 
                        HorizontalAlignment="Center"
+                       TextWrapping="Wrap"
+                       TextAlignment="Center"
                        FontSize="15" Foreground="Gray"
                        Margin="0,50,0,10" DockPanel.Dock="Top"/>
             <ProgressBar Width="200" Height="4" BorderThickness="0" 
                          Maximum="100" Minimum="0"
+                         VerticalAlignment="Top"
                          Foreground="#0AA1DD" Value="{Binding LoadingValue}">
                 <ProgressBar.Triggers>
                     <EventTrigger RoutedEvent="ProgressBar.ValueChanged">
@@ -84,5 +110,25 @@
                 </ProgressBar.Triggers>
             </ProgressBar>
         </DockPanel>
+        <StackPanel HorizontalAlignment="Center" 
+                    VerticalAlignment="Bottom"
+                    Margin="0,0,0,40"
+                    Orientation="Horizontal">
+            <Button Width="100" Height="35" 
+                    Content="Retry"
+                    FontSize="15" Background="#0AA1DD"
+                    BorderThickness="1" BorderBrush="#0f3452" 
+                    Foreground="White"
+                    Margin="0,0,20,0"
+                    Visibility="{Binding RetryButtonVisibility}"
+                    Command="{Binding RetryCommand}"/>
+            <Button Width="100" Height="35" 
+                    Content="Exit"
+                    FontSize="15" Background="DarkRed"
+                    BorderThickness="1" BorderBrush="#0f3452" 
+                    Foreground="White"
+                    Visibility="{Binding RetryButtonVisibility}"
+                    Command="{Binding ExitCommand}"/>
+        </StackPanel>
     </Grid>
 </Window>

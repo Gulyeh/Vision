@@ -36,7 +36,7 @@ namespace MessageService_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Chats");
+                    b.ToTable("Chats", (string)null);
                 });
 
             modelBuilder.Entity("MessageService_API.Entites.Message", b =>
@@ -76,7 +76,7 @@ namespace MessageService_API.Migrations
 
                     b.HasIndex("ChatId");
 
-                    b.ToTable("Messages");
+                    b.ToTable("Messages", (string)null);
                 });
 
             modelBuilder.Entity("MessageService_API.Entites.MessageAttachment", b =>
@@ -100,7 +100,7 @@ namespace MessageService_API.Migrations
 
                     b.HasIndex("MessageId");
 
-                    b.ToTable("MessagesAttachments");
+                    b.ToTable("MessagesAttachments", (string)null);
                 });
 
             modelBuilder.Entity("MessageService_API.Entites.Message", b =>

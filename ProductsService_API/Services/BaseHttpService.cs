@@ -1,7 +1,6 @@
 using Newtonsoft.Json;
 using ProdcutsService_API.Helpers;
 using ProductsService_API.Helpers;
-using ProductsService_API.Services.IServices;
 using System.Net.Http.Headers;
 using System.Text;
 
@@ -17,7 +16,7 @@ namespace ProductsService_API.Services
             this.httpClientFactory = httpClientFactory;
             this.logger = logger;
         }
-        
+
         public async Task<T?> SendAsync<T>(ApiRequest apiRequest)
         {
             var client = httpClientFactory.CreateClient("MessageService_API");
@@ -27,7 +26,7 @@ namespace ProductsService_API.Services
             client.DefaultRequestHeaders.Clear();
 
             if (apiRequest.Data is not null) request.Content = new StringContent(JsonConvert.SerializeObject(apiRequest.Data), Encoding.UTF8, "application/json");
-            if (!string.IsNullOrEmpty(apiRequest.Access_Token)) client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiRequest.Access_Token);
+            if (!string.IsNullOrEmpty(apiRequest.Access_Token)) client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiRequest.Access_Token.Replace("Bearer ", ""));
 
             HttpResponseMessage apiResponse;
             request.Method = apiRequest.apiType switch

@@ -1,6 +1,7 @@
 using Identity_API.DbContexts;
 using Identity_API.Helpers;
 using Identity_API.Middleware;
+using Identity_API.Processors;
 using Identity_API.RabbitMQSender;
 using Identity_API.Repository;
 using Identity_API.Repository.IRepository;
@@ -18,13 +19,16 @@ namespace Identity_API.Extensions
             {
                 opt.UseSqlServer(config.GetConnectionString("Connection"));
             });
+            services.AddMemoryCache();
             services.Configure<RabbitMQSettings>(config.GetSection("RabbitMQSettings"));
+            services.Configure<ServersData>(config.GetSection("ServersData"));
             services.AddScoped<IRabbitMQSender, RabbitMQMessageSender>();
             services.AddScoped<IAccountRepository, AccountRepository>();
             services.AddScoped<IAccessRepository, AccessRepository>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<ErrorHandler>();
+            services.AddScoped<IEmailProcessor, EmailProcessor>();
             return services;
         }
     }

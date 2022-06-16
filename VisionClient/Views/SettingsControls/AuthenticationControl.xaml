@@ -73,11 +73,17 @@
                         Margin="50,20,20,0">
                 <TextBlock Text="Two-Factor Authentication" FontSize="20" Foreground="White" Margin="0,0,0,10"/>
                 <Separator Margin="0,0,0,20" Height="0.9"/>
-                <Border Width="600" Height="250" CornerRadius="2"
+                <TextBlock Text="Scan QR code in Authenticator app or type phrase provided to enable or type authentication code to disable 2FA " FontSize="12" Foreground="White" Margin="0,0,0,10"/>
+                <Border Width="700" Height="250" CornerRadius="2"
                         HorizontalAlignment="Left"
                         Background="#0f3452">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <Image Source="https://pl.online-qrcode-generator.com/QR-Code/qrcode-generator.png" Height="150"/>
+                        <StackPanel Orientation="Vertical" 
+                                    VerticalAlignment="Center" 
+                                    Margin="0,0,0,20">
+                            <TextBlock Text="{Binding TokenCode}" Padding="5,2,5,2" HorizontalAlignment="Center" FontSize="12" Foreground="White" Margin="0,0,0,10"/>
+                            <Image Source="{Binding QRCodeImage, IsAsync=True}" Height="150"/>
+                        </StackPanel>
                         <StackPanel Orientation="Vertical" 
                                     Margin="10,0,0,0"
                                     VerticalAlignment="Center">
@@ -86,10 +92,11 @@
                                    DockPanel.Dock="Top"
                                    Margin="0,0,0,5"/>
                             <TextBox Text="{Binding SecurityCode, Mode=TwoWay}"/>
+                            <TextBlock Text="{Binding CodeError}" FontSize="10" Foreground="Red"/>
                             <Button Content="Save"
-                                    Margin="0,30,0,0"
+                                    Margin="0,15,0,0"
                                     Style="{StaticResource ButtonTemplate}"
-                                    Command="{Binding EnableAuthCommand}"
+                                    Command="{Binding ToggleAuthCommand}"
                                     FontSize="15"
                                     Width="150"
                                     Height="40"/>
@@ -104,7 +111,7 @@
                                     Style="{StaticResource AppButton}"
                                     Command="{Binding GetAppCommand}"
                                     CommandParameter="Google">
-                                <Image Source="https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Google_Play_Store_badge_EN.svg/640px-Google_Play_Store_badge_EN.svg.png"
+                                <Image Source="pack://application:,,,/Images/GooglePlay.png"
                                        Height="40"/>
                             </Button>
                             <Button VerticalAlignment="Center"
@@ -113,12 +120,16 @@
                                     Style="{StaticResource AppButton}"
                                     Command="{Binding GetAppCommand}"
                                     CommandParameter="Apple">
-                                <Image Source="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Download_on_the_App_Store_Badge.svg/2560px-Download_on_the_App_Store_Badge.svg.png"
-                                       Height="40"/>
+                                <Image Source="pack://application:,,,/Images/AppleStore.png"
+                                       Height="45"/>
                             </Button>
                         </StackPanel>
                     </StackPanel>
                 </Border>
+                <TextBlock Text="{Binding ErrorText}" 
+                           FontSize="12"
+                           Foreground="Red" 
+                           Margin="0,10,0,0" HorizontalAlignment="Left"/>
             </StackPanel>
         </ScrollViewer>
     </Grid>

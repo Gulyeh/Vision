@@ -1,19 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using VisionClient.Core.Helpers;
 
 namespace VisionClient.Core.Models
 {
-    public class SearchModel
+    public class SearchModel : NotifyPropertyChanged
     {
         public SearchModel()
         {
             User = new();
         }
 
-        public UserModel User { get; set; }
-        public bool IsFriend { get; set; }
+        public BaseUserModel User { get; set; }
+
+        private bool isRequestable = true;
+        public bool IsRequestable
+        {
+            get => isRequestable;
+            set
+            {
+                isRequestable = value;
+                OnPropertyChanged();
+            }
+        }
     }
 }

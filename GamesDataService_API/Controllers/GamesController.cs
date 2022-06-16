@@ -29,7 +29,7 @@ namespace GamesDataService_API.Controllers
         }
 
         [Authorize(Roles = StaticData.AdminRole)]
-        [HttpPost("EditGame")]
+        [HttpPut("EditGame")]
         public async Task<ActionResult<ResponseDto>> EditGame([FromBody] GamesDto data)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);

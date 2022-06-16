@@ -56,11 +56,11 @@ namespace UsersService_API.RabbitMQConsumer
 
         private async Task HandleMessage(Message? data)
         {
-            if(data is not null)
+            if (data is not null)
             {
                 Guid Id;
                 Guid.TryParse(data.userId, out Id);
-                if (Id != Guid.Empty) 
+                if (Id != Guid.Empty)
                 {
                     using var scope = serviceScopeFactory.CreateScope();
                     var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();

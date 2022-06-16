@@ -28,6 +28,14 @@ namespace GamesDataService_API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("BannerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BannerUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ClientVersion")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -57,6 +65,43 @@ namespace GamesDataService_API.Migrations
                     b.ToTable("Games");
                 });
 
+            modelBuilder.Entity("GamesDataService_API.Entities.Informations", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Developer")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("GameId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Genre")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Publisher")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GameId")
+                        .IsUnique();
+
+                    b.ToTable("Informations");
+                });
+
             modelBuilder.Entity("GamesDataService_API.Entities.News", b =>
                 {
                     b.Property<Guid>("Id")
@@ -66,6 +111,9 @@ namespace GamesDataService_API.Migrations
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<Guid>("GameId")
                         .HasColumnType("uniqueidentifier");
@@ -89,6 +137,74 @@ namespace GamesDataService_API.Migrations
                     b.ToTable("News");
                 });
 
+            modelBuilder.Entity("GamesDataService_API.Entities.Requirements", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("GameId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("MinimumCPU")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MinimumGPU")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MinimumMemory")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MinimumOS")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MinimumStorage")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RecommendedCPU")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RecommendedGPU")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RecommendedMemory")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RecommendedOS")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RecommendedStorage")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GameId")
+                        .IsUnique();
+
+                    b.ToTable("Requirements");
+                });
+
+            modelBuilder.Entity("GamesDataService_API.Entities.Informations", b =>
+                {
+                    b.HasOne("GamesDataService_API.Entities.Games", "Game")
+                        .WithOne("Informations")
+                        .HasForeignKey("GamesDataService_API.Entities.Informations", "GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Game");
+                });
+
             modelBuilder.Entity("GamesDataService_API.Entities.News", b =>
                 {
                     b.HasOne("GamesDataService_API.Entities.Games", "Game")
@@ -100,9 +216,26 @@ namespace GamesDataService_API.Migrations
                     b.Navigation("Game");
                 });
 
+            modelBuilder.Entity("GamesDataService_API.Entities.Requirements", b =>
+                {
+                    b.HasOne("GamesDataService_API.Entities.Games", "Game")
+                        .WithOne("Requirements")
+                        .HasForeignKey("GamesDataService_API.Entities.Requirements", "GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Game");
+                });
+
             modelBuilder.Entity("GamesDataService_API.Entities.Games", b =>
                 {
+                    b.Navigation("Informations")
+                        .IsRequired();
+
                     b.Navigation("News");
+
+                    b.Navigation("Requirements")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

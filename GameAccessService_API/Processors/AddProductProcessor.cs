@@ -1,14 +1,15 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using GameAccessService_API.DbContexts;
 using GameAccessService_API.Processors.Interfaces;
 using GameAccessService_API.Services.IServices;
 
 namespace GameAccessService_API.Processors
 {
-    public class AddProductProcessor
+    public interface IAddProductProcessor
+    {
+        IProduct GenerateProduct(Guid gameId);
+    }
+
+    public class AddProductProcessor : IAddProductProcessor
     {
         private readonly ICacheService cacheService;
         private readonly ApplicationDbContext db;
@@ -18,12 +19,11 @@ namespace GameAccessService_API.Processors
             this.cacheService = cacheService;
             this.db = db;
         }
-    
-        public IProduct GenerateProduct(Guid? productId){
-            return productId switch{
-                null => new UserGamesData(cacheService, db),
-                _ => new UserProductData(cacheService, db)
-            };
+
+        public IProduct GenerateProduct(Guid gameId)
+        {
+            if (gameId == Guid.Empty) return new UserGamesData(cacheService, db);
+            return new UserProductData(cacheService, db);
         }
     }
 }

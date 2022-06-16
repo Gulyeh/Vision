@@ -1,12 +1,11 @@
-﻿using Prism.Events;
+﻿using Prism.Commands;
+using Prism.Events;
 using Prism.Services.Dialogs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows;
+using VisionClient.Core.Helpers;
 using VisionClient.Core.Models;
 using VisionClient.Helpers;
+using VisionClient.Utility;
 
 namespace VisionClient.ViewModels.DialogsViewModels
 {
@@ -18,9 +17,31 @@ namespace VisionClient.ViewModels.DialogsViewModels
             get { return attachment; }
             set { SetProperty(ref attachment, value); }
         }
-
+        public DelegateCommand<string> ImageMenuCommand { get; }
         public ImagePreviewControlViewModel(IEventAggregator eventAggregator) : base(eventAggregator)
         {
+            ImageMenuCommand = new DelegateCommand<string>(ImageMenu);
+        }
+
+        private async void ImageMenu(string data)
+        {
+            switch (data)
+            {
+                case "CopyUrl":
+                    Clipboard.SetText(Attachment.AttachmentUrl);
+                    break;
+                case "OpenUrl":
+                    OpenBrowserHelper.OpenUrl(Attachment.AttachmentUrl);
+                    break;
+                case "SaveImage":
+                    await FileDialogHelper.SaveFile(Attachment.AttachmentUrl, false);
+                    break;
+                case "CopyImage":
+                    await FileDialogHelper.SaveFile(Attachment.AttachmentUrl, true);
+                    break;
+                default:
+                    break;
+            }
         }
 
         public override void OnDialogOpened(IDialogParameters parameters)
@@ -29,9 +50,9 @@ namespace VisionClient.ViewModels.DialogsViewModels
             Attachment = parameters.GetValue<AttachmentModel>("attachment");
         }
 
-        public override void Execute(object? data)
+        protected override void Execute(object? data)
         {
-        
+
         }
     }
 }

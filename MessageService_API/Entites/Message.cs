@@ -8,6 +8,7 @@ namespace MessageService_API.Entites
         public Message()
         {
             Chat = new Chat();
+            Attachments = new List<MessageAttachment>();
         }
 
         [Key]
@@ -19,7 +20,7 @@ namespace MessageService_API.Entites
         public string? Content { get; set; }
         public DateTime? DateRead { get; set; }
         [Required]
-        public DateTime MessageSent { get; set; } = DateTime.UtcNow;
+        public DateTime MessageSent { get; set; } = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
         [Required]
         public bool SenderDeleted { get; set; }
         [Required]
@@ -30,6 +31,6 @@ namespace MessageService_API.Entites
         public Guid ChatId { get; set; }
         [ForeignKey("ChatId")]
         public Chat Chat { get; set; }
-        public ICollection<MessageAttachment>? Attachments { get; set; }
+        public ICollection<MessageAttachment> Attachments { get; set; }
     }
 }

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace VisionClient.Core.Models
+﻿namespace VisionClient.Core.Models
 {
     public class ProductInfoModel
     {
@@ -14,11 +8,13 @@ namespace VisionClient.Core.Models
             Developer = string.Empty;
             Publisher = string.Empty;
             Language = string.Empty;
+            Description = string.Empty;
         }
 
         public string Genre { get; set; }
         public string Developer { get; set; }
         public string Publisher { get; set; }
         public string Language { get; set; }
+        public string Description { get; set; }
     }
 }

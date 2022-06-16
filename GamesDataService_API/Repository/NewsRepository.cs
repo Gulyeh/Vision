@@ -19,7 +19,7 @@ namespace GamesDataService_API.Repository
         private readonly IMapper mapper;
         private readonly IMemoryCache memoryCache;
 
-        public NewsRepository(IUploadService uploadService, ILogger<NewsRepository> logger, ICacheService cacheService, 
+        public NewsRepository(IUploadService uploadService, ILogger<NewsRepository> logger, ICacheService cacheService,
             ApplicationDbContext db, IMapper mapper, IMemoryCache memoryCache)
         {
             this.uploadService = uploadService;
@@ -42,7 +42,7 @@ namespace GamesDataService_API.Repository
             mapped.PhotoId = results.PublicId;
             mapped.PhotoUrl = results.SecureUrl.AbsoluteUri;
 
-            game.News.Add(mapped);
+            game.News?.Add(mapped);
             if (await db.SaveChangesAsync() > 0)
             {
                 await cacheService.TryAddToCache<News>(CacheType.News, mapped);
@@ -60,10 +60,10 @@ namespace GamesDataService_API.Repository
             var game = await db.Games.Include(x => x.News).FirstOrDefaultAsync(x => x.Id == gameId);
             if (game is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game does not exist" });
 
-            var news = game.News.FirstOrDefault(x => x.Id == newsId);
+            var news = game.News?.FirstOrDefault(x => x.Id == newsId);
             if (news is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "News does not exist" });
 
-            game.News.Remove(news);
+            game.News?.Remove(news);
             if (await db.SaveChangesAsync() > 0)
             {
                 await cacheService.TryRemoveFromCache<News>(CacheType.News, news);
@@ -83,7 +83,7 @@ namespace GamesDataService_API.Repository
             var game = await db.Games.Include(x => x.News).FirstOrDefaultAsync(x => x.Id == data.GameId);
             if (game is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game does not exist" });
 
-            var news = game.News.FirstOrDefault(x => x.Id == data.Id);
+            var news = game.News?.FirstOrDefault(x => x.Id == data.Id);
             if (news is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "News does not exist" });
 
             if (data.Photo is not null)
@@ -113,7 +113,13 @@ namespace GamesDataService_API.Repository
         public async Task<ResponseDto> GetGameNews(Guid gameId)
         {
             IEnumerable<News> news = await cacheService.TryGetFromCache<News>(CacheType.News);
-            IEnumerable<News> gameNews = news.Where(x => x.GameId == gameId).OrderByDescending(x => x.Id).Take(5);
+            if (news.Count() == 0)
+            {
+                var dbNews = await db.News.ToListAsync();
+                foreach (var item in dbNews) await cacheService.TryAddToCache<News>(CacheType.News, item);
+                news = dbNews;
+            }
+            IEnumerable<News> gameNews = news.Where(x => x.GameId == gameId).OrderByDescending(x => x.Id).Take(10);
 
             return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<NewsDto>>(gameNews));
         }

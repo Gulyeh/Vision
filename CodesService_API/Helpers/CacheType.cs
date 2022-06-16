@@ -2,6 +2,7 @@ namespace CodesService_API.Helpers
 {
     public enum CacheType
     {
-        Codes
+        Codes,
+        CodesUsed
     }
 }

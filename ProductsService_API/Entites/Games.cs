@@ -5,10 +5,18 @@ namespace ProductsService_API.Entites
 {
     public class Games : BaseProducts
     {
-        [Key]
-        public Guid Id { get; set; }
+        public Games()
+        {
+            PhotoId = string.Empty;
+            PhotoUrl = string.Empty;
+        }
+
         [Required]
         public Guid GameId { get; set; }
-        public ICollection<Products>? GameProducts { get; set; }
+        [Required]
+        public string PhotoUrl { get; set; }
+        [Required]
+        public string PhotoId { get; set; }
+        public ICollection<Products>? Products { get; set; }
     }
 }

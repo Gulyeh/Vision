@@ -45,6 +45,26 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style TargetType="Button" x:Key="RegisterButton">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Name="Border">
+                            <ContentPresenter VerticalAlignment="Center"
+                                          HorizontalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -94,6 +114,11 @@
                        FontSize="10" Foreground="Red"
                        HorizontalAlignment="Center" 
                        VerticalAlignment="Top"/>
+            <Button Background="Transparent" BorderThickness="0" 
+                    Content="Resend email confirmation" Margin="0,15,0,0"
+                    Foreground="gray" FontSize="9" 
+                    Command="{Binding ResendEmailCommand}"
+                    Style="{StaticResource RegisterButton}"/>
         </DockPanel>
         <DockPanel Grid.Row="2" VerticalAlignment="Center" 
                    HorizontalAlignment="Center">

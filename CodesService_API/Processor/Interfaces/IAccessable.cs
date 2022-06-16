@@ -1,13 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using CodesService_API.Services.IServices;
-
 namespace CodesService_API.Processor.Interfaces
 {
-    public interface IAccessable : IResponder
+    public interface IAccessable
     {
-        Task<bool> CheckAccess(string? gameId, string Access_Token, string? productId = null);
+        Task<bool> CheckAccess(Guid? gameId, string Access_Token, string productId);
     }
 }

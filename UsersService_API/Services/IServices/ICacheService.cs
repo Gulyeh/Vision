@@ -6,6 +6,6 @@ namespace UsersService_API.Services.IServices
     {
         Task<bool> TryAddToCache(OnlineUsersData data);
         Task<bool> TryRemoveFromCache(OnlineUsersData data);
-        Task<Dictionary<Guid, List<string>>> TryGetFromCache();
+        Task<Dictionary<Guid, List<string>>> TryGetFromCache(HubTypes hubType);
     }
 }

@@ -2,36 +2,32 @@
 using Prism.Events;
 using Prism.Mvvm;
 using Prism.Regions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VisionClient.Core.Events;
+using VisionClient.Core.Helpers.Aggregators;
 using VisionClient.Core.Models;
 
 namespace VisionClient.ViewModels
 {
     internal class HomeDetailsControlViewModel : BindableBase
     {
-        private HomeModel gameDetails = new();
-        public HomeModel GameDetails
+        private GameModel gameDetails = new();
+        public GameModel GameDetails
         {
             get { return gameDetails; }
             set { SetProperty(ref gameDetails, value); }
         }
 
         private readonly IRegionManager regionManager;
-        public DelegateCommand GoHomeCommand { get; set; }
+        public DelegateCommand GoHomeCommand { get; }
 
         public HomeDetailsControlViewModel(IEventAggregator eventAggregator, IRegionManager regionManager)
         {
-            eventAggregator.GetEvent<SendEvent<HomeModel>>().Subscribe(x => GameDetails = x);
-            GoHomeCommand = new DelegateCommand(navigateToHome);
+            eventAggregator.GetEvent<SendEvent<HomeToDetails>>().Subscribe(x => GameDetails = x.Game);
+            GoHomeCommand = new DelegateCommand(NavigateToHome);
             this.regionManager = regionManager;
         }
 
-        private void navigateToHome()
+        private void NavigateToHome()
         {
             regionManager.RequestNavigate("ContentRegion", "HomeControl");
         }

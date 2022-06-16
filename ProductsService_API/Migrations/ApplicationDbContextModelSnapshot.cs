@@ -31,8 +31,12 @@ namespace ProductsService_API.Migrations
                     b.Property<int>("Amount")
                         .HasColumnType("int");
 
-                    b.Property<decimal?>("Discount")
-                        .HasColumnType("decimal(15,2)");
+                    b.Property<string>("Details")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Discount")
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("bit");
@@ -55,35 +59,12 @@ namespace ProductsService_API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal?>("Discount")
-                        .HasColumnType("decimal(15,2)");
-
-                    b.Property<Guid>("GameId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsAvailable")
-                        .HasColumnType("bit");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(15,2)");
-
-                    b.Property<string>("Title")
+                    b.Property<string>("Details")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
-
-                    b.ToTable("Games");
-                });
-
-            modelBuilder.Entity("ProductsService_API.Entites.Products", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal?>("Discount")
-                        .HasColumnType("decimal(15,2)");
+                    b.Property<int?>("Discount")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("GameId")
                         .HasColumnType("uniqueidentifier");
@@ -108,17 +89,56 @@ namespace ProductsService_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GameId");
+                    b.ToTable("Games");
+                });
 
-                    b.ToTable("GamesProducts");
+            modelBuilder.Entity("ProductsService_API.Entites.Products", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Details")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Discount")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("GameProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsAvailable")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PhotoId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhotoUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(15,2)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GameProductId");
+
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("ProductsService_API.Entites.Products", b =>
                 {
                     b.HasOne("ProductsService_API.Entites.Games", "Game")
-                        .WithMany("GameProducts")
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .WithMany("Products")
+                        .HasForeignKey("GameProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Game");
@@ -126,7 +146,7 @@ namespace ProductsService_API.Migrations
 
             modelBuilder.Entity("ProductsService_API.Entites.Games", b =>
                 {
-                    b.Navigation("GameProducts");
+                    b.Navigation("Products");
                 });
 #pragma warning restore 612, 618
         }

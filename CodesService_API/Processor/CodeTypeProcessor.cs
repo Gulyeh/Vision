@@ -1,20 +1,20 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using CodesService_API.Helpers;
-using CodesService_API.Processor;
 using CodesService_API.Processor.Interfaces;
 using CodesService_API.RabbitMQSender;
 using CodesService_API.Services.IServices;
 
 namespace CodesService_API.Processor
 {
-    public class CodeTypeProcessor
+    public interface ICodeTypeProcessor
+    {
+        IAccessable? CreateAccessCode(CodeTypes codeType);
+        ISender? CreateSenderCode(CodeTypes codeType);
+    }
+
+    public class CodeTypeProcessor : ICodeTypeProcessor
     {
         private readonly IGameAccessService gameAccessService;
         private readonly IRabbitMQSender rabbitMQSender;
-        private GameType? gameType { get; set; } = null;
         private ProductType? productType { get; set; } = null;
 
         public CodeTypeProcessor(IGameAccessService gameAccessService, IRabbitMQSender rabbitMQSender)
@@ -25,8 +25,8 @@ namespace CodesService_API.Processor
 
         public IAccessable? CreateAccessCode(CodeTypes codeType)
         {
-            return codeType switch{
-                CodeTypes.Game => gameType != null ? gameType : gameType = new GameType(rabbitMQSender, gameAccessService),
+            return codeType switch
+            {
                 CodeTypes.Product => productType != null ? productType : productType = new ProductType(rabbitMQSender, gameAccessService),
                 _ => null
             };
@@ -34,8 +34,8 @@ namespace CodesService_API.Processor
 
         public ISender? CreateSenderCode(CodeTypes codeType)
         {
-            return codeType switch{
-                CodeTypes.Game => gameType != null ? gameType : gameType = new GameType(rabbitMQSender, gameAccessService),
+            return codeType switch
+            {
                 CodeTypes.Product => productType != null ? productType : productType = new ProductType(rabbitMQSender, gameAccessService),
                 CodeTypes.Currency => new CurrencyType(rabbitMQSender),
                 _ => null

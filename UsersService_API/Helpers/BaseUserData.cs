@@ -7,7 +7,11 @@ namespace UsersService_API.Helpers
         public BaseUserData()
         {
             PhotoUrl = string.Empty;
-            Nickname = string.Empty;
+            Username = string.Empty;
+            PhotoUrl = "https://res.cloudinary.com/dhj8btqwp/image/upload/v1653243593/default_ya5gro.png";
+            Username = "VisionUser";
+            Status = Status.Offline;
+            Description = string.Empty;
         }
 
         [Required]
@@ -17,6 +21,7 @@ namespace UsersService_API.Helpers
         [Required]
         public Status Status { get; set; }
         [Required]
-        public string Nickname { get; set; }
+        public string Username { get; set; }
+        public string Description { get; set; }
     }
 }

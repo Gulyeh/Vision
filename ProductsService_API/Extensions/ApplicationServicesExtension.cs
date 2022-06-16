@@ -20,12 +20,17 @@ namespace ProductsService_API.Extensions
             services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));
             services.AddMemoryCache();
             services.AddHttpClient<IGameDataService, GameDataService>();
+            services.AddHttpClient<IGameAccessService, GameAccessService>();
+            services.AddScoped<IGameAccessService, GameAccessService>();
+            services.AddScoped<IGameDataService, GameDataService>();
+            services.AddScoped<IGetCachedGames, GetCachedGames>();
             services.AddScoped<ICacheService, CacheService>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<ErrorHandler>();
             services.AddScoped<IUploadService, UploadService>();
             services.AddScoped<IProductsRepository, ProductsRepository>();
             services.AddScoped<IGamesRepository, GamesRepository>();
+            services.AddScoped<ICurrencyRepository, CurrencyRepository>();
             return services;
         }
     }

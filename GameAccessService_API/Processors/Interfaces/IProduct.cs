@@ -1,13 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace GameAccessService_API.Processors.Interfaces
 {
     public interface IProduct
     {
-        void SetData(Guid userId, Guid gameId, Guid? productId = null);
+        void SetData(Guid userId, Guid gameId, Guid productId);
         Task AddToCache();
         Task SaveData();
     }

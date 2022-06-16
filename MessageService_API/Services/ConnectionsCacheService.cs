@@ -11,38 +11,47 @@ namespace MessageService_API.Services
             this.memoryCache = memoryCache;
         }
 
-        public Task AddToGroupCache(Guid chatId, string connectionId)
+        public Task AddToGroupCache(Guid chatId, Guid userId, string connectionId)
         {
-            List<string> connectionIds = new List<string>();
+            Dictionary<Guid, List<string>> connectionIds;
             memoryCache.TryGetValue(chatId, out connectionIds);
-            lock (connectionIds)
+            if (connectionIds is null) connectionIds = new();
+
+            if (!connectionIds.Any(x => x.Key == userId))
             {
-                connectionIds.Add(connectionId);
-                memoryCache.Set(chatId, connectionIds);
+                connectionIds.Add(userId, new List<string>());
             }
+
+            connectionIds[userId].Add(connectionId);
+            memoryCache.Set(chatId, connectionIds);
+
             return Task.CompletedTask;
         }
 
-        public Task<Dictionary<string, List<string>>> GetFromGroupCache(Guid chatId)
+        public Task<Dictionary<Guid, List<string>>> GetFromGroupCache(Guid chatId)
         {
-            Dictionary<string, List<string>> connectionIds = new Dictionary<string, List<string>>();
+            Dictionary<Guid, List<string>> connectionIds;
             memoryCache.TryGetValue(chatId, out connectionIds);
+            if (connectionIds is null) connectionIds = new();
+
             return Task.FromResult(connectionIds);
         }
 
         public Task RemoveFromGroupCache(Guid chatId, Guid userId, string connectionId)
         {
-            Dictionary<string, List<string>> connectionIds = new Dictionary<string, List<string>>();
+            Dictionary<Guid, List<string>> connectionIds;
             memoryCache.TryGetValue(chatId, out connectionIds);
-            lock (connectionIds)
+            if (connectionIds is null) connectionIds = new();
+
+            if (connectionIds.Any(x => x.Key == userId))
             {
-                if (connectionIds.ContainsKey(userId.ToString()))
-                {
-                    var userConnections = connectionIds[userId.ToString()];
-                    userConnections.Remove(connectionId);
-                    if (userConnections.Count == 0) connectionIds.Remove(userId.ToString());
-                }
+                connectionIds[userId].Remove(connectionId);
+                if (connectionIds[userId].Count == 0) connectionIds.Remove(userId);
+
+                if (connectionIds.Count == 0) memoryCache.Remove(chatId);
+                else memoryCache.Set(chatId, connectionIds);
             }
+
             return Task.CompletedTask;
         }
     }

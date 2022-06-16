@@ -5,12 +5,14 @@ namespace OrderService_API.Messages
         public PaymentCompleted()
         {
             Email = string.Empty;
+            Access_Token = string.Empty;
         }
 
-        public bool isSuccess { get; set; }
-        public Guid userId { get; set; }
-        public Guid orderId { get; set; }
+        public bool IsSuccess { get; set; }
+        public Guid UserId { get; set; }
+        public Guid OrderId { get; set; }
+        public Guid PaymentId { get; set; }
         public string Email { get; set; }
-        public string? Access_Token { get; set; }
+        public string Access_Token { get; set; }
     }
 }

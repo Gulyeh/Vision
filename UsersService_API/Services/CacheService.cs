@@ -15,30 +15,32 @@ namespace UsersService_API.Services
 
         public Task<bool> TryAddToCache(OnlineUsersData data)
         {
-            Dictionary<Guid, List<string>> value;
-            if (memoryCache.TryGetValue(CacheType.OnlineUsers, out value))
+            try
             {
-                lock (value)
+                Dictionary<Guid, List<string>> value;
+                memoryCache.TryGetValue(data.HubType, out value);
+                if (value is null) value = new Dictionary<Guid, List<string>>();
+
+                if (value.ContainsKey(data.UserId))
                 {
-                    if (value.ContainsKey(data.UserId))
-                    {
-                        value[data.UserId].Add(data.connectionId);
-                    }
-                    else
-                    {
-                        value.Add(data.UserId, new List<string>() { data.connectionId });
-                    }
-                    memoryCache.Set(CacheType.OnlineUsers, value);
-                    return Task.FromResult(true);
+                    value[data.UserId].Add(data.connectionId);
                 }
+                else
+                {
+                    value.Add(data.UserId, new List<string>() { data.connectionId });
+                }
+                memoryCache.Set(data.HubType, value);
+                return Task.FromResult(true);
+
             }
-            return Task.FromResult(false);
+            catch (Exception) { return Task.FromResult(false); }
         }
 
-        public Task<Dictionary<Guid, List<string>>> TryGetFromCache()
+        public Task<Dictionary<Guid, List<string>>> TryGetFromCache(HubTypes hubType)
         {
             Dictionary<Guid, List<string>> value;
-            memoryCache.TryGetValue(CacheType.OnlineUsers, out value);
+            memoryCache.TryGetValue(hubType, out value);
+            if (value is null) value = new Dictionary<Guid, List<string>>();
             return Task.FromResult(value);
         }
 
@@ -46,20 +48,17 @@ namespace UsersService_API.Services
         {
             bool isOnline = true;
             Dictionary<Guid, List<string>> value;
-            if (memoryCache.TryGetValue(CacheType.OnlineUsers, out value))
+            if (memoryCache.TryGetValue(data.HubType, out value))
             {
-                lock (value)
+                if (value.ContainsKey(data.UserId))
                 {
-                    if (value.ContainsKey(data.UserId))
+                    value[data.UserId].Remove(data.connectionId);
+                    if (value[data.UserId].Count == 0)
                     {
-                        value[data.UserId].Remove(data.connectionId);
-                        if (value[data.UserId].Count == 0)
-                        {
-                            value.Remove(data.UserId);
-                            isOnline = false;
-                        }
-                        memoryCache.Set(CacheType.OnlineUsers, value);
+                        value.Remove(data.UserId);
+                        isOnline = false;
                     }
+                    memoryCache.Set(data.HubType, value);
                 }
             }
             return Task.FromResult(isOnline);

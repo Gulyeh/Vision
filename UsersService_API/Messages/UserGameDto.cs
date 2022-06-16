@@ -2,8 +2,9 @@ namespace UsersService_API.Messages
 {
     public class UserGameDto
     {
-        public Guid userId { get; set; }
-        public Guid gameId { get; set; }
-        public Guid? productId { get; set; }
+        public bool IsSuccess { get; set; }
+        public Guid UserId { get; set; }
+        public Guid GameId { get; set; }
+        public Guid ProductId { get; set; }
     }
 }

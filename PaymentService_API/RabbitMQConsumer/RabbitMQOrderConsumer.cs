@@ -16,15 +16,14 @@ namespace PaymentService_API.RabbitMQConsumer
         private IConnection connection;
         private IModel channel;
         private readonly IRabbitMQSender rabbitMQSender;
+        private readonly IServiceScopeFactory serviceScopeFactory;
         private readonly ILogger<RabbitMQOrderConsumer> logger;
-        private readonly IPaymentRepository paymentRepository;
 
-        public RabbitMQOrderConsumer(IOptions<RabbitMQSettings> options, IRabbitMQSender rabbitMQSender, 
+        public RabbitMQOrderConsumer(IOptions<RabbitMQSettings> options, IRabbitMQSender rabbitMQSender,
             IServiceScopeFactory serviceScopeFactory, ILogger<RabbitMQOrderConsumer> logger)
         {
-            using var scope = serviceScopeFactory.CreateScope();
-            this.paymentRepository = scope.ServiceProvider.GetRequiredService<IPaymentRepository>();
             this.rabbitMQSender = rabbitMQSender;
+            this.serviceScopeFactory = serviceScopeFactory;
             this.logger = logger;
             var factory = new ConnectionFactory
             {
@@ -44,26 +43,39 @@ namespace PaymentService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
-                logger.LogInformation("Received message from queue: CreatePaymentQueue"); 
+                logger.LogInformation("Received message from queue: CreatePaymentQueue");
                 var content = Encoding.UTF8.GetString(args.Body.ToArray());
                 PaymentMessage? gameData = JsonConvert.DeserializeObject<PaymentMessage>(content);
                 HandleMessage(gameData).GetAwaiter().GetResult();
                 channel.BasicAck(args.DeliveryTag, false);
             };
-            channel.BasicConsume("CreatePaymentQueue", true, consumer);
+            channel.BasicConsume("CreatePaymentQueue", false, consumer);
 
             return Task.CompletedTask;
         }
 
         private async Task HandleMessage(PaymentMessage? data)
         {
-            if (data is not null)
+            try
             {
-                await paymentRepository.CreatePayment(data);
-                var paymentData = await paymentRepository.RequestStripePayment(data);
-                rabbitMQSender.SendMessage(paymentData, "PaymentUrlQueue");
+                if (data is not null)
+                {
+                    using var scope = serviceScopeFactory.CreateScope();
+                    var paymentRepository = scope.ServiceProvider.GetRequiredService<IPaymentRepository>();
+
+                    await paymentRepository.CreatePayment(data);
+                    var paymentData = await paymentRepository.RequestPayment(data);
+                    rabbitMQSender.SendMessage(paymentData, "PaymentUrlQueue");
+
+                    scope.Dispose();
+                    return;
+                }
+                rabbitMQSender.SendMessage(new PaymentUrlData(), "PaymentUrlQueue");
             }
-            else rabbitMQSender.SendMessage(null, "PaymentUrlQueue");        
+            catch (Exception)
+            {
+                rabbitMQSender.SendMessage(new PaymentUrlData(), "PaymentUrlQueue");
+            }
         }
     }
 }

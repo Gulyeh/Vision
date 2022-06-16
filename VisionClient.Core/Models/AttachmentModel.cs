@@ -1,20 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace VisionClient.Core.Models
+﻿namespace VisionClient.Core.Models
 {
     public class AttachmentModel : ICloneable
     {
         public AttachmentModel()
         {
-            PhotoUrl = string.Empty;
+            AttachmentUrl = string.Empty;
         }
 
-        public int Id { get; set; }
-        public string PhotoUrl { get; set; }
+        public Guid Id { get; set; }
+        public string AttachmentUrl { get; set; }
 
         public object Clone()
         {

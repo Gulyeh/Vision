@@ -3,6 +3,7 @@ using Microsoft.OpenApi.Models;
 using PaymentService_API.Extensions;
 using PaymentService_API.Middleware;
 using Serilog;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,10 +53,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
 app.UseMiddleware<ErrorHandler>();
 app.UseHttpsRedirection();
-app.UseSerilogRequestLogging();
+StripeConfiguration.ApiKey = builder.Configuration.GetSection("StripeSettings:ApiKey").Get<string>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

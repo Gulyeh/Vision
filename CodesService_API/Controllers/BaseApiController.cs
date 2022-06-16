@@ -1,10 +1,12 @@
 using CodesService_API.Dtos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CodesService_API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class BaseApiController : ControllerBase
     {
         [ApiExplorerSettings(IgnoreApi = true)]

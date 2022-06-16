@@ -21,7 +21,8 @@ namespace GameAccessService_API.Controllers
         public async Task<ActionResult<ResponseDto>> CheckAccess([FromQuery] Guid gameId)
         {
             if (gameId == Guid.Empty) return BadRequest();
-            return Ok(new ResponseDto(true, StatusCodes.Status200OK, new HasAccess(await accessRepository.CheckUserAccess(gameId, User.GetId()))));
+            (var hasAccess, var bannedData) = await accessRepository.CheckUserAccess(gameId, User.GetId());
+            return Ok(new ResponseDto(hasAccess, StatusCodes.Status200OK, bannedData));
         }
 
         [Authorize(Roles = StaticData.AdminRole)]
@@ -34,7 +35,7 @@ namespace GameAccessService_API.Controllers
         }
 
         [Authorize(Roles = StaticData.AdminRole)]
-        [HttpPost("UnbanUser")]
+        [HttpDelete("UnbanUser")]
         public async Task<ActionResult<ResponseDto>> UnbanUser([FromBody] AccessDataDto data)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -48,12 +49,11 @@ namespace GameAccessService_API.Controllers
             return Ok(new ResponseDto(true, StatusCodes.Status200OK, new HasAccess(await accessRepository.CheckUserHasGame(gameId, User.GetId()))));
         }
 
-        [HttpGet("BoughtProduct")]
-        public async Task<ActionResult<ResponseDto>> CheckUserBoughtProduct([FromQuery] Guid gameId, [FromQuery] Guid productId)
+        [HttpGet("OwnsProduct")]
+        public async Task<ActionResult<ResponseDto>> CheckUserOwnsProduct([FromQuery] Guid productId, [FromQuery] Guid gameId)
         {
-            if (gameId == Guid.Empty || productId == Guid.Empty) return BadRequest();
-            return Ok(new ResponseDto(true, StatusCodes.Status200OK, new HasAccess(await accessRepository.CheckUserHasProduct(productId, User.GetId()))));
+            if (productId == Guid.Empty) return BadRequest();
+            return Ok(new ResponseDto(true, StatusCodes.Status200OK, new HasAccess(await accessRepository.CheckUserHasProduct(productId, gameId, User.GetId()))));
         }
-
     }
 }

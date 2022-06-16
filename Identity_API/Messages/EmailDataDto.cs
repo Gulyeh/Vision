@@ -11,7 +11,7 @@ namespace Identity_API.Dtos
             ReceiverEmail = string.Empty;
         }
 
-        public Guid userId { get; set; }
+        public Guid UserId { get; set; }
         public string Content { get; set; }
         public string ReceiverEmail { get; set; }
         public EmailTypes EmailType { get; set; }

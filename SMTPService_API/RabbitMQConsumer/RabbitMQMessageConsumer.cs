@@ -37,8 +37,8 @@ namespace SMTPService_API.RabbitMQConsumer
             stoppingToken.ThrowIfCancellationRequested();
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
-            {          
-                logger.LogInformation("Received message from queue: SendEmailQueue"); 
+            {
+                logger.LogInformation("Received message from queue: SendEmailQueue");
                 var content = Encoding.UTF8.GetString(args.Body.ToArray());
                 EmailDataDto? emailData = JsonConvert.DeserializeObject<EmailDataDto>(content);
                 HandleMessage(emailData).GetAwaiter().GetResult();
@@ -51,7 +51,8 @@ namespace SMTPService_API.RabbitMQConsumer
 
         private async Task HandleMessage(EmailDataDto? data)
         {
-            if (data is not null) {
+            if (data is not null)
+            {
                 using var scope = serviceScopeFactory.CreateScope();
                 var emailRepository = scope.ServiceProvider.GetRequiredService<IEmailRepository>();
                 await emailRepository.InitializeEmail(data);

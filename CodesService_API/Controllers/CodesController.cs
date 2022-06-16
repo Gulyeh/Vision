@@ -19,18 +19,21 @@ namespace CodesService_API.Controllers
             this.codesRepository = codesRepository;
         }
 
-        [HttpGet("ApplyCode")]
-        public async Task<ActionResult<ResponseDto>> ApplyCode([FromQuery] string code, [FromQuery] CodeTypes codeType){
+        [HttpPut("ApplyCode")]
+        public async Task<ActionResult<ResponseDto>> ApplyCode([FromQuery] string code, [FromQuery] string codeType)
+        {
             if (string.IsNullOrEmpty(code)) return BadRequest();
             var token = HttpContext.Request.Headers["Authorization"][0];
-            return CheckActionResult(await codesRepository.ApplyCode(code, User.GetId(), codeType, token));
+            Enum.TryParse(codeType, true, out CodeTypes CodeType);
+            return CheckActionResult(await codesRepository.ApplyCode(code, User.GetId(), CodeType, token));
         }
 
         [HttpGet("ValidateCode")]
-        public async Task<ActionResult<ResponseDto>> ValidateCode([FromQuery] string code, [FromQuery] CodeTypes codeType)
+        public async Task<ActionResult<ResponseDto>> ValidateCode([FromQuery] string code, [FromQuery] string codeType)
         {
             if (string.IsNullOrEmpty(code)) return BadRequest();
-            return CheckActionResult(await codesRepository.CheckCode(code, codeType));
+            Enum.TryParse(codeType, true, out CodeTypes CodeType);
+            return CheckActionResult(await codesRepository.CheckCode(code, CodeType, User.GetId()));
         }
 
 
@@ -50,7 +53,7 @@ namespace CodesService_API.Controllers
         }
 
         [Authorize(Roles = StaticData.AdminRole)]
-        [HttpPost("EditCode")]
+        [HttpPut("EditCode")]
         public async Task<ActionResult<ResponseDto>> EditCode([FromBody] CodesDataDto data)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);

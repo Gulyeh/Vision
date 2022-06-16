@@ -12,6 +12,11 @@ namespace UsersService_API
             CreateMap<EditableUserDataDto, Users>();
             CreateMap<Users, UserDataDto>();
             CreateMap<Users, GetFriendRequestsDto>();
+            CreateMap<Users, GetFriendsDto>();
+            CreateMap<Users, GetPendingRequestsDto>();
+            CreateMap<Users, GetUserDto>();
+            CreateMap<UserDataDto, GetFriendsDto>();
+            CreateMap<UserDataDto, GetUserDto>();
         }
     }
 }

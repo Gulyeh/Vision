@@ -1,5 +1,5 @@
-using System.ComponentModel.DataAnnotations;
 using GameAccessService_API.Helpers;
+using System.ComponentModel.DataAnnotations;
 
 namespace GameAccessService_API.Entites
 {

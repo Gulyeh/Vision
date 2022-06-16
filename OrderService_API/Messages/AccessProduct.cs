@@ -1,20 +1,18 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace OrderService_API.Messages
 {
     public class AccessProduct
     {
-        public AccessProduct()
+        public AccessProduct(Guid userId, Guid? gameId, Guid productId, string email)
         {
-            Email = string.Empty;
+            UserId = userId;
+            GameId = gameId;
+            ProductId = productId;
+            Email = email;
         }
 
-        public Guid userId { get; set; }
-        public Guid? gameId { get; set; }
-        public Guid productId { get; set; }
+        public Guid UserId { get; set; }
+        public Guid? GameId { get; set; }
+        public Guid ProductId { get; set; }
         public string Email { get; set; }
     }
 }

@@ -19,23 +19,17 @@ namespace OrderService_API.RabbitMQConsumer
     {
         private IConnection connection;
         private IModel channel;
-        private readonly ICacheService cacheService;
-        private readonly IHubContext<OrderHub> hubContext;
         private readonly IRabbitMQSender rabbitMQSender;
         private readonly ILogger<RabbitMQPaymentCompletedConsumer> logger;
-        private readonly IOrderRepository orderRepository;
-        private readonly IProductsService productService;
+        private readonly IServiceScopeFactory serviceScopeFactory;
 
-        public RabbitMQPaymentCompletedConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory serviceScopeFactory, 
+        public RabbitMQPaymentCompletedConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory serviceScopeFactory,
             IRabbitMQSender rabbitMQSender, ILogger<RabbitMQPaymentCompletedConsumer> logger)
         {
-            using var scope = serviceScopeFactory.CreateScope();
-            this.hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<OrderHub>>();
-            this.orderRepository = scope.ServiceProvider.GetRequiredService<IOrderRepository>();
-            this.productService = scope.ServiceProvider.GetRequiredService<IProductsService>();
-            this.cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
+            this.serviceScopeFactory = serviceScopeFactory;
             this.rabbitMQSender = rabbitMQSender;
             this.logger = logger;
+
             var factory = new ConnectionFactory
             {
                 HostName = options.Value.Hostname,
@@ -60,7 +54,7 @@ namespace OrderService_API.RabbitMQConsumer
                 HandleMessage(paymentCompleted).GetAwaiter().GetResult();
                 channel.BasicAck(args.DeliveryTag, false);
             };
-            channel.BasicConsume("PaymentQueue", true, consumer);
+            channel.BasicConsume("PaymentQueue", false, consumer);
 
             return Task.CompletedTask;
         }
@@ -68,29 +62,60 @@ namespace OrderService_API.RabbitMQConsumer
         private async Task HandleMessage(PaymentCompleted? data)
         {
             if (data is not null)
-            {           
-                if (data.isSuccess)
+            {
+                try
                 {
-                    var order = await orderRepository.GetOrder(data.orderId);
-                    await orderRepository.ChangeOrderStatus(data.orderId, data.isSuccess);
-                    var orderProccessor = new OrderTypeProcessor(order.OrderType, orderRepository, rabbitMQSender, productService).CreateOrder();
-                    if(orderProccessor is null) {
-                        await PaymentNotCompleted(data);
-                        return;
+                    if (data.IsSuccess)
+                    {
+                        using var scope = serviceScopeFactory.CreateScope();
+                        var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<OrderHub>>();
+                        var orderRepository = scope.ServiceProvider.GetRequiredService<IOrderRepository>();
+                        var productService = scope.ServiceProvider.GetRequiredService<IProductsService>();
+                        var cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
+                        var orderTypeProcessor = scope.ServiceProvider.GetRequiredService<IOrderTypeProcessor>();
+
+                        var order = await orderRepository.GetOrder(data.OrderId);
+                        await orderRepository.ChangeOrderStatus(data);
+                        var orderProccessor = orderTypeProcessor.CreateOrder(order.OrderType);
+
+                        if (orderProccessor is null)
+                        {
+                            await PaymentNotCompleted(data);
+                            return;
+                        }
+
+                        var completed = await orderProccessor.PaymentCompleted(data, order);
+                        if (!completed)
+                        {
+                            await PaymentNotCompleted(data);
+                            return;
+                        }
+
+                        rabbitMQSender.SendMessage(new EmailDataDto(data.UserId, order.Title, data.Email), "SendEmailQueue");
+                        scope.Dispose();
                     }
-                    var completed = await orderProccessor.PaymentCompleted(data, order);
-                    if(!completed) await PaymentNotCompleted(data);
+                    else
+                    {
+                        await PaymentNotCompleted(data);
+                    }
                 }
-                else
+                catch (Exception)
                 {
                     await PaymentNotCompleted(data);
                 }
             }
         }
 
-        private async Task PaymentNotCompleted(PaymentCompleted data){
-            var connIds = await cacheService.TryGetFromCache(data.userId);
-            if (connIds.Count() > 0) await hubContext.Clients.Clients(connIds).SendAsync("PaymentDone", new { isSuccess = false });
+        private async Task PaymentNotCompleted(PaymentCompleted data)
+        {
+            using var scope = serviceScopeFactory.CreateScope();
+            var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<OrderHub>>();
+            var cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
+
+            var connIds = await cacheService.TryGetFromCache(data.UserId);
+            if (connIds.Count() > 0) await hubContext.Clients.Clients(connIds).SendAsync("PaymentFailed");
+
+            scope.Dispose();
         }
     }
 }

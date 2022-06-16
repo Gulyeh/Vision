@@ -93,13 +93,21 @@
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"
                    Margin="0,-50,0,0"
-                   Source="{Binding Attachment.PhotoUrl}">
+                   Source="{Binding Attachment.AttachmentUrl, IsAsync=True}">
                 <Image.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="Copy Image"/>
-                        <MenuItem Header="Copy Url"/>
-                        <MenuItem Header="Save Image"/>
-                        <MenuItem Header="Open Url"/>
+                        <MenuItem Header="Copy Image"
+                                  Command="{Binding ImageMenuCommand}"
+                                  CommandParameter="CopyImage"/>
+                        <MenuItem Header="Copy Url"
+                                  Command="{Binding ImageMenuCommand}"
+                                  CommandParameter="CopyUrl"/>
+                        <MenuItem Header="Save Image"
+                                  Command="{Binding ImageMenuCommand}"
+                                  CommandParameter="SaveImage"/>
+                        <MenuItem Header="Open Url"
+                                  Command="{Binding ImageMenuCommand}"
+                                  CommandParameter="OpenUrl"/>
                     </ContextMenu>
                 </Image.ContextMenu>
             </Image>

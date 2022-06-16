@@ -24,6 +24,7 @@
     </prism:Dialog.WindowStyle>
     <UserControl.Resources>
         <Converters:DiscountToVisibilityConverter x:Key="DiscountToVis"/>
+        <Converters:NullToBooleanConverter x:Key="NullToBool"/>
         <Style TargetType="Button">
             <Setter Property="HorizontalAlignment" Value="Right"/>
             <Setter Property="Width" Value="100"/>
@@ -136,6 +137,9 @@
                                 <TextBlock Text="{Binding Title}" TextAlignment="Center" Foreground="White" FontSize="15"
                                        HorizontalAlignment="Center" DockPanel.Dock="Top"
                                        Margin="5,5,5,0" TextWrapping="Wrap"/>
+                                <TextBlock Text="{Binding Details}" TextAlignment="Center" Foreground="White" FontSize="8"
+                                       HorizontalAlignment="Center" DockPanel.Dock="Top"
+                                       Margin="5,2,5,0" TextTrimming="CharacterEllipsis"/>
                                 <TextBlock Text="{Binding OldPrice, StringFormat=C}" Foreground="Red" Opacity="0.5" FontSize="10"
                                        HorizontalAlignment="Left" VerticalAlignment="Bottom"
                                        TextDecorations="Strikethrough"
@@ -207,7 +211,7 @@
                     <DataTemplate>
                         <DockPanel Width="100" Height="70" Background="#0AA1DD">
                             <DockPanel>
-                                <Image Source="{Binding PhotoUrl}"
+                                <Image Source="{Binding PhotoUrl, IsAsync=True}"
                                         Height="40" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                             </DockPanel>
                             <DockPanel.Effect>
@@ -250,17 +254,21 @@
                 </ListView.ItemContainerStyle>
             </ListView>
         </DockPanel>
-        
+
         <DockPanel Grid.Row="2" Margin="10,0,10,10" VerticalAlignment="Center">
-            <TextBlock Text="Discount Code:" FontSize="13" Margin="0,0,0,5"
-                       Foreground="Gray" DockPanel.Dock="Top"/>
+            <DockPanel DockPanel.Dock="Top">
+                <TextBlock Text="Discount Code:" FontSize="13" Margin="0,0,0,5"
+                       Foreground="Gray" />
+                <TextBlock Text="{Binding ErrorText}" FontSize="10" Margin="0,0,0,5"
+                       Foreground="Red" HorizontalAlignment="Right"/>
+            </DockPanel>
             <Border Width="300"
                     Background="DarkGray"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Top" >
-                <DockPanel>
+                <DockPanel IsHitTestVisible="{Binding CouponCodeVerified, Converter={StaticResource NullToBool}}">
                     <Button Width="88" Content="Apply Code"
-                            Command="{Binding SearchUserCommand}"/>
+                            Command="{Binding ApplyCodeCommand}"/>
                     <TextBox Text="{Binding Code, Mode=OneWayToSource}"
                              FontSize="15"
                              MaxLength="50"
@@ -274,13 +282,12 @@
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
                 <Button Name="PayButton"
                         Content="Pay" Margin="0,0,20,0"
-                        Command="{Binding CloseDialogCommand}"
-                        CommandParameter="true"
+                        Command="{Binding ExecuteCommand}"
                         IsEnabled="False">
                 </Button>
                 <Button Content="Cancel" Background="DarkRed"
                         Command="{Binding CloseDialogCommand}"
-                        CommandParameter="true"/>
+                        CommandParameter="false"/>
             </StackPanel>
         </DockPanel>
     </Grid>

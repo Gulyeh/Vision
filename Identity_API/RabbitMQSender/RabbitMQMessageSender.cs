@@ -27,7 +27,7 @@ namespace Identity_API.RabbitMQSender
                 var json = JsonConvert.SerializeObject(message);
                 var body = Encoding.UTF8.GetBytes(json);
                 channel.BasicPublish(exchange: "", routingKey: queueName, basicProperties: null, body: body);
-                logger.LogInformation("RabbitMQ sent message to queue: {queueName}", queueName); 
+                logger.LogInformation("RabbitMQ sent message to queue: {queueName}", queueName);
             }
         }
 

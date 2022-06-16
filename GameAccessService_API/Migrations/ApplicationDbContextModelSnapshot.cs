@@ -30,20 +30,17 @@ namespace GameAccessService_API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<DateTime>("BlockDate")
+                    b.Property<DateTime>("BanDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("BlockedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("ExpireDate")
+                    b.Property<DateTime>("BanExpires")
                         .HasColumnType("datetime2");
 
                     b.Property<Guid>("GameId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Reason")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("UserId")
@@ -77,9 +74,6 @@ namespace GameAccessService_API.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("GameId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("ProductId")

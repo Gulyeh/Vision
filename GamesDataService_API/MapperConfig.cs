@@ -12,6 +12,8 @@ namespace GamesDataService_API
             CreateMap<Games, AddGamesDto>().ReverseMap();
             CreateMap<AddNewsDto, News>().ReverseMap();
             CreateMap<News, NewsDto>().ReverseMap();
+            CreateMap<Informations, InformationsDto>().ReverseMap();
+            CreateMap<Requirements, RequirementsDto>().ReverseMap();
         }
     }
 }

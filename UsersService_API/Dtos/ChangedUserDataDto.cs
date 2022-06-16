@@ -4,13 +4,13 @@ namespace UsersService_API.Dtos
     {
         public ChangedUserDataDto(Guid userId, string description, string nickname)
         {
-            this.userId = userId;
+            this.UserId = userId;
             Description = description;
-            Nickname = nickname;
+            Username = nickname;
         }
 
-        public Guid userId { get; private set; }
+        public Guid UserId { get; private set; }
         public string Description { get; private set; }
-        public string Nickname { get; private set; }
+        public string Username { get; private set; }
     }
 }

@@ -1,8 +1,11 @@
+using AutoMapper;
 using GameAccessService_API.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using UsersService_API.Dtos;
+using UsersService_API.Helpers;
 using UsersService_API.Repository.IRepository;
+using UsersService_API.Services.IServices;
 
 namespace UsersService_API.SignalR
 {
@@ -12,84 +15,134 @@ namespace UsersService_API.SignalR
         private readonly IFriendsRepository friendsRepository;
         private readonly IUserRepository userRepository;
         private readonly ILogger<FriendsHub> logger;
-        private readonly Guid userId;
-        public FriendsHub(IFriendsRepository friendsRepository, IUserRepository userRepository, ILogger<FriendsHub> logger)
+        private readonly IMapper mapper;
+        private readonly ICacheService cacheService;
+
+        public FriendsHub(IFriendsRepository friendsRepository, IUserRepository userRepository, ILogger<FriendsHub> logger, IMapper mapper, ICacheService cacheService)
         {
+            this.cacheService = cacheService;
             this.friendsRepository = friendsRepository;
             this.userRepository = userRepository;
             this.logger = logger;
-            userId = Context.User != null ? Context.User.GetId() : Guid.Empty;
+            this.mapper = mapper;
+        }
+
+        private Guid GetId()
+        {
+            return Context.User != null ? Context.User.GetId() : Guid.Empty;
         }
 
         public override async Task OnConnectedAsync()
         {
+            Guid userId = GetId();
+            var token = Context.GetHttpContext()?.Request.Headers["Authorization"][0];
             await Clients.Caller.SendAsync("GetFriendsData", await friendsRepository.GetPendingRequests(userId),
                 await friendsRepository.GetFriendRequests(userId),
-                await friendsRepository.GetFriends(userId));
+                await friendsRepository.GetFriends(userId, token));
+            await cacheService.TryAddToCache(new OnlineUsersData(userId, Context.ConnectionId, HubTypes.Friends));
             logger.LogInformation("User with ID: {userId} has connected to FriendsHub with ID: {connId}", userId, Context.ConnectionId);
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
+            Guid userId = GetId();
             await base.OnDisconnectedAsync(exception);
-            logger.LogInformation("User with ID: {userId} has disconnected from FriendsHub", userId);
+            await cacheService.TryRemoveFromCache(new OnlineUsersData(userId, Context.ConnectionId, HubTypes.Friends));
+            logger.LogInformation("User with ID: {userId} has disconnected from FriendsHub", GetId());
+        }
+
+        public async Task ToggleBlockUser(Guid UserToToggleId)
+        {
+            var userId = GetId();
+            (bool isSuccess, bool isBlocked) = await friendsRepository.ToggleBlock(userId, UserToToggleId);
+            if (!isSuccess) return;
+
+            await CheckIfMultipleClients("ToggleBlockFriend", UserToToggleId, isBlocked, userId);
         }
 
         public async Task AcceptFriendRequest(Guid SenderId)
         {
-            if (!await friendsRepository.AcceptFriendRequest(userId, SenderId)) throw new HubException();
+            var userId = GetId();
+            if (!await friendsRepository.AcceptFriendRequest(userId, SenderId)) return;
 
-            await SendToUserOnlineData(SenderId, "NewFriend");
+            await SendToUserOnline<GetFriendsDto>(SenderId, "NewFriend");
 
             var senderData = await userRepository.GetUserData(SenderId);
-            await Clients.Caller.SendAsync("NewFriend", senderData);
+
+            await CheckIfMultipleClients("AcceptedFriendRequest", mapper.Map<GetFriendsDto>(senderData), userId);
         }
 
-        public async Task DeclineFriendRequest(Guid SenderId)
+        public async Task DeclineFriendRequest(Guid userId)
         {
-            if (!await friendsRepository.DeclineFriendRequest(userId, SenderId)) throw new HubException();
+            var deleterId = GetId();
+            if (!await friendsRepository.DeclineFriendRequest(userId, deleterId)) return;
 
-            await SendToUserOnlineId(SenderId, "RequestDeclined");
-
-            await Clients.Caller.SendAsync("RequestDeclined", SenderId);
+            await SendToUserOnline(userId, "RequestDeclined");
+            await CheckIfMultipleClients("RequestDeclined", userId, deleterId);
         }
 
         public async Task DeleteFriend(Guid FriendToDelete)
         {
-            if (!await friendsRepository.DeleteFriend(userId, FriendToDelete)) throw new HubException();
+            var userId = GetId();
+            if (!await friendsRepository.DeleteFriend(userId, FriendToDelete)) return;
 
-            await SendToUserOnlineId(FriendToDelete, "FriendDeleted");
-
-            await Clients.Caller.SendAsync("FriendDeleted", FriendToDelete);
+            await SendToUserOnline(FriendToDelete, "FriendDeleted");
+            await CheckIfMultipleClients("FriendDeleted", FriendToDelete, userId);
         }
 
         public async Task SendFriendRequest(FriendRequestDto data)
         {
-            data.Sender = userId;
-            if (!await friendsRepository.SendFriendRequest(data)) throw new HubException();
+            data.Sender = GetId();
+            if (!await friendsRepository.SendFriendRequest(data)) return;
 
-            await SendToUserOnlineData(data.Receiver, "NewFriendRequest");
+            await SendToUserOnline<GetUserDto>(data.Receiver, "NewFriendRequest");
 
             var requestedData = await userRepository.GetUserData(data.Receiver);
-            await Clients.Caller.SendAsync("FriendRequestsPending", requestedData);
+            await CheckIfMultipleClients("FriendRequestsPending", mapper.Map<GetUserDto>(requestedData), data.Sender);
         }
 
-        private async Task SendToUserOnlineData(Guid friendId, string connName)
+        private async Task CheckIfMultipleClients(string connName, object data, Guid userId)
         {
-            var connIds = await userRepository.CheckFriendIsOnline(friendId);
-            if (connIds.Count > 0)
+            await MultipleClientSource(connName, data, userId);
+        }
+
+        private async Task CheckIfMultipleClients(string connName, object data, object data2, Guid userId)
+        {
+            await MultipleClientSource(connName, data, userId, data2);
+        }
+
+        private async Task MultipleClientSource(string connName, object data, Guid userId, object? data2 = null)
+        {
+            var cachedIds = await cacheService.TryGetFromCache(HubTypes.Friends);
+            if (cachedIds.Any(x => x.Key == userId))
             {
-                var data = await userRepository.GetUserData(userId);
-                await Clients.Users(connIds).SendAsync(connName, data);
+                if (cachedIds[userId].Count > 1)
+                {
+                    if (data2 is not null) await Clients.Clients(cachedIds[userId]).SendAsync(connName, data, data2);
+                    else await Clients.Clients(cachedIds[userId]).SendAsync(connName, data);
+                    return;
+                }
+
+                if (data2 is not null) await Clients.Caller.SendAsync(connName, data, data2);
+                else await Clients.Caller.SendAsync(connName, data);
             }
         }
 
-        private async Task SendToUserOnlineId(Guid friendId, string connName)
+        private async Task SendToUserOnline(Guid userId, string connName)
         {
-            var connIds = await userRepository.CheckFriendIsOnline(friendId);
+            var connIds = await userRepository.CheckUserIsOnline(userId, HubTypes.Friends);
+            if (connIds.Count > 0) await Clients.Clients(connIds).SendAsync(connName, GetId());
+        }
+
+        private async Task SendToUserOnline<T>(Guid userId, string connName) where T : class
+        {
+            var connIds = await userRepository.CheckUserIsOnline(userId, HubTypes.Friends);
             if (connIds.Count > 0)
             {
-                await Clients.Users(connIds).SendAsync(connName, userId);
+                var senderId = GetId();
+                var data = await userRepository.GetUserData(senderId);
+                var mapped = mapper.Map<T>(data);
+                await Clients.Clients(connIds).SendAsync(connName, mapped);
             }
         }
     }

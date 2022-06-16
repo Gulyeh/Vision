@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using GameAccessService_API.DbContexts;
 using GameAccessService_API.Entites;
 using GameAccessService_API.Helpers;
@@ -28,9 +24,9 @@ namespace GameAccessService_API.Processors
             await cacheService.TryAddToCache<UserGames>(CacheType.OwnGame, userGames);
         }
 
-        public void SetData(Guid userId, Guid gameId, Guid? productId = null)
+        public void SetData(Guid userId, Guid gameId, Guid productId)
         {
-            userGames.GameId = gameId;
+            userGames.GameId = productId != Guid.Empty ? productId : Guid.Empty;
             userGames.UserId = userId;
         }
 

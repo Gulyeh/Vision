@@ -1,27 +1,44 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using UsersService_API.DbContexts;
 using UsersService_API.Dtos;
 using UsersService_API.Entites;
 using UsersService_API.Messages;
 using UsersService_API.RabbitMQSender;
 using UsersService_API.Repository.IRepository;
+using UsersService_API.Services.IServices;
 
 namespace UsersService_API.Repository
 {
     public class FriendsRepository : IFriendsRepository
     {
+        private readonly IMessageService messageService;
         private readonly ApplicationDbContext db;
         private readonly IMapper mapper;
         private readonly IRabbitMQSender rabbitMQSender;
         private readonly ILogger<FriendsRepository> logger;
 
-        public FriendsRepository(ApplicationDbContext db, IMapper mapper, IRabbitMQSender rabbitMQSender, ILogger<FriendsRepository> logger)
+        public FriendsRepository(IMessageService messageService, ApplicationDbContext db, IMapper mapper, IRabbitMQSender rabbitMQSender, ILogger<FriendsRepository> logger)
         {
+            this.messageService = messageService;
             this.db = db;
             this.mapper = mapper;
             this.rabbitMQSender = rabbitMQSender;
             this.logger = logger;
+        }
+
+        public async Task<(bool, bool)> ToggleBlock(Guid userId, Guid UserToToggleId)
+        {
+            var blocked = await db.BlockedUsers.FirstOrDefaultAsync(x => x.BlockerId == userId && x.BlockedId == UserToToggleId);
+            if (blocked is null)
+            {
+                var areFriends = db.UsersFriends.Any(x => (x.User1 == userId && x.User2 == UserToToggleId) || (x.User1 == UserToToggleId && x.User2 == userId));
+                if (!areFriends) return (false, false);
+                await db.BlockedUsers.AddAsync(new BlockedUsers(userId, UserToToggleId));
+            }
+            else db.BlockedUsers.Remove(blocked);
+            return (await SaveChangesAsync(), blocked is null);
         }
 
         public async Task<bool> AcceptFriendRequest(Guid userId, Guid SenderId)
@@ -31,22 +48,22 @@ namespace UsersService_API.Repository
 
             db.FriendRequests.Remove(findRequest);
 
-            var newFriends = new UsersFriends();       
+            var newFriends = new UsersFriends();
             newFriends.User1 = SenderId;
             newFriends.User2 = userId;
 
             await db.UsersFriends.AddAsync(newFriends);
 
-            return await SaveChangesAsync("AcceptFriendRequest");
+            return await SaveChangesAsync();
         }
 
         public async Task<bool> DeclineFriendRequest(Guid userId, Guid SenderId)
         {
-            var findRequest = await db.FriendRequests.FirstOrDefaultAsync(x => x.Sender == SenderId && x.Receiver == userId);
+            var findRequest = await db.FriendRequests.FirstOrDefaultAsync(x => (x.Sender == SenderId && x.Receiver == userId) || (x.Sender == userId && x.Receiver == SenderId));
             if (findRequest is null) return false;
 
             db.FriendRequests.Remove(findRequest);
-            return await SaveChangesAsync("DeclineFriendRequest");
+            return await SaveChangesAsync();
         }
 
         public async Task<bool> DeleteFriend(Guid userId, Guid ToDeleteUserId)
@@ -54,6 +71,9 @@ namespace UsersService_API.Repository
             var findFriends = await db.UsersFriends.FirstOrDefaultAsync(x => (x.User1 == userId && x.User2 == ToDeleteUserId)
             || (x.User1 == ToDeleteUserId && x.User2 == userId));
             if (findFriends is null) return false;
+
+            var blocked = await db.BlockedUsers.FirstOrDefaultAsync(x => (x.BlockedId == userId && x.BlockerId == ToDeleteUserId) || (x.BlockedId == ToDeleteUserId && x.BlockerId == userId));
+            if (blocked is not null) db.BlockedUsers.Remove(blocked);
 
             db.UsersFriends.Remove(findFriends);
             if (await SaveChangesAsync())
@@ -66,10 +86,11 @@ namespace UsersService_API.Repository
             return false;
         }
 
-        public async Task<ResponseDto> GetFriends(Guid userId)
+        public async Task<IEnumerable<GetFriendsDto>> GetFriends(Guid userId, string? access_token)
         {
             var findFriends = await db.UsersFriends.Where(x => x.User1 == userId || x.User2 == userId).ToListAsync();
-            List<UserDataDto> friendList = new List<UserDataDto>();
+            var blockedUsers = await db.BlockedUsers.Where(x => x.BlockerId == userId).ToListAsync();
+            List<GetFriendsDto> friendList = new List<GetFriendsDto>();
 
             foreach (var friend in findFriends)
             {
@@ -79,23 +100,57 @@ namespace UsersService_API.Repository
 
                 if (data is not null)
                 {
-                    var friendDto = mapper.Map<UserDataDto>(data);
+                    var friendDto = mapper.Map<GetFriendsDto>(data);
+                    friendDto.IsBlocked = blockedUsers.Any(x => x.BlockedId == User);
                     friendList.Add(friendDto);
                 }
             }
 
-            return new ResponseDto(true, StatusCodes.Status200OK, friendList);
+
+            if (!string.IsNullOrWhiteSpace(access_token))
+            {
+                ICollection<Guid> friends = new List<Guid>(friendList.Select(x => x.UserId));
+                var response = await messageService.CheckUnreadMessages(access_token, friends);
+
+                if (response is not null)
+                {
+                    var dataString = response.Response.ToString();
+
+                    if (!string.IsNullOrWhiteSpace(dataString))
+                    {
+                        var json = JsonConvert.DeserializeObject<IEnumerable<HasUnreadMessagesDto>>(dataString);
+
+                        if (json is not null)
+                        {
+                            foreach (var friend in json.Where(x => x.HasUnreadMessages == true))
+                            {
+                                var user = friendList.FirstOrDefault(x => x.UserId == friend.UserId);
+                                if (user is null) continue;
+                                user.HasUnreadMessages = friend.HasUnreadMessages;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return friendList;
         }
 
         public async Task<bool> SendFriendRequest(FriendRequestDto data)
         {
+            var isFriend = db.UsersFriends.Any(x => (x.User1 == data.Sender && x.User2 == data.Receiver) || (x.User1 == data.Receiver && x.User2 == data.Sender));
+            if (isFriend) return false;
+
+            var requestExists = db.FriendRequests.Any(x => (x.Sender == data.Sender && x.Receiver == data.Receiver) || (x.Sender == data.Receiver && x.Receiver == data.Sender));
+            if (requestExists) return false;
+
             var mapped = mapper.Map<FriendRequests>(data);
             await db.FriendRequests.AddAsync(mapped);
 
-            return await SaveChangesAsync("SendFriendRequest");
+            return await SaveChangesAsync();
         }
 
-        public async Task<ResponseDto> GetFriendRequests(Guid userId)
+        public async Task<IEnumerable<GetFriendRequestsDto>> GetFriendRequests(Guid userId)
         {
             var findRequests = await db.FriendRequests.Where(x => x.Receiver == userId).ToListAsync();
             List<GetFriendRequestsDto> requests = new List<GetFriendRequestsDto>();
@@ -105,41 +160,35 @@ namespace UsersService_API.Repository
                 var user = await db.Users.FirstOrDefaultAsync(x => x.UserId == data.Sender);
                 if (user is not null)
                 {
-                    var request = mapper.Map<GetFriendRequestsDto>(user);             
+                    var request = mapper.Map<GetFriendRequestsDto>(user);
                     requests.Add(request);
                 }
             }
 
-            return new ResponseDto(true, StatusCodes.Status200OK, findRequests);
+            return requests;
         }
 
-        public async Task<ResponseDto> GetPendingRequests(Guid userId)
+        public async Task<IEnumerable<GetPendingRequestsDto>> GetPendingRequests(Guid userId)
         {
             var findSentRequests = await db.FriendRequests.Where(x => x.Sender == userId).ToListAsync();
-            List<GetFriendRequestsDto> requests = new List<GetFriendRequestsDto>();
+            List<GetPendingRequestsDto> requests = new List<GetPendingRequestsDto>();
 
             foreach (var data in findSentRequests)
             {
                 var user = await db.Users.FirstOrDefaultAsync(x => x.UserId == data.Receiver);
                 if (user is not null)
                 {
-                    var request = mapper.Map<GetFriendRequestsDto>(user);             
+                    var request = mapper.Map<GetPendingRequestsDto>(user);
                     requests.Add(request);
                 }
             }
 
-            return new ResponseDto(true, StatusCodes.Status200OK, findSentRequests);
+            return requests;
         }
 
-        private async Task<bool> SaveChangesAsync(string? methodName = null)
+        private async Task<bool> SaveChangesAsync()
         {
-            if (await db.SaveChangesAsync() > 0) {
-                if(methodName != null && !string.IsNullOrEmpty(methodName)) logger.LogInformation("Saved data from {methodName} successfully", methodName);
-                return true;
-            }
-
-            if(methodName != null && !string.IsNullOrEmpty(methodName)) logger.LogInformation("Could not save data from {methodName}", methodName);
-            return false;
+            return await db.SaveChangesAsync() > 0;
         }
     }
 }

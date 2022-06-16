@@ -1,17 +1,11 @@
 ﻿using Prism.Ioc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VisionClient.Views;
-using VisionClient.Views.Login;
 using VisionClient.Views.SettingsControls;
 
 namespace VisionClient.Extensions
 {
     internal static class RegisterForNavigationExtensions
-    { 
+    {
         public static void RegisterViews(this IContainerRegistry containerRegistry)
         {
             containerRegistry.RegisterForNavigation<LibraryControl>("LibraryControl");

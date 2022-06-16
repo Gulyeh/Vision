@@ -23,8 +23,7 @@ namespace VisionClient.Views
 
         private void Deselect_ListItem(object sender, RoutedEventArgs e)
         {
-            ListView? listView = sender as ListView;
-            if (listView == null) return;
+            if (sender is not ListView listView) return;
             listView.SelectedItem = null;
         }
 
@@ -63,6 +62,11 @@ namespace VisionClient.Views
         private void HandlePreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
             HandleScrollingToParent.HandlePreviewMouseWheel(sender, e);
+        }
+
+        private void PreventRightMouseButton(object sender, MouseButtonEventArgs e)
+        {
+            e.Handled = true;
         }
     }
 }

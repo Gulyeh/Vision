@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using OrderService_API.Builders;
 using OrderService_API.Helpers;
 using OrderService_API.Messages;
 using OrderService_API.RabbitMQSender;
@@ -18,17 +17,14 @@ namespace OrderService_API.RabbitMQConsumer
     {
         private IConnection connection;
         private IModel channel;
-        private readonly ICacheService cacheService;
-        private readonly IHubContext<OrderHub> hubContext;
+        private readonly IServiceScopeFactory serviceScopeFactory;
         private readonly IRabbitMQSender rabbitMQSender;
         private readonly ILogger<RabbitMQAccessConsumer> logger;
 
-        public RabbitMQAccessConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory serviceScopeFactory, 
+        public RabbitMQAccessConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory serviceScopeFactory,
             IRabbitMQSender rabbitMQSender, ILogger<RabbitMQAccessConsumer> logger)
         {
-            using var scope = serviceScopeFactory.CreateScope();
-            this.hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<OrderHub>>();
-            this.cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
+            this.serviceScopeFactory = serviceScopeFactory;
             this.rabbitMQSender = rabbitMQSender;
             this.logger = logger;
             var factory = new ConnectionFactory
@@ -55,7 +51,7 @@ namespace OrderService_API.RabbitMQConsumer
                 HandleMessage(access).GetAwaiter().GetResult();
                 channel.BasicAck(args.DeliveryTag, false);
             };
-            channel.BasicConsume("ProductAccessDoneQueue", true, consumer);
+            channel.BasicConsume("ProductAccessDoneQueue", false, consumer);
 
             return Task.CompletedTask;
         }
@@ -64,10 +60,20 @@ namespace OrderService_API.RabbitMQConsumer
         {
             if (data is not null)
             {
-                var connIds = await cacheService.TryGetFromCache(data.UserId);
-                if (connIds.Count() > 0) await hubContext.Clients.Clients(connIds).SendAsync("ProductPaymentDone", new { isSuccess = data.isSuccess, gameId = data.gameId, productId = data.productId });
-                var emailGenerator = new EmailGenerator<UserAccessDto>(data);
-                rabbitMQSender.SendMessage(emailGenerator.Generate(), "SendEmailQueue");
+                List<string> connIds = new();
+                using var scope = serviceScopeFactory.CreateScope();
+                var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<OrderHub>>();
+                try
+                {
+                    var cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
+                    connIds = await cacheService.TryGetFromCache(data.UserId);
+                    if (connIds.Count() > 0) await hubContext.Clients.Clients(connIds).SendAsync("ProductPaymentDone", data.IsSuccess);
+                    scope.Dispose();
+                }
+                catch (Exception)
+                {
+                    if (connIds.Count() > 0) await hubContext.Clients.Clients(connIds).SendAsync("ProductPaymentDone", data.IsSuccess);
+                }
             }
         }
     }

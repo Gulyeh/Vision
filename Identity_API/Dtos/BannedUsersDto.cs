@@ -11,15 +11,15 @@ namespace Identity_API.Dtos
         }
         [Required]
         public Guid UserId { get; set; }
-        public string? Reason { get; set; }
+        public string Reason { get; set; }
         [JsonIgnore]
         public DateTime BanDate { get; set; } = DateTime.Now;
         [JsonIgnore]
         private DateTime banExpires;
         [Required]
-        public DateTime BanExpires 
-        { 
-            get => banExpires; 
+        public DateTime BanExpires
+        {
+            get => banExpires;
             set => banExpires = value.ToUniversalTime();
         }
     }

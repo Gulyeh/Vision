@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProductsService_API.Dtos;
@@ -18,29 +15,35 @@ namespace ProductsService_API.Controllers
             this.gamesRepository = gamesRepository;
         }
 
-        [HttpGet("GetGames")]
-        public async Task<ActionResult<ResponseDto>> GetGames([FromQuery] Guid? GameId = null){
-            return CheckActionResult(await gamesRepository.GetGames(GameId));
+        [HttpGet("GetProductGame")]
+        public async Task<ActionResult<ResponseDto>> GetGame([FromQuery] Guid GameId)
+        {
+            var token = await HttpContext.GetTokenAsync("access_token");
+            if (string.IsNullOrEmpty(token)) return new ResponseDto(false, StatusCodes.Status400BadRequest, false);
+            return CheckActionResult(await gamesRepository.GetGame(GameId, token));
         }
 
-        [HttpPost("EditGame")]
+        [HttpPut("EditProductGame")]
         [Authorize(Roles = StaticData.AdminRole)]
-        public async Task<ActionResult<ResponseDto>> EditGame([FromBody] GamesDto data){
-            if(!ModelState.IsValid) return BadRequest();
+        public async Task<ActionResult<ResponseDto>> EditGame([FromBody] GamesDto data)
+        {
+            if (!ModelState.IsValid) return BadRequest();
             return CheckActionResult(await gamesRepository.EditGame(data));
         }
 
-        [HttpDelete("DeleteGame")]
+        [HttpDelete("DeleteProductGame")]
         [Authorize(Roles = StaticData.AdminRole)]
-        public async Task<ActionResult<ResponseDto>> DeleteGame([FromQuery] Guid GameId){
-            if(GameId == Guid.Empty) return BadRequest();
+        public async Task<ActionResult<ResponseDto>> DeleteGame([FromQuery] Guid GameId)
+        {
+            if (GameId == Guid.Empty) return BadRequest();
             return CheckActionResult(await gamesRepository.DeleteGame(GameId));
         }
 
-        [HttpPost("AddGame")]
+        [HttpPost("AddProductGame")]
         [Authorize(Roles = StaticData.AdminRole)]
-        public async Task<ActionResult<ResponseDto>> AddGame([FromBody] AddGamesDto data){
-            if(!ModelState.IsValid) return BadRequest();
+        public async Task<ActionResult<ResponseDto>> AddGame([FromBody] AddGamesDto data)
+        {
+            if (!ModelState.IsValid) return BadRequest();
             var token = HttpContext.Request.Headers["Authorization"][0];
             return CheckActionResult(await gamesRepository.AddGame(data, token));
         }

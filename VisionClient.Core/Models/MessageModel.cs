@@ -1,33 +1,72 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
+using VisionClient.Core.Helpers;
 
 namespace VisionClient.Core.Models
 {
-    public class MessageModel : ICloneable
+    public class MessageModel : NotifyPropertyChanged, ICloneable
     {
         public MessageModel()
         {
-            Content = string.Empty;
             User = new UserModel();
             Attachments = new ObservableCollection<AttachmentModel>();
         }
 
-        public int Id { get; set; }
-        public string Content { get; set; }
-        public DateTime DateSent { get; set; }
-        public bool IsEdited { get; set; }
+        public Guid Id { get; set; }
+        public Guid SenderId { get; set; }
+        private string? content;
+        public string? Content
+        {
+            get => content;
+            set
+            {
+                content = value;
+                OnPropertyChanged();
+            }
+        }
+        private DateTime messageSent;
+        public DateTime MessageSent
+        {
+            get => messageSent;
+            set => messageSent = value.ToLocalTime();
+        }
+        private DateTime? dateRead;
+        public DateTime? DateRead
+        {
+            get => dateRead;
+            set
+            {
+                dateRead = value;
+                OnPropertyChanged();
+            }
+        }
+        private bool isEdited;
+        public bool IsEdited
+        {
+            get => isEdited;
+            set
+            {
+                isEdited = value;
+                OnPropertyChanged();
+            }
+        }
         public UserModel User { get; set; }
-        public ObservableCollection<AttachmentModel> Attachments { get; set; }
+
+        private ObservableCollection<AttachmentModel> attachments = new();
+        public ObservableCollection<AttachmentModel> Attachments
+        {
+            get => attachments;
+            set
+            {
+                attachments = value;
+                OnPropertyChanged();
+            }
+        }
 
         public object Clone()
         {
             MessageModel clone = (MessageModel)this.MemberwiseClone();
             clone.Attachments = new ObservableCollection<AttachmentModel>();
-            foreach(var attachment in Attachments)
+            foreach (var attachment in Attachments)
             {
                 clone.Attachments.Add((AttachmentModel)attachment.Clone());
             }

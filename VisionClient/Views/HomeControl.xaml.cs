@@ -23,5 +23,10 @@ namespace VisionClient.Views
         {
             HandleScrollingToParent.HandlePreviewMouseWheel(sender, e);
         }
+
+        private void PreventRightMouseButton(object sender, MouseButtonEventArgs e)
+        {
+            e.Handled = true;
+        }
     }
 }

@@ -1,36 +1,30 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
 using OrderService_API.Dtos;
 using OrderService_API.Helpers;
 using OrderService_API.Services.IServices;
-using OrderService_API.Statics;
 
 namespace OrderService_API.Services
 {
     public class CouponService : BaseHttpService, ICouponService
     {
-        public CouponService(IHttpClientFactory httpClientFactory, ILogger<BaseHttpService> logger) : base(httpClientFactory, logger)
+        private readonly string CouponServiceUrl;
+
+        public CouponService(IHttpClientFactory httpClientFactory, ILogger<BaseHttpService> logger, IConfiguration config) : base(httpClientFactory, logger)
         {
+            CouponServiceUrl = config.GetValue<string>("CouponServiceUrl");
         }
 
-        private class Response{
-            public int codeValue { get; set; }
-        }
-
-        public async Task<int> ApplyCoupon(string coupon, string Access_Token, CodeTypes codeType)
+        public async Task<CouponDataDto> ApplyCoupon(string coupon, string Access_Token, CodeTypes codeType)
         {
-           var response = await SendAsync<Response>(new ApiRequest()
+            var type = Enum.GetName(typeof(CodeTypes), codeType);
+            var response = await SendAsync<CouponDataDto>(new ApiRequest()
             {
-                apiType = APIType.GET,
-                ApiUrl = $"{APIUrls.CouponServiceUrl}api/codes/applycode?code={coupon}&codeType={codeType}",
+                apiType = APIType.PUT,
+                ApiUrl = $"{CouponServiceUrl}api/codes/applycode?code={coupon}&codeType={type}",
                 Access_Token = Access_Token
             });
 
-            if(response is not null) return response.codeValue;
-            return 0;
+            if (response is not null) return response;
+            return new();
         }
     }
 }

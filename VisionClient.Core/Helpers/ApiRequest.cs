@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using VisionClient.Core.Enums;
 
 namespace VisionClient.Core.Helpers
 {
@@ -10,14 +6,13 @@ namespace VisionClient.Core.Helpers
     {
         public ApiRequest()
         {
-            Data = new();
             ApiUrl = string.Empty;
-            Access_Token = StaticData.Access_Token;
+            Access_Token = string.Empty;
         }
 
         public APIType ApiType { get; set; }
-        public object Data { get; set; }
+        public object? Data { get; set; }
         public string ApiUrl { get; set; }
-        public string Access_Token { get; private set; }
+        public string Access_Token { get; set; }
     }
 }

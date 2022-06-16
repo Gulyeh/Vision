@@ -4,17 +4,11 @@ using Prism.Mvvm;
 using Prism.Regions;
 using Prism.Services.Dialogs;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VisionClient.Core;
 using VisionClient.Core.Enums;
 using VisionClient.Core.Events;
-using VisionClient.Core.Helpers;
 using VisionClient.Core.Models;
+using VisionClient.SignalR;
 
 namespace VisionClient.ViewModels
 {
@@ -24,50 +18,27 @@ namespace VisionClient.ViewModels
         public UserModel? SelectedUser
         {
             get { return selectedUser; }
-            set 
-            { 
+            set
+            {
                 SetProperty(ref selectedUser, value);
                 if (SelectedUser is not null) ShowMessage(SelectedUser);
             }
         }
 
-        private UserModel user = new();
-        public UserModel User
-        {
-            get { return user; }
-            set { SetProperty(ref user, value); }
-        }
-
-        private int onlineCount = 0;
-        public int OnlineCount
-        {
-            get { return onlineCount; }
-            set { SetProperty(ref onlineCount, value); }
-        }
-
-        private int offlineCount = 0;
-        public int OfflineCount
-        {
-            get { return offlineCount; }
-            set { SetProperty(ref offlineCount, value); }
-        }
-
         private readonly IRegionManager regionManager;
         private readonly IEventAggregator eventAggregator;
         private readonly IDialogService dialogService;
+        private readonly IUsersService_Hubs usersService_Hubs;
 
-        public ObservableCollection<UserModel> FriendsListOnline { get; set; }
-        public ObservableCollection<UserModel> FriendsListOffline { get; set; }
-        public DelegateCommand<string> ChangeStatusCommand { get; set; }
-        public DelegateCommand<UserModel> BlockFriendCommand { get; set; }
-        public DelegateCommand<UserModel> DeleteFriendCommand { get; set; }
-        public DelegateCommand<string> OpenControlCommand { get; set; }
+        public IStaticData StaticData { get; }
+        public DelegateCommand<string> ChangeStatusCommand { get; }
+        public DelegateCommand<UserModel> BlockFriendCommand { get; }
+        public DelegateCommand<UserModel> DeleteFriendCommand { get; }
+        public DelegateCommand<string> OpenControlCommand { get; }
 
-        public FriendsControlViewModel(IRegionManager regionManager, IEventAggregator eventAggregator, IDialogService dialogService)
+        public FriendsControlViewModel(IRegionManager regionManager, IEventAggregator eventAggregator, IDialogService dialogService,
+            IUsersService_Hubs usersService_Hubs, IStaticData staticData)
         {
-            User = StaticData.UserData;
-            FriendsListOnline = new ObservableCollection<UserModel>();
-            FriendsListOffline = new ObservableCollection<UserModel>();
             ChangeStatusCommand = new DelegateCommand<string>(ChangeUserStatus);
             BlockFriendCommand = new DelegateCommand<UserModel>(BlockUser);
             DeleteFriendCommand = new DelegateCommand<UserModel>(DeleteUser);
@@ -78,88 +49,47 @@ namespace VisionClient.ViewModels
                 SelectedUser = null;
             }, ThreadOption.PublisherThread, false, x => x == "StopFocus");
 
-
-            List<UserModel> FriendsList = new List<UserModel>();
-
-            //TEST
-            var user = new UserModel()
-            {
-                Id = new Guid(),
-                UserName = "TestUserasdasdasdasdasdadasdadadasd",
-                Description = "Test Descriptionasdasdadadsadadadasdada",
-                IsBlocked = false,
-                PhotoUrl = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__340.png",
-                Status = Status.Online
-            };
-            var user1 = new UserModel()
-            {
-                Id = new Guid(),
-                UserName = "TestUser1",
-                IsBlocked = true,
-                PhotoUrl = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__340.png",
-                Status = Status.Offline
-            };
-
-            var user3 = new UserModel()
-            {
-                Id = new Guid(),
-                UserName = "TestUserasdasdasdasdasdadasdadadasd",
-                IsBlocked = false,
-                PhotoUrl = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__340.png",
-                Status = Status.Away
-            };
-
-
-            FriendsList.Add(user1);
-            FriendsList.Add(user);
-            FriendsList.Add(user1);
-            FriendsList.Add(user);
-            FriendsList.Add(user1);
-            FriendsList.Add(user);
-            FriendsList.Add(user3);
-            FriendsList.Add(user1);
-            FriendsList.Add(user);
-            FriendsList.Add(user1);
-            FriendsList.Add(user);
-            FriendsList.Add(user1);
-            FriendsList.Add(user);
-
             this.regionManager = regionManager;
             this.eventAggregator = eventAggregator;
             this.dialogService = dialogService;
-            FriendsListOnline = new ObservableCollection<UserModel>(FriendsList.Where(x => x.Status != Status.Invisible && x.Status != Status.Offline)
-                .OrderBy(x => x.UserName));
-            FriendsListOffline = new ObservableCollection<UserModel>(FriendsList.Where(x => x.Status != Status.Online && x.Status != Status.Away)
-                .OrderBy(x => x.UserName));
-            OnlineCount = FriendsListOnline.Count();
-            OfflineCount = FriendsListOffline.Count();
+            this.usersService_Hubs = usersService_Hubs;
+            this.StaticData = staticData;
         }
 
-        private void OpenControl(string name)
+        private void OpenControl(string name) => regionManager.RequestNavigate("LibraryContentRegion", name);
+
+        private async void BlockUser(UserModel user)
         {
-            regionManager.RequestNavigate("LibraryContentRegion", name);
+            try
+            {
+                if (user == null) return;
+                var userBlocked = user.IsBlocked ? "Unblock" : "Block";
+                var userName = user.Username;
+                var message = $"Do you want to {userBlocked} {userName}?";
+                var title = $"{userBlocked} {userName}";
+                if (ShowDialog(message, title)) await usersService_Hubs.Send(UserServiceHubs.Friends, "ToggleBlockUser", user.UserId);
+            }
+            catch (Exception) { }
         }
 
-        private void BlockUser(UserModel user)
+        private async void DeleteUser(UserModel user)
         {
-            if (user == null) return;
-            var userBlocked = user.IsBlocked ? "Unblock" : "Block";
-            var userName = user.UserName;
-            var message = $"Do you want to {userBlocked} {userName}?";
-            var title = $"{userBlocked} {userName}";
-            ShowDialog(message, title);
+            try
+            {
+                if (user == null) return;
+                var userName = user.Username;
+                var message = $"Do you want to delete {userName} from friends list?";
+                var title = $"Delete {userName}";
+                if (ShowDialog(message, title))
+                {
+                    eventAggregator.GetEvent<SendEvent<Guid>>().Publish(user.UserId);
+                    await usersService_Hubs.Send(UserServiceHubs.Friends, "DeleteFriend", user.UserId);
+                }
+            }
+            catch (Exception) { }
         }
 
-        private void DeleteUser(UserModel user)
-        {
-            if (user == null) return;
-            var userName = user.UserName;
-            var message = $"Do you want to delete {userName} from friends list?";
-            var title = $"Delete {userName}";
-            ShowDialog(message, title);
-        }
-
-        private void ShowDialog(string message, string title)
+        private bool ShowDialog(string message, string title)
         {
             var dialogParams = new DialogParameters
             {
@@ -167,15 +97,27 @@ namespace VisionClient.ViewModels
                 { "title", title }
             };
 
-            dialogService.ShowDialog("ConfirmControl", dialogParams, null);
+            bool result = false;
+
+            dialogService.ShowDialog("ConfirmControl", dialogParams, r =>
+            {
+                result = r.Result switch
+                {
+                    ButtonResult.OK => true,
+                    ButtonResult.Cancel => false,
+                    _ => false,
+                };
+            });
+
+            return result;
         }
 
-        private void ChangeUserStatus(string status)
+        private async void ChangeUserStatus(string status)
         {
-            Enum.TryParse(status, out Status enumStatus);
-            if(enumStatus == User.Status) return;
-            User.Status = enumStatus;
-            RaisePropertyChanged(nameof(User));
+            var parsed = Enum.TryParse(status, out Status enumStatus);
+            if (!parsed || enumStatus == StaticData.UserData.Status) return;
+
+            await usersService_Hubs.Send(UserServiceHubs.Users, "ChangeUserStatus", enumStatus);
         }
 
         private void ShowMessage(UserModel user)

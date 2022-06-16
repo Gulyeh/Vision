@@ -24,7 +24,7 @@ namespace UsersService_API.Extensions
             services.Configure<RabbitMQSettings>(config.GetSection("RabbitMQSettings"));
             services.AddHostedService<RabbitMQIdentityConsumer>();
             services.AddHostedService<RabbitMQCurrencyConsumer>();
-            services.AddHostedService<RabbitMQAccessConsumer>();
+            services.AddHostedService<RabbitMQCouponAccessConsumer>();
             services.AddSingleton<IRabbitMQSender, RabbitMQMessageSender>();
             services.AddScoped<ICacheService, CacheService>();
             services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));
@@ -34,6 +34,9 @@ namespace UsersService_API.Extensions
             services.AddScoped<ICurrencyRepository, CurrencyRepository>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<ErrorHandler>();
+            services.AddHttpClient<IMessageService, MessageService>();
+            services.AddScoped<IMessageService, MessageService>();
+
             return services;
         }
     }

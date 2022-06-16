@@ -3,11 +3,11 @@ using Prism.Events;
 using Prism.Services.Dialogs;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using VisionClient.Core;
+using VisionClient.Core.Dtos;
 using VisionClient.Core.Models;
 using VisionClient.Helpers;
+using VisionClient.SignalR;
 
 namespace VisionClient.ViewModels.DialogsViewModels
 {
@@ -20,14 +20,22 @@ namespace VisionClient.ViewModels.DialogsViewModels
             set { SetProperty(ref editmessage, value); }
         }
 
-        public DelegateCommand<AttachmentModel> DeletePhotoCommand { get; set; }
-        public EditMessageControlViewModel(IEventAggregator eventAggregator) : base(eventAggregator)
+        public DelegateCommand<AttachmentModel> DeletePhotoCommand { get; }
+        public List<Guid> DeletedAttachmentIds { get; }
+        private readonly IMessageService_Hubs messageService_Hubs;
+        private readonly IStaticData StaticData;
+
+        public EditMessageControlViewModel(IEventAggregator eventAggregator, IMessageService_Hubs messageService_Hubs, IStaticData staticData) : base(eventAggregator)
         {
             DeletePhotoCommand = new DelegateCommand<AttachmentModel>(DeleteAttachment);
+            DeletedAttachmentIds = new List<Guid>();
+            this.messageService_Hubs = messageService_Hubs;
+            this.StaticData = staticData;
         }
 
         private void DeleteAttachment(AttachmentModel attachment)
         {
+            DeletedAttachmentIds.Add(attachment.Id);
             EditMessage.Attachments.Remove(attachment);
         }
 
@@ -37,9 +45,19 @@ namespace VisionClient.ViewModels.DialogsViewModels
             EditMessage = parameters.GetValue<MessageModel>("editmessage");
         }
 
-        public override void Execute(object? data)
+        protected override async void Execute(object? data)
         {
-          
+            try
+            {
+                var message = new EditMessageDto(EditMessage.Id, EditMessage.Content, DeletedAttachmentIds, StaticData.ChatId);
+                await messageService_Hubs.Send("EditMessage", message);
+                RaiseRequestClose(new DialogResult(ButtonResult.OK));
+            }
+            catch (Exception)
+            {
+
+            }
+
         }
     }
 }

@@ -32,27 +32,34 @@ namespace CodesService_API.Migrations
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("CodeType")
                         .HasColumnType("int");
 
                     b.Property<string>("CodeValue")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("ExpireDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("GameId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsLimited")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("Signature")
+                        .HasColumnType("int");
+
                     b.Property<int?>("Uses")
                         .HasColumnType("int");
 
-                    b.Property<Guid?>("gameId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("isLimited")
-                        .HasColumnType("bit");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
 
                     b.ToTable("Codes");
                 });

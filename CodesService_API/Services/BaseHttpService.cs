@@ -1,5 +1,5 @@
+using CodesService_API.Dtos;
 using CodesService_API.Helpers;
-using CodesService_API.Services.IServices;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
 using System.Text;
@@ -42,8 +42,16 @@ namespace CodesService_API.Services
             if (apiContent is not null)
             {
                 logger.LogInformation("Received data from '{url}'", apiRequest.ApiUrl);
-                var apiResponseDto = JsonConvert.DeserializeObject<T>(apiContent);
-                if (apiResponseDto is not null) return apiResponseDto;
+                var apiResponseDto = JsonConvert.DeserializeObject<ResponseDto>(apiContent);
+                if (apiResponseDto is not null && apiResponseDto.isSuccess)
+                {
+                    var response = apiResponseDto.Response.ToString();
+                    if (!string.IsNullOrWhiteSpace(response))
+                    {
+                        var parsedResponse = JsonConvert.DeserializeObject<T>(response);
+                        if (parsedResponse is not null) return parsedResponse;
+                    }
+                }
                 logger.LogInformation("Could not parse data from '{url}'", apiRequest.ApiUrl);
             }
 

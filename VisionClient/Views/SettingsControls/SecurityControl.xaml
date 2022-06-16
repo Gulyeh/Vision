@@ -71,17 +71,32 @@
                                            Foreground="Gray"
                                            DockPanel.Dock="Top"
                                            Margin="0,0,0,5"/>
-                    <PasswordBox />
+                    <TextBox FontFamily="/Resources/#password" Text="{Binding NewPassword}" />
+                    <TextBlock Text="{Binding NewPassword_Error}" FontSize="12" 
+                               Foreground="Red"
+                               VerticalAlignment="Top"
+                               HorizontalAlignment="Right"
+                               Margin="0,5,0,0"/>
                     <TextBlock Text="Repeat Password" FontSize="12" 
                                            Foreground="Gray"
                                            DockPanel.Dock="Top"
-                                           Margin="0,10,0,5"/>
-                    <PasswordBox />
+                                           Margin="0,5,0,5"/>
+                    <TextBox FontFamily="/Resources/#password" Text="{Binding RepeatPassword}" />
+                    <TextBlock Text="{Binding RepeatPassword_Error}" FontSize="12" 
+                               Foreground="Red"
+                               VerticalAlignment="Top"
+                               HorizontalAlignment="Right"
+                               Margin="0,5,0,0"/>
                     <TextBlock Text="Current Password" FontSize="12" 
                                            Foreground="Gray"
                                            DockPanel.Dock="Top"
-                                           Margin="0,30,0,5"/>
-                    <PasswordBox />
+                                           Margin="0,25,0,5"/>
+                    <TextBox FontFamily="/Resources/#password" Text="{Binding CurrentPassword}" />
+                    <TextBlock Text="{Binding CurrentPassword_Error}" FontSize="12" 
+                               Foreground="Red"
+                               VerticalAlignment="Top"
+                               HorizontalAlignment="Right"
+                               Margin="0,5,0,0"/>
                     <Button Content="Save"
                             Style="{StaticResource ButtonTemplate}"
                             Command="{Binding SaveNewPasswordCommand}"
@@ -89,6 +104,11 @@
                             Width="350"
                             Height="40"
                             Margin="0,20,0,0"/>
+                    <TextBlock Text="{Binding ErrorText}" FontSize="12" 
+                               Foreground="Red"
+                               VerticalAlignment="Top"
+                               HorizontalAlignment="Right"
+                               Margin="0,10,0,0"/>
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>

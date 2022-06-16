@@ -6,5 +6,6 @@ namespace Identity_API.Repository.IRepository
     {
         Task<ResponseDto> BanUser(BannedUsersDto data);
         Task<ResponseDto> UnbanUser(Guid userId);
+        Task<ResponseDto> GetServerData(Guid sessionToken, Guid userId);
     }
 }

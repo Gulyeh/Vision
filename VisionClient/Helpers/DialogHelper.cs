@@ -3,10 +3,6 @@ using Prism.Events;
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using VisionClient.Core.Events;
 
@@ -14,22 +10,22 @@ namespace VisionClient.Helpers
 {
     internal abstract class DialogHelper : BindableBase, IDialogAware
     {
-        private string? _message;
-        public string? Message
+        private string _message = string.Empty;
+        public string Message
         {
             get { return _message; }
             set { SetProperty(ref _message, value); }
         }
 
-        private string? _title;
-        public string? Title
+        private string _title = string.Empty;
+        public string Title
         {
             get { return _title; }
             set { SetProperty(ref _title, value); }
         }
 
-        private string? content;
-        public string? Content
+        private string content = string.Empty;
+        public string Content
         {
             get { return content; }
             set { SetProperty(ref content, value); }
@@ -59,20 +55,11 @@ namespace VisionClient.Helpers
             RaiseRequestClose(new DialogResult(result));
         }
 
-        public virtual void RaiseRequestClose(IDialogResult dialogResult)
-        {
-            RequestClose?.Invoke(dialogResult);
-        }
+        protected virtual void RaiseRequestClose(IDialogResult dialogResult) => RequestClose?.Invoke(dialogResult);
 
-        public bool CanCloseDialog()
-        {
-            return true;
-        }
+        public bool CanCloseDialog() => true;
 
-        public virtual void OnDialogClosed()
-        {
-            eventAggregator.GetEvent<SendEvent<Visibility>>().Publish(Visibility.Hidden);
-        }
+        public virtual void OnDialogClosed() => eventAggregator.GetEvent<SendEvent<Visibility>>().Publish(Visibility.Hidden);
 
         public virtual void OnDialogOpened(IDialogParameters parameters)
         {
@@ -82,6 +69,6 @@ namespace VisionClient.Helpers
             Content = parameters.GetValue<string>("content");
         }
 
-        public abstract void Execute(object? data);
+        protected abstract void Execute(object? data);
     }
 }

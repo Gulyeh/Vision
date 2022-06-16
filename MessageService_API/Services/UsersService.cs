@@ -1,39 +1,55 @@
+using MessageService_API.Dtos;
 using MessageService_API.Helpers;
 using MessageService_API.Services.IServices;
-using MessageService_API.Static;
 
 namespace MessageService_API.Services
 {
     public class UsersService : BaseHttpService, IUsersService
     {
-        public UsersService(IHttpClientFactory httpClientFactory, ILogger<BaseHttpService> logger) : base(httpClientFactory, logger)
+        private readonly string UsersServiceUrl;
+
+        public UsersService(IHttpClientFactory httpClientFactory, ILogger<BaseHttpService> logger, IConfiguration config) : base(httpClientFactory, logger)
         {
+            UsersServiceUrl = config.GetValue<string>("UsersServiceUrl");
         }
 
-        public async Task<T?> CheckUserExists<T>(Guid userId, string Access_Token)
+        public async Task<ResponseDto?> CheckIfUserIsBlocked(Guid userId, Guid user2Id, string Access_Token)
         {
-            var response = await SendAsync<T>(new ApiRequest()
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
             {
                 apiType = APIType.GET,
-                ApiUrl = $"{APIUrls.UsersService}api/users/userexists?userId={userId}",
+                ApiUrl = $"{UsersServiceUrl}/api/Users/IsUserBlocked?userId={userId}&user2Id={user2Id}",
                 Access_Token = Access_Token
             });
 
             if (response is not null) return response;
-            return default(T);
+            return null;
         }
 
-        public async Task<T?> SendUserMessageNotification<T>(Guid userId, Guid chatId, string Access_Token)
+        public async Task<ResponseDto?> CheckUserExists(Guid userId, string Access_Token)
         {
-            var response = await SendAsync<T>(new ApiRequest()
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
             {
                 apiType = APIType.GET,
-                ApiUrl = $"{APIUrls.UsersService}api/users/MessageNotification?receiverId={userId}&chatId={chatId}",
+                ApiUrl = $"{UsersServiceUrl}/api/Users/UserExists?userId={userId}",
                 Access_Token = Access_Token
             });
 
             if (response is not null) return response;
-            return default(T);
+            return null;
+        }
+
+        public async Task<ResponseDto?> SendUserMessageNotification(Guid receiverId, Guid senderId, string Access_Token)
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                apiType = APIType.GET,
+                ApiUrl = $"{UsersServiceUrl}/api/users/MessageNotification?receiverId={receiverId}&senderId={senderId}",
+                Access_Token = Access_Token
+            });
+
+            if (response is not null) return response;
+            return null;
         }
     }
 }

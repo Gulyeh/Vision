@@ -7,7 +7,7 @@
              xmlns:prism="http://prismlibrary.com/"
              xmlns:Converters="clr-namespace:VisionClient.Converters"
              mc:Ignorable="d" 
-             d:DesignHeight="250" d:DesignWidth="450"          
+             d:DesignHeight="300" d:DesignWidth="450"          
              Background="#0f3452"
              BorderThickness="1"
              BorderBrush="#0AA1DD">
@@ -18,7 +18,8 @@
             <Setter Property="ResizeMode" Value="NoResize"/>
             <Setter Property="ShowInTaskbar" Value="False"/>
             <Setter Property="Width" Value="450"/>
-            <Setter Property="MinHeight" Value="250"/>
+            <Setter Property="Height" Value="300"/>
+            <Setter Property="MinHeight" Value="150"/>
             <Setter Property="MaxHeight" Value="430"/>
             <Setter Property="WindowStyle" Value="None"/>
         </Style>
@@ -146,8 +147,9 @@
                       Name="AttachmentList"
                       Background="Transparent"
                       BorderThickness="0"
-                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
                       ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                      ScrollViewer.CanContentScroll="False"
                       SelectionMode="Single"
                       Focusable="False"
                       Visibility="{Binding EditMessage.Attachments.Count, Converter={StaticResource CountToVis}}" 
@@ -186,7 +188,7 @@
                                     CommandParameter="{Binding}"
                                     Content="X" FontSize="15" 
                                     Foreground="DarkRed"/>
-                            <Image Source="{Binding PhotoUrl}" Height="100" Margin="0,-20,0,0"/>
+                            <Image Source="{Binding AttachmentUrl, IsAsync=True}" Height="100" Margin="0,-20,0,0"/>
                         </DockPanel>
                     </DataTemplate>
                 </ListView.ItemTemplate>
@@ -197,8 +199,7 @@
                    HorizontalAlignment="Center">
             <Button Content="Update"
                     Style="{StaticResource ButtonTemplate}"
-                    Command="{Binding CloseDialogCommand}"
-                    CommandParameter="true"
+                    Command="{Binding ExecuteCommand}"
                     Margin="0,0,80,0"/>
             <Button Content="Cancel"
                     Style="{StaticResource ButtonTemplate}"

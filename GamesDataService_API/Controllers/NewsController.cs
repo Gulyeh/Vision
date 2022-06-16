@@ -37,7 +37,7 @@ namespace GamesDataService_API.Controllers
             return CheckActionResult(await newsRepository.DeleteNews(newsId, gameId));
         }
 
-        [HttpPost("EditNews")]
+        [HttpPut("EditNews")]
         [Authorize(Policy = "HasAdminOrModRole")]
         public async Task<ActionResult<ResponseDto>> EditGameNews([FromBody] NewsDto data)
         {

@@ -1,5 +1,7 @@
-using MailKit.Net.Smtp;
-using MimeKit;
+using Mailjet.Client;
+using Mailjet.Client.Resources;
+using Newtonsoft.Json.Linq;
+using SMTPService_API.Generator.Interfaces;
 using SMTPService_API.Helpers;
 using SMTPService_API.Messages;
 using SMTPService_API.Services.IServices;
@@ -9,42 +11,53 @@ namespace SMTPService_API.Services
     public class EmailService : IEmailService
     {
         private readonly IConfiguration config;
+        private readonly IEmailGenerator emailGenerator;
 
-        public EmailService(IConfiguration config)
+        public EmailService(IConfiguration config, IEmailGenerator emailGenerator)
         {
             this.config = config.GetSection("SMTPData");
+            this.emailGenerator = emailGenerator;
         }
 
         public async Task<bool> SendEmail(EmailDataDto data)
         {
             try
             {
-                var emailToSend = new MimeMessage();
-                emailToSend.From.Add(MailboxAddress.Parse(config["SenderName"]));
-                emailToSend.To.Add(MailboxAddress.Parse(data.ReceiverEmail));
-                emailToSend.Body = new TextPart(MimeKit.Text.TextFormat.Html) { Text = data.Content };
+                var generator = emailGenerator.GetType(data.EmailType);
+                if (generator is null) return false;
+
+                MailjetClient client = new MailjetClient(config["SenderAccount"], config["SenderPassword"]);
+                MailjetRequest request = new MailjetRequest
+                {
+                    Resource = Send.Resource,
+                }
+                .Property(Send.FromEmail, config["SenderEmail"])
+                .Property(Send.FromName, "Vision")
+                .Property(Send.Recipients, new JArray {
+                    new JObject {
+                        {"Email", data.ReceiverEmail}
+                    }
+                })
+                .Property(Send.HtmlPart, generator.GenerateContent(data.Content));
+
                 switch (data.EmailType)
                 {
                     case EmailTypes.ResetPassword:
-                        emailToSend.Subject = "Reset Password";
+                        request.Property(Send.Subject, "Reset Password");
                         break;
                     case EmailTypes.Confirmation:
-                        emailToSend.Subject = "Account Confirmation";
+                        request.Property(Send.Subject, "Account Confirmation");
                         break;
                     case EmailTypes.Payment:
-                        emailToSend.Subject = "Payment Confirmation";
+                        request.Property(Send.Subject, "Payment Confirmation");
                         break;
                     default:
                         break;
                 }
 
-                using var emailClient = new SmtpClient();
-                emailClient.ServerCertificateValidationCallback = (s, c, h, e) => true;
-                await emailClient.ConnectAsync(config["SMTPServer"], int.Parse(config["SMTPPort"]), MailKit.Security.SecureSocketOptions.StartTls);
-                await emailClient.AuthenticateAsync(config["SenderEmail"], config["SenderPassword"]);
-                await emailClient.SendAsync(emailToSend);
-                await emailClient.DisconnectAsync(true);
-                return true;
+                MailjetResponse response = await client.PostAsync(request);
+                if (response.IsSuccessStatusCode) return true;
+                return false;
             }
             catch (Exception)
             {

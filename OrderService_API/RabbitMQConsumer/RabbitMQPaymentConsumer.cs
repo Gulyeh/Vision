@@ -16,17 +16,12 @@ namespace OrderService_API.RabbitMQConsumer
     {
         private IConnection connection;
         private IModel channel;
-        private readonly ICacheService cacheService;
-        private readonly IHubContext<OrderHub> hubContext;
+        private readonly IServiceScopeFactory serviceScopeFactory;
         private readonly ILogger<RabbitMQPaymentConsumer> logger;
 
         public RabbitMQPaymentConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory serviceScopeFactory,
             ILogger<RabbitMQPaymentConsumer> logger)
         {
-            using var scope = serviceScopeFactory.CreateScope();
-            this.hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<OrderHub>>();
-            this.cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
-
             var factory = new ConnectionFactory
             {
                 HostName = options.Value.Hostname,
@@ -37,6 +32,7 @@ namespace OrderService_API.RabbitMQConsumer
             connection = factory.CreateConnection();
             channel = connection.CreateModel();
             channel.QueueDeclare(queue: "PaymentUrlQueue", false, false, false, arguments: null);
+            this.serviceScopeFactory = serviceScopeFactory;
             this.logger = logger;
         }
 
@@ -52,7 +48,7 @@ namespace OrderService_API.RabbitMQConsumer
                 HandleMessage(paymentUrl).GetAwaiter().GetResult();
                 channel.BasicAck(args.DeliveryTag, false);
             };
-            channel.BasicConsume("PaymentUrlQueue", true, consumer);
+            channel.BasicConsume("PaymentUrlQueue", false, consumer);
 
             return Task.CompletedTask;
         }
@@ -61,8 +57,19 @@ namespace OrderService_API.RabbitMQConsumer
         {
             if (data is not null)
             {
-                var connIds = await cacheService.TryGetFromCache(data.userId);
-                if (connIds.Count() > 0) await hubContext.Clients.Clients(connIds).SendAsync("PaymentUrl", new { paymentUrl = data.PaymentUrl });
+                List<string> connIds = new();
+                using var scope = serviceScopeFactory.CreateScope();
+                var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<OrderHub>>();
+                try
+                {
+                    var cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
+                    connIds = await cacheService.TryGetFromCache(data.userId);
+                    if (connIds.Count() > 0) await hubContext.Clients.Clients(connIds).SendAsync("PaymentUrl", data.PaymentUrl);
+                }
+                catch (Exception)
+                {
+                    if (connIds.Count() > 0) await hubContext.Clients.Clients(connIds).SendAsync("PaymentUrl", data.PaymentUrl);
+                }
             }
         }
     }

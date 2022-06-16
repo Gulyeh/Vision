@@ -13,17 +13,16 @@ namespace GameAccessService_API.RabbitMQConsumer
 {
     public class RabbitMQOrderConsumer : BackgroundService
     {
-        private readonly IAccessRepository accessRepository;
         private readonly ILogger<RabbitMQOrderConsumer> logger;
+        private readonly IServiceScopeFactory scopeFactory;
         private readonly IRabbitMQSender rabbitMQSender;
         private IConnection connection;
         private IModel channel;
 
         public RabbitMQOrderConsumer(IOptions<RabbitMQSettings> options, ILogger<RabbitMQOrderConsumer> logger, IServiceScopeFactory scopeFactory, IRabbitMQSender rabbitMQSender)
         {
-            using var scope = scopeFactory.CreateScope();
-            accessRepository = scope.ServiceProvider.GetRequiredService<IAccessRepository>();
             this.logger = logger;
+            this.scopeFactory = scopeFactory;
             this.rabbitMQSender = rabbitMQSender;
 
             var factory = new ConnectionFactory
@@ -51,7 +50,7 @@ namespace GameAccessService_API.RabbitMQConsumer
 
                 channel.BasicAck(args.DeliveryTag, false);
             };
-            channel.BasicConsume("AccessProductQueue", true, consumer);
+            channel.BasicConsume("AccessProductQueue", false, consumer);
 
             return Task.CompletedTask;
         }
@@ -60,17 +59,19 @@ namespace GameAccessService_API.RabbitMQConsumer
         {
             if (data is not null)
             {
-                if (data.productId is not null)
+                try
                 {
-                    data.isSuccess = await accessRepository.AddProductOrGame(data.userId, data.gameId, (Guid)data.productId);
+                    using var scope = scopeFactory.CreateScope();
+                    var accessRepository = scope.ServiceProvider.GetRequiredService<IAccessRepository>();
+                    data.IsSuccess = await accessRepository.AddProductOrGame(data.UserId, data.GameId, data.ProductId);
+                    rabbitMQSender.SendMessage(data, "ProductAccessDoneQueue");
+                    scope.Dispose();
                 }
-                else
+                catch (Exception)
                 {
-                    data.isSuccess = await accessRepository.AddProductOrGame(data.userId, data.gameId);
+                    data.IsSuccess = false;
+                    rabbitMQSender.SendMessage(data, "ProductAccessDoneQueue");
                 }
-
-                rabbitMQSender.SendMessage(data, "ProductAccessDoneQueue");
-                rabbitMQSender.SendMessage(data, "AccessProductQueue");
             }
         }
     }

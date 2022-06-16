@@ -7,14 +7,21 @@
     <UseWPF>true</UseWPF>
     <PackageIcon>Vision.png</PackageIcon>
     <ApplicationIcon>Vision.ico</ApplicationIcon>
+    <Product>$(AssemblyName)</Product>
+    <Company>$(Authors)</Company>
+    <Version>$(VersionPrefix)</Version>
+    <Authors>$(AssemblyName)</Authors>
+    <PackageId>$(AssemblyName)</PackageId>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Images\Add.png" />
     <None Remove="Images\AddGame.png" />
+    <None Remove="Images\AppleStore.png" />
     <None Remove="Images\Exit.png" />
     <None Remove="Images\Facebook.png" />
     <None Remove="Images\Google.png" />
+    <None Remove="Images\GooglePlay.png" />
     <None Remove="Images\LeftArrow.png" />
     <None Remove="Images\Maximize.png" />
     <None Remove="Images\Minimize.png" />
@@ -26,14 +33,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Images\AppleStore.png" />
     <Resource Include="Images\Google.png" />
     <Content Include="Vision.ico" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Notification.WPF" Version="6.1.0.4" />
     <PackageReference Include="Prism.Unity" Version="8.1.97" />
     <PackageReference Include="Prism.Unity.Extensions" Version="8.0.62" />
     <PackageReference Include="Prism.Wpf" Version="8.1.97" />
+    <PackageReference Include="QRCoder" Version="1.4.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -45,6 +55,7 @@
     <Resource Include="Images\AddGame.png" />
     <Resource Include="Images\Exit.png" />
     <Resource Include="Images\Facebook.png" />
+    <Resource Include="Images\GooglePlay.png" />
     <Resource Include="Images\LeftArrow.png" />
     <Resource Include="Images\Maximize.png" />
     <Resource Include="Images\Minimize.png" />
@@ -56,7 +67,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Commands\" />
     <Folder Include="Views\AdminPanel\AddControls\" />
     <Folder Include="Views\AdminPanel\ManageControls\" />
   </ItemGroup>
@@ -67,7 +77,13 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Update="Views\Dialogs\PurchaseProgressControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\Dialogs\InformationControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\Login\Dialogs\ResendEmailControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\Login\Dialogs\ForgotPasswordControl.xaml.cs">
@@ -83,7 +99,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Page Update="Views\Dialogs\PurchaseProgressControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Views\Dialogs\InformationControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Login\Dialogs\ResendEmailControl.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>

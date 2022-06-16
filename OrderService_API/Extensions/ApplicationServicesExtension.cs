@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using OrderService_API.DbContexts;
 using OrderService_API.Helpers;
 using OrderService_API.Middleware;
+using OrderService_API.Processors;
 using OrderService_API.RabbitMQConsumer;
 using OrderService_API.RabbitMQSender;
 using OrderService_API.Repository;
@@ -34,6 +35,8 @@ namespace OrderService_API.Extensions
             services.AddScoped<IOrderRepository, OrderRepository>();
             services.AddScoped<ICouponService, CouponService>();
             services.AddSingleton<IRabbitMQSender, RabbitMQMessageSender>();
+            services.AddScoped<IGameAccessService, GameAccessService>();
+            services.AddScoped<IOrderTypeProcessor, OrderTypeProcessor>();
             return services;
         }
     }

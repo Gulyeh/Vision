@@ -2,7 +2,7 @@ namespace GameAccessService_API.Dtos
 {
     public class ResponseDto
     {
-        public ResponseDto(bool _isSuccess, int status, object response)
+        public ResponseDto(bool _isSuccess, int status, object? response)
         {
             isSuccess = _isSuccess;
             Status = status;
@@ -11,6 +11,6 @@ namespace GameAccessService_API.Dtos
 
         public bool isSuccess { get; init; }
         public int Status { get; init; }
-        public object Response { get; init; }
+        public object? Response { get; init; }
     }
 }

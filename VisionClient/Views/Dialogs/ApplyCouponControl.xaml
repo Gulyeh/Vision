@@ -120,14 +120,19 @@
                        HorizontalAlignment="Center"
                        FontSize="9" Foreground="Gray"/>
             <TextBox Text="{Binding CouponCode}"/>
+            <TextBlock Text="{Binding ErrorText}"
+                       Foreground="Red"
+                       HorizontalAlignment="Center"
+                       FontSize="9" Margin="0,2,0,0"/>
         </StackPanel>
         
         <DockPanel Grid.Row="2" 
-                   HorizontalAlignment="Center">
+                   HorizontalAlignment="Center"
+                   IsHitTestVisible="{Binding IsEnabledButton}"
+                   Margin="0,0,0,15">
             <Button Content="Apply"
                     Style="{StaticResource ButtonTemplate}"
-                    Command="{Binding CloseDialogCommand}"
-                    CommandParameter="true"
+                    Command="{Binding ExecuteCommand}"
                     Margin="0,0,80,0"/>
             <Button Content="Cancel"
                     Style="{StaticResource ButtonTemplate}"

@@ -1,25 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
-using VisionClient.Core;
 
 namespace VisionClient.Converters
 {
-    public class UserIdToVisibilityConverter : IValueConverter
+    public class UserIdToVisibilityConverter : IMultiValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object[] value, Type targetType, object parameter, CultureInfo culture)
         {
-            return (Guid)value != StaticData.UserData.Id ? Visibility.Visible : Visibility.Collapsed;
+            if (value[0] == DependencyProperty.UnsetValue || value[1] == DependencyProperty.UnsetValue) return Visibility.Collapsed;
+            return (Guid)value[0] != (Guid)value[1] ? Visibility.Visible : Visibility.Collapsed;
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object[] ConvertBack(object value, Type[] targetType, object parameter, CultureInfo culture)
         {
-            return (Guid)value != StaticData.UserData.Id ? Visibility.Visible : Visibility.Collapsed;
+            throw new NotImplementedException();
         }
     }
 }

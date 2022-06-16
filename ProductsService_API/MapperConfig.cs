@@ -8,9 +8,10 @@ namespace ProductsService_API
     {
         public MapperConfig()
         {
-            CreateMap<Products, ProductsDto>().ReverseMap();
+            CreateMap<ProductsDto, Products>().ReverseMap();
             CreateMap<AddProductsDto, Products>();
             CreateMap<Games, GamesDto>().ReverseMap();
+            CreateMap<Currency, CurrencyDto>().ReverseMap();
         }
     }
 }

@@ -4,10 +4,7 @@ using Prism.Unity;
 using System.Windows;
 using VisionClient.Extensions;
 using VisionClient.ViewModels;
-using VisionClient.ViewModels.DialogsViewModels;
 using VisionClient.Views;
-using VisionClient.Views.Dialogs;
-using VisionClient.Views.Login;
 using VisionClient.Views.SettingsControls;
 
 namespace VisionClient
@@ -23,6 +20,7 @@ namespace VisionClient
         {
             RegisterForNavigationExtensions.RegisterViews(containerRegistry);
             RegisterDialogExtensions.RegisterDialogs(containerRegistry);
+            RegisterDependenciesExtension.RegisterMainWindowDependencies(containerRegistry);
         }
 
         protected override void ConfigureViewModelLocator()

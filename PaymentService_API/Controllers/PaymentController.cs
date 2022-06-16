@@ -1,43 +1,42 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PaymentService_API.Dtos;
 using PaymentService_API.Helpers;
 using PaymentService_API.Repository.IRepository;
 
 namespace PaymentService_API.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class PaymentController : ControllerBase
+
+    public class PaymentController : BaseApiController
     {
         private readonly IPaymentRepository paymentRepository;
+        private readonly IValidateJWT validateJWT;
 
-        public PaymentController(IPaymentRepository paymentRepository)
+        public PaymentController(IPaymentRepository paymentRepository, IValidateJWT validateJWT)
         {
             this.paymentRepository = paymentRepository;
+            this.validateJWT = validateJWT;
         }
 
-        [HttpGet("Success")]
-        public async Task<ContentResult> PaymentSuccess([FromQuery] string sessionId)
+        [HttpGet("GetPaymentMethods")]
+        [Authorize]
+        public async Task<ActionResult<ResponseDto>> GetPaymentMethods()
         {
-            var token = HttpContext.Request.Headers["Authorization"][0];
-            await paymentRepository.PaymentCompleted(sessionId, PaymentStatus.Completed, token);
-            return base.Content(@"
-                    <body>
-                        <script type='text/javascript'>
-                            window.close();
-                        </script>
-                    </body>");
+            return CheckActionResult(await paymentRepository.GetPaymentMethods());
         }
 
-        [HttpGet("Failed")]
-        public async Task<ContentResult> PaymentFailed([FromQuery] string sessionId)
+        [HttpPost("Success")]
+        public async Task<ActionResult<ResponseDto>> PaymentSuccess([FromBody] PaymentCompletedDto data)
         {
-            await paymentRepository.PaymentCompleted(sessionId, PaymentStatus.Cancelled);
-            return base.Content(@"
-                    <body>
-                        <script type='text/javascript'>
-                            window.close();
-                        </script>
-                    </body>");
+            if (!validateJWT.IsTokenValid(data.Token, out string decodedToken)) return Unauthorized();
+            return CheckActionResult(await paymentRepository.PaymentCompleted(data.SessionId, PaymentStatus.Completed, decodedToken));
+        }
+
+        [HttpPost("Failed")]
+        public async Task<ActionResult<ResponseDto>> PaymentFailed([FromBody] PaymentCompletedDto data)
+        {
+            if (string.IsNullOrEmpty(data.SessionId)) return BadRequest();
+            return CheckActionResult(await paymentRepository.PaymentCompleted(data.SessionId, PaymentStatus.Cancelled, string.Empty));
         }
     }
 }

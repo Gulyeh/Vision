@@ -9,8 +9,11 @@ namespace ProductsService_API.Helpers
         {
             Title = string.Empty;
             Discount = 0;
+            Details = string.Empty;
         }
 
+        [Key]
+        public Guid Id { get; set; }
         [Required]
         public string Title { get; set; }
         [Required]
@@ -18,7 +21,8 @@ namespace ProductsService_API.Helpers
         public decimal Price { get; set; }
         [Required]
         public bool IsAvailable { get; set; }
-        [Column(TypeName = "decimal(15,2)")]
-        public decimal? Discount { get; set; }
+        public int? Discount { get; set; }
+        [Required]
+        public string Details { get; set; }
     }
 }

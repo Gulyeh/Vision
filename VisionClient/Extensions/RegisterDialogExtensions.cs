@@ -1,9 +1,4 @@
 ﻿using Prism.Ioc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VisionClient.ViewModels.DialogsViewModels;
 using VisionClient.Views.Dialogs;
 
@@ -22,6 +17,7 @@ namespace VisionClient.Extensions
             containerRegistry.RegisterDialog<EditMessageControl, EditMessageControlViewModel>();
             containerRegistry.RegisterDialog<ImagePreviewControl, ImagePreviewControlViewModel>();
             containerRegistry.RegisterDialog<BuyMoreControl, BuyMoreControlViewModel>();
+            containerRegistry.RegisterDialog<PurchaseProgressControl, PurchaseProgressControlViewModel>();
         }
     }
 }

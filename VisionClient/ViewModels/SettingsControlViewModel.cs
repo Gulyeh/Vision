@@ -2,18 +2,13 @@
 using Prism.Mvvm;
 using Prism.Regions;
 using Prism.Services.Dialogs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace VisionClient.ViewModels
 {
     internal class SettingsControlViewModel : BindableBase
     {
-        public DelegateCommand<string> SettingsContentCommand { get; set; }
-        public DelegateCommand<string> ButtonPressedCommand { get; set; }
+        public DelegateCommand<string> SettingsContentCommand { get; }
+        public DelegateCommand<string> ButtonPressedCommand { get; }
         private readonly IRegionManager regionManager;
         private readonly IDialogService dialogService;
 

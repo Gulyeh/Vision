@@ -6,20 +6,14 @@ namespace GameAccessService_API.Entites
 {
     public class UserAccess : BaseUser
     {
-        public UserAccess()
-        {
-            Reason = string.Empty;
-            BlockedBy = string.Empty;
-        }
-
         [Key]
         public int Id { get; set; }
-        public string? Reason { get; set; }
         [Required]
-        public string BlockedBy { get; set; }
+        public Guid GameId { get; set; }
+        public string Reason { get; set; } = string.Empty;
         [Required]
-        public DateTime BlockDate { get; set; } = DateTime.UtcNow;
+        public DateTime BanDate { get; set; } = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
         [Required]
-        public DateTime ExpireDate { get; set; }
+        public DateTime BanExpires { get; set; }
     }
 }

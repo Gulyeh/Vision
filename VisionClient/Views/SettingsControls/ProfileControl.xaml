@@ -99,7 +99,7 @@
                                 <Ellipse RenderOptions.BitmapScalingMode="HighQuality" 
                                      Height="150" Width="150" DockPanel.Dock="Top">
                                     <Ellipse.Fill>
-                                        <ImageBrush Stretch="UniformToFill" ImageSource="{Binding User.PhotoUrl}"/>
+                                        <ImageBrush Stretch="UniformToFill" ImageSource="{Binding StaticData.UserData.PhotoUrl, IsAsync=True}"/>
                                     </Ellipse.Fill>
                                 </Ellipse>
                                 <TextBlock Text="Click to Change Avatar" DockPanel.Dock="Top" 
@@ -112,7 +112,11 @@
                                            Foreground="Gray"
                                            DockPanel.Dock="Top"
                                            Margin="0,0,0,5"/>
-                                <TextBlock Text="{Binding User.UserName}" Foreground="White" FontSize="20" />
+                                <TextBlock Text="{Binding StaticData.UserData.Username}" 
+                                           Foreground="White" 
+                                           FontSize="20" 
+                                           MaxWidth="250"
+                                           TextTrimming="CharacterEllipsis"/>
                                 <Button Content="Edit" Style="{StaticResource ButtonTemplate}"
                                         Command="{Binding SettingsCommand}" CommandParameter="Username"/>
                             </DockPanel>
@@ -122,9 +126,11 @@
                                            Foreground="Gray"
                                            DockPanel.Dock="Top"
                                            Margin="0,0,0,5"/>
-                                <TextBlock Text="{Binding User.Description}" 
+                                <TextBlock Text="{Binding StaticData.UserData.Description}" 
                                            Foreground="white" 
                                            FontSize="15" 
+                                           MaxWidth="250"
+                                           TextTrimming="CharacterEllipsis"
                                            VerticalAlignment="Center"/>
                                 <Button Content="Edit" 
                                         Command="{Binding SettingsCommand}" 
@@ -134,40 +140,6 @@
                         </DockPanel>
                     </StackPanel>
                 </Border>
-
-                <StackPanel Orientation="Vertical" Margin="0,50,0,0"
-                            HorizontalAlignment="Stretch">
-                    <TextBlock Text="Email Address" FontSize="20" 
-                               Foreground="White" Margin="0,0,0,10"/>
-                    <Separator Margin="0,0,0,20" Height="0.9"/>
-                    <StackPanel Orientation="Vertical" 
-                                HorizontalAlignment="Left"
-                                Margin="0,10,0,0">
-                        <TextBlock Text="Current Email Address" FontSize="12" 
-                                           Foreground="Gray"
-                                           DockPanel.Dock="Top"
-                                           Margin="0,0,0,5"/>
-                        <TextBox Text="{Binding User.EmailAddress}" 
-                                 IsHitTestVisible="False"/>
-                        <TextBlock Text="New Email Address" FontSize="12" 
-                                           Foreground="Gray"
-                                           DockPanel.Dock="Top"
-                                           Margin="0,50,0,5"/>
-                        <TextBox/>
-                        <TextBlock Text="Current Password" FontSize="12" 
-                                           Foreground="Gray"
-                                           DockPanel.Dock="Top"
-                                           Margin="0,20,0,5"/>
-                        <PasswordBox />
-                        <Button Content="Save"
-                            Style="{StaticResource ButtonTemplate}"
-                            Command="{Binding SaveNewEmailCommand}"
-                            FontSize="15"
-                            Width="350"
-                            Height="40"
-                            Margin="0,20,0,0"/>
-                    </StackPanel>
-                </StackPanel>
             </StackPanel>
         </ScrollViewer>
     </Grid>

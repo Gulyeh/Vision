@@ -9,6 +9,7 @@ namespace PaymentService_API.Entities
         public Payment()
         {
             Email = string.Empty;
+            Provider = string.Empty;
         }
 
         [Key]
@@ -26,5 +27,7 @@ namespace PaymentService_API.Entities
         public string? StripeId { get; set; }
         [Required]
         public PaymentStatus PaymentStatus { get; set; }
+        [Required]
+        public string Provider { get; set; }
     }
 }

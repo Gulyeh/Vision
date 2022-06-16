@@ -4,12 +4,13 @@ namespace UsersService_API.Repository.IRepository
 {
     public interface IFriendsRepository
     {
-        Task<ResponseDto> GetFriends(Guid userId);
-        Task<ResponseDto> GetFriendRequests(Guid userId);
+        Task<IEnumerable<GetFriendsDto>> GetFriends(Guid userId, string? access_token);
+        Task<IEnumerable<GetFriendRequestsDto>> GetFriendRequests(Guid userId);
         Task<bool> SendFriendRequest(FriendRequestDto data);
         Task<bool> AcceptFriendRequest(Guid userId, Guid SenderId);
         Task<bool> DeclineFriendRequest(Guid userId, Guid SenderId);
         Task<bool> DeleteFriend(Guid userId, Guid ToDeleteUserId);
-        Task<ResponseDto> GetPendingRequests(Guid userId);
+        Task<IEnumerable<GetPendingRequestsDto>> GetPendingRequests(Guid userId);
+        Task<(bool, bool)> ToggleBlock(Guid userId, Guid UserToBlockId);
     }
 }

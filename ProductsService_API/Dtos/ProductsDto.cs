@@ -10,11 +10,12 @@ namespace ProductsService_API.Dtos
             PhotoUrl = string.Empty;
         }
 
-        public Guid ProductId { get; set; }
         [Required]
         public Guid GameId { get; set; }
         [Required]
         public string PhotoUrl { get; set; }
+        [Required]
+        public bool IsPurchased { get; set; }
         public IFormFile? Photo { get; set; }
     }
 }

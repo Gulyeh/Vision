@@ -1,38 +1,28 @@
 ﻿using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Security.Cryptography.Xml;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 
 namespace VisionClient.Utility
 {
-    internal interface IXMLCredentials
-    {
-        (string, string, bool) LoadCredentials();
-        void SaveCredentials(string email, string password, bool keepLoggedIn);
-    }
 
-    internal class XMLCredentials : IXMLCredentials
+    public static class XMLCredentials
     {
-        public (string, string, bool) LoadCredentials()
+        public static (string, string, bool) LoadCredentials()
         {
             try
             {
-                XmlDocument doc = new XmlDocument();
+                XmlDocument doc = new();
                 doc.Load(Directory.GetCurrentDirectory() + @"\VisionConfig.xml");
                 if (doc is null) return (string.Empty, string.Empty, false);
 
                 RegistryKey? key = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Vision");
-                byte[]? aesKey = key?.GetValue("Key") as byte[];
-                byte[]? aesIV = key?.GetValue("IV") as byte[];
 
-                if (aesKey is null || aesIV is null) return (string.Empty, string.Empty, false);
+                if (key?.GetValue("Key") is not byte[] aesKey ||
+                    key?.GetValue("IV") is not byte[] aesIV) return (string.Empty, string.Empty, false);
 
                 var aes = Aes.Create();
                 aes.Key = aesKey;
@@ -40,7 +30,7 @@ namespace VisionClient.Utility
 
                 var email = DecryptAES(doc?.SelectSingleNode("//Config/Credentials/Email")?.InnerText, aes);
                 var password = DecryptAES(doc?.SelectSingleNode("//Config/Credentials/Password")?.InnerText, aes);
-                bool.TryParse(doc?.SelectSingleNode("//Config/Credentials/AutoLogin")?.InnerText, out bool autologin);
+                _ = bool.TryParse(doc?.SelectSingleNode("//Config/Credentials/AutoLogin")?.InnerText, out bool autologin);
 
                 return (email, password, autologin);
             }
@@ -50,7 +40,7 @@ namespace VisionClient.Utility
             }
         }
 
-        public void SaveCredentials(string email, string password, bool keepLoggedIn)
+        public static void SaveCredentials(string email, string password, bool keepLoggedIn)
         {
             try
             {
@@ -85,7 +75,7 @@ namespace VisionClient.Utility
             catch (Exception) { }
         }
 
-        private void CreateConfig(string directory)
+        private static void CreateConfig(string directory)
         {
             new XDocument(
                     new XElement("Config",
@@ -98,29 +88,27 @@ namespace VisionClient.Utility
             ).Save(directory);
         }
 
-        private string EncryptAES(string plainText, SymmetricAlgorithm aes)
+        private static string EncryptAES(string plainText, SymmetricAlgorithm aes)
         {
             byte[] encrypted;
 
             ICryptoTransform enc = aes.CreateEncryptor(aes.Key, aes.IV);
 
-            using (MemoryStream ms = new MemoryStream())
+            using (MemoryStream ms = new())
             {
-                using (CryptoStream cs = new CryptoStream(ms, enc, CryptoStreamMode.Write))
+                using CryptoStream cs = new(ms, enc, CryptoStreamMode.Write);
+                using (StreamWriter sw = new(cs))
                 {
-                    using (StreamWriter sw = new StreamWriter(cs))
-                    {
-                        sw.Write(plainText);
-                    }
-
-                    encrypted = ms.ToArray();
+                    sw.Write(plainText);
                 }
+
+                encrypted = ms.ToArray();
             }
 
             return Convert.ToBase64String(encrypted);
         }
 
-        private string DecryptAES(string? encryptedText, SymmetricAlgorithm aes)
+        private static string DecryptAES(string? encryptedText, SymmetricAlgorithm aes)
         {
             if (string.IsNullOrEmpty(encryptedText)) return string.Empty;
 
@@ -129,15 +117,11 @@ namespace VisionClient.Utility
 
             ICryptoTransform dec = aes.CreateDecryptor(aes.Key, aes.IV);
 
-            using (MemoryStream ms = new MemoryStream(cipher))
+            using (MemoryStream ms = new(cipher))
             {
-                using (CryptoStream cs = new CryptoStream(ms, dec, CryptoStreamMode.Read))
-                {
-                    using (StreamReader sr = new StreamReader(cs))
-                    {
-                        decrypted = sr.ReadToEnd();
-                    }
-                }
+                using CryptoStream cs = new(ms, dec, CryptoStreamMode.Read);
+                using StreamReader sr = new(cs);
+                decrypted = sr.ReadToEnd();
             }
             return decrypted;
         }

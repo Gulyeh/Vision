@@ -10,6 +10,7 @@ namespace GamesDataService_API.Helpers
             IconUrl = string.Empty;
             CoverUrl = string.Empty;
             ClientVersion = string.Empty;
+            BannerUrl = string.Empty;
         }
 
         [Required]
@@ -18,6 +19,8 @@ namespace GamesDataService_API.Helpers
         public string IconUrl { get; set; }
         [Required]
         public string CoverUrl { get; set; }
+        [Required]
+        public string BannerUrl { get; set; }
         [Required]
         public string ClientVersion { get; set; }
     }

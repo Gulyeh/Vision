@@ -5,30 +5,24 @@ using Prism.Mvvm;
 using Prism.Regions;
 using Prism.Services.Dialogs;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
 using VisionClient.Core.Enums;
 using VisionClient.Core.Events;
+using VisionClient.Core.Models;
 using VisionClient.Core.Models.Account;
 using VisionClient.Core.Repository.IRepository;
-using VisionClient.Core.Services.IServices;
 using VisionClient.Extensions;
 using VisionClient.Helpers;
 using VisionClient.Utility;
-using VisionClient.Views;
 using VisionClient.Views.Login.Dialogs;
 
 namespace VisionClient.ViewModels
 {
     internal class LoginControlViewModel : BindableBase
     {
-        private string? errorText;
-        public string? ErrorText
+        private string errorText = string.Empty;
+        public string ErrorText
         {
             get { return errorText; }
             set { SetProperty(ref errorText, value); }
@@ -41,15 +35,15 @@ namespace VisionClient.ViewModels
             set { SetProperty(ref keepLogged, value); }
         }
 
-        private string? email_errorText;
-        public string? Email_ErrorText
+        private string email_errorText = string.Empty;
+        public string Email_ErrorText
         {
             get { return email_errorText; }
             set { SetProperty(ref email_errorText, value); }
         }
 
-        private string? password_errorText;
-        public string? Password_ErrorText
+        private string password_errorText = string.Empty;
+        public string Password_ErrorText
         {
             get { return password_errorText; }
             set { SetProperty(ref password_errorText, value); }
@@ -69,32 +63,30 @@ namespace VisionClient.ViewModels
             set { SetProperty(ref password, value); }
         }
 
-        private string? authCode;
-        public string? AuthCode
+        private string authCode = string.Empty;
+        public string AuthCode
         {
             get { return authCode; }
             set { SetProperty(ref authCode, value); }
         }
 
-        public UserControl? tempControl { get; set; } = null;
-        public DelegateCommand RegisterCommand { get; set; }
-        public DelegateCommand ForgotPasswordCommand { get; set; }
-        public DelegateCommand LoginCommand { get; set; }
+        public UserControl? TempControl { get; set; } = null;
+        public DelegateCommand RegisterCommand { get; }
+        public DelegateCommand ForgotPasswordCommand { get; }
+        public DelegateCommand LoginCommand { get; }
 
         private readonly IRegionManager regionManager;
         private readonly IEventAggregator eventAggregator;
         private readonly IDialogService dialogService;
         private readonly IAccountRepository accountRepository;
-        private readonly IXMLCredentials xmlCredentials;
 
-        public LoginControlViewModel(IRegionManager regionManager, IEventAggregator eventAggregator, 
-            IDialogService dialogService, IAccountRepository accountRepository, IXMLCredentials xmlCredentials)
+        public LoginControlViewModel(IRegionManager regionManager, IEventAggregator eventAggregator,
+            IDialogService dialogService, IAccountRepository accountRepository)
         {
             this.regionManager = regionManager;
             this.eventAggregator = eventAggregator;
             this.dialogService = dialogService;
             this.accountRepository = accountRepository;
-            this.xmlCredentials = xmlCredentials;
 
             RegisterCommand = new DelegateCommand(SwitchToRegister);
             ForgotPasswordCommand = new DelegateCommand(OpenForgotPasswordDialog);
@@ -110,7 +102,7 @@ namespace VisionClient.ViewModels
 
             if (string.IsNullOrEmpty(Email) && string.IsNullOrEmpty(Password))
             {
-                (Email, Password, KeepLogged) = xmlCredentials.LoadCredentials();
+                (Email, Password, KeepLogged) = XMLCredentials.LoadCredentials();
                 if (KeepLogged) LoginCommand.Execute();
             }
         }
@@ -151,39 +143,43 @@ namespace VisionClient.ViewModels
                     {
                         LoginResponseTypes.WrongCredentials => WrongCredentials(stringData),
                         LoginResponseTypes.UserBanned => UserBanned(stringData),
-                        LoginResponseTypes.TwoFactorAuth => TFARequired(),
+                        LoginResponseTypes.TwoFactorAuth => TFARequired(loginVis),
                         LoginResponseTypes.WrongAuthCode => WrongAuthCode(stringData),
-                        _ => LoginPassed()
+                        _ => await LoginPassed()
                     };
 
-                    xmlCredentials.SaveCredentials(Email, Password, KeepLogged);
+                    XMLCredentials.SaveCredentials(Email, Password, KeepLogged);
                     loginVis.IsLoadingVisible(false);
                 }
                 else throw new Exception();
             }
-            catch (Exception) {
+            catch (Exception)
+            {
                 loginVis.IsLoadingVisible(false);
-                ErrorText = "Wrong email or password"; 
-            };          
+                ErrorText = "Wrong email or password";
+            };
         }
 
         private bool WrongCredentials(string stringData)
         {
-            ErrorText = JsonConvert.DeserializeObject<string>(stringData);
+            var json = JsonConvert.DeserializeObject<string>(stringData);
+            if (json is not null) ErrorText = json;
             return true;
         }
 
         private bool UserBanned(string stringData)
         {
+            var json = JsonConvert.DeserializeObject<BanModel>(stringData);
             dialogService.ShowDialog("UserBannedControl", new DialogParameters()
             {
-                { "content",  stringData }
+                { "banModel",  json }
             }, null);
             return true;
         }
 
-        private bool TFARequired()
+        private bool TFARequired(LoginWindowLoadingVisibilityHelper loginVis)
         {
+            loginVis.IsLoadingVisible(false);
             dialogService.ShowDialog(nameof(TFAControl));
             return true;
         }
@@ -197,11 +193,14 @@ namespace VisionClient.ViewModels
             return true;
         }
 
-        private bool LoginPassed()
+        private async Task<bool> LoginPassed()
         {
+            bool response = await accountRepository.GetServerData();
+            if (!response) throw new Exception();
+
             var bs = new LoadingBootstrapper();
             bs.Run();
-            CloseParentWindowHelper.Close(tempControl);
+            CloseParentWindowHelper.Close(TempControl);
             return true;
         }
 

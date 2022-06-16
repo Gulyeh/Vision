@@ -11,7 +11,7 @@
              d:DesignHeight="850" d:DesignWidth="800"
              Background="#164971">
     <UserControl.Resources>
-        <Converters:CountToVisibilityCovnerter x:Key="DiscountToVis" />
+        <Converters:DiscountToVisibilityConverter x:Key="DiscountToVis" />
         <Converters:GamePurchasedToTextConverter x:Key="PurchaseToText"/>
         <Converters:BooleanToOpacityConverter x:Key="BoolToOpacity"/>
         <Style TargetType="Button" x:Key="ArrowButton">
@@ -45,6 +45,9 @@
                                 <Setter TargetName="Border" Property="Opacity" Value="0.8"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
                                 <Setter TargetName="Border" Property="Opacity" Value="0.5"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -82,36 +85,42 @@
     <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Hidden" CanContentScroll="False">
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="*" MinHeight="250"/>
-                <RowDefinition Height="300" MinHeight="200"/>
-                <RowDefinition Height="300" MinHeight="200"/>
-                <RowDefinition Height="30"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="300"/>
+                <RowDefinition Height="300"/>
+                <RowDefinition Height="*" MinHeight="30"/>
             </Grid.RowDefinitions>
             <DockPanel Grid.Row="0"
                         HorizontalAlignment="Stretch" 
-                        VerticalAlignment="Center">
+                        VerticalAlignment="Top">
                 <Border HorizontalAlignment="Stretch" 
                         Height="45" 
                         DockPanel.Dock="Bottom" Margin="0,-45,0,0" 
                         Panel.ZIndex="1">
-                    <Button Width="100" Height="30" Content="Apply Coupon" 
+                    <DockPanel>
+                        <Button Width="100" Height="30" Content="Apply Coupon" 
                             FontSize="13" Background="#164971"
                             BorderThickness="1" BorderBrush="Gray" 
                             Foreground="White" HorizontalAlignment="Left" 
                             Margin="40,0,0,0" Style="{StaticResource TemplateButton}"
                             Command="{Binding OpenCouponDialogCommand}"/>
+                        <TextBlock Text="{Binding ErrorText}" Foreground="Red" FontSize="10" HorizontalAlignment="Right"
+                                   VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    </DockPanel>
                     <Border.Background>
                         <SolidColorBrush Color="Black" Opacity="0.3"/>
                     </Border.Background>
                 </Border>
                 <Button Width="200" Height="50" 
-                        Content="{Binding GameModel.IsPurchased, Converter = {StaticResource PurchaseToText}}" 
+                        Content="{Binding GameProducts.IsPurchased, Converter = {StaticResource PurchaseToText}}" 
                         FontSize="20" Background="#0AA1DD"
+                        IsEnabled="{Binding MainButtonEnabled}"
+                        Style="{StaticResource TemplateButton}"
                         BorderThickness="1" BorderBrush="#0f3452" 
                         Foreground="White" HorizontalAlignment="Center" 
                         Margin="35,-180,0,0" DockPanel.Dock="Bottom" 
                         Panel.ZIndex="1" Command="{Binding MainButtonCommand}"/>
-                <Image Source="{Binding GameModel.PhotoUrl, Mode=OneWay}" 
+                <Image Source="{Binding GameModel.BannerUrl, Mode=OneWay, IsAsync=True}" 
                        MinHeight="250"
                        MaxHeight="400" Panel.ZIndex="0"
                        HorizontalAlignment="Center" 
@@ -124,7 +133,10 @@
                     </Image.OpacityMask>
                 </Image>
             </DockPanel>
-            <DockPanel Grid.Row="1" HorizontalAlignment="Stretch" Margin="40,20,20,0" VerticalAlignment="Top">
+            <DockPanel Grid.Row="1" 
+                       HorizontalAlignment="Stretch" 
+                       Margin="40,20,20,0" 
+                       VerticalAlignment="Top">
                 <Button Name="RightNewsScrollButton" Foreground="White"
                         Style="{StaticResource ArrowButton}"
                         BorderThickness="0" 
@@ -153,6 +165,7 @@
             <ListView Grid.Row="1"
                       Name="NewsListView"
                       PreviewMouseWheel="HandlePreviewMouseWheel"
+                      PreviewMouseRightButtonDown="PreventRightMouseButton"
                       ScrollViewer.ScrollChanged="NewsListView_ScrollChanged"
                       HorizontalAlignment="Left"
                       VerticalAlignment="Center"
@@ -161,15 +174,15 @@
                       SelectionMode="Single"
                       ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                       ScrollViewer.CanContentScroll="False"
-                      ItemsSource="{Binding newsList}"
+                      ItemsSource="{Binding NewsList}"
                       SelectedItem="{Binding SelectedNews}"
                       Margin="40,20,0,0"
                       LostFocus="Deselect_ListItem">
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <Border Width="370" Height="200" BorderThickness="1" BorderBrush="Gray">
+                        <Border Width="370" Height="210" BorderThickness="1" BorderBrush="Gray">
                             <DockPanel>
-                                <Image Source="{Binding PhotoUrl}" 
+                                <Image Source="{Binding PhotoUrl, IsAsync=True}" 
                                         Height="280" VerticalAlignment="Center" DockPanel.Dock="Top" Panel.ZIndex="0"/>
                                 <Border Panel.ZIndex="1" Height="60" BorderThickness="0"
                                         DockPanel.Dock="Bottom" Margin="0,-60,0,0">
@@ -177,7 +190,7 @@
                                         <SolidColorBrush Color="Black" Opacity="0.8"/>
                                     </Border.Background>
                                     <StackPanel Orientation="Vertical" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding Date, StringFormat='{}{0:dd/MM/yyyy}'}" 
+                                        <TextBlock Text="{Binding CreatedDate, StringFormat='{}{0:dd/MM/yyyy}'}" 
                                                    VerticalAlignment="Top" 
                                                    Foreground="Gray" 
                                                    FontSize="10" 
@@ -195,7 +208,10 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-            <DockPanel Grid.Row="2" HorizontalAlignment="Stretch" Margin="40,20,20,0" VerticalAlignment="Top">
+            <DockPanel Grid.Row="2" 
+                       HorizontalAlignment="Stretch" 
+                       Margin="40,20,20,0" 
+                       VerticalAlignment="Top">
                 <Button Name="RightPackageScrollButton" Foreground="White"
                         Style="{StaticResource ArrowButton}"
                         BorderThickness="0" 
@@ -224,6 +240,7 @@
             <ListView Grid.Row="2"
                       ScrollViewer.ScrollChanged="PackageListView_ScrollChanged"
                       PreviewMouseWheel="HandlePreviewMouseWheel"
+                      PreviewMouseRightButtonDown="PreventRightMouseButton"
                       Name="PackageListView"
                       HorizontalAlignment="Left"
                       VerticalAlignment="Center"
@@ -233,17 +250,17 @@
                       ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                       ScrollViewer.VerticalScrollBarVisibility="Hidden"
                       ScrollViewer.CanContentScroll="False"
-                      ItemsSource="{Binding productList}"
-                      IsHitTestVisible="{Binding GameModel.IsPurchased}"
+                      ItemsSource="{Binding GameProducts.Products}"
+                      IsHitTestVisible="{Binding EnabledProducts}"
                       SelectedItem="{Binding SelectedPackage, Mode=OneWayToSource}"
-                      Opacity="{Binding GameModel.IsPurchased, Converter={StaticResource BoolToOpacity}}"
-                      Margin="40,40,0,0"
+                      Opacity="{Binding GameProducts.IsPurchased, Converter={StaticResource BoolToOpacity}}"
+                      Margin="40,10,0,0"
                       PreviewMouseLeftButtonDown="Deselect_ListItem">
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <Border Height="200" Width="300" Grid.Row="2" IsHitTestVisible="{Binding IsAvailable}" 
-                                Opacity="{Binding IsAvailable, Converter={StaticResource BoolToOpacity}}"
-                                BorderBrush="Gray" BorderThickness="2">
+                        <Border Height="200" Width="300" Grid.Row="2" Opacity="{Binding IsAvailable, Converter={StaticResource BoolToOpacity}}"
+                                BorderBrush="Gray" BorderThickness="2" 
+                                IsHitTestVisible="{Binding IsAvailable}">
                             <DockPanel>
                                 <Border Height="40" DockPanel.Dock="Top" Panel.ZIndex="1">
                                     <TextBlock Text="{Binding Title}"
@@ -276,7 +293,7 @@
                                        Panel.ZIndex="0"
                                        Margin="0,-40,0,0"
                                        DockPanel.Dock="Top"
-                                       Source="{Binding PhotoUrl}"/>
+                                       Source="{Binding PhotoUrl, IsAsync=True}"/>
                             </DockPanel>
                         </Border>
                     </DataTemplate>

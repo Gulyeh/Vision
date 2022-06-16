@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using ProductsService_API.Dtos;
 
 namespace ProductsService_API.Repository.IRepository
@@ -11,6 +7,6 @@ namespace ProductsService_API.Repository.IRepository
         Task<ResponseDto> AddGame(AddGamesDto data, string Access_Token);
         Task<ResponseDto> DeleteGame(Guid gameId);
         Task<ResponseDto> EditGame(GamesDto data);
-        Task<ResponseDto> GetGames(Guid? gameId = null);
+        Task<ResponseDto> GetGame(Guid gameId, string Access_Token);
     }
 }

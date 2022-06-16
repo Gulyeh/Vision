@@ -1,49 +1,34 @@
 ﻿using Prism.Commands;
 using Prism.Mvvm;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using VisionClient.Core;
+using VisionClient.Core.Enums;
 using VisionClient.Core.Models;
+using VisionClient.SignalR;
 
 namespace VisionClient.ViewModels
 {
     internal class PendingControlViewModel : BindableBase
     {
-        public ObservableCollection<SearchModel> PendingUsersList { get; set; }
-        public DelegateCommand<SearchModel> CancelPendingCommand { get; set; }
-        public PendingControlViewModel()
-        {
-            PendingUsersList = new ObservableCollection<SearchModel>();
-            CancelPendingCommand = new DelegateCommand<SearchModel>(CancelPending);
-            var User = new SearchModel()
-            {
-                IsFriend = false,
-                User = new UserModel()
-                {
-                    PhotoUrl = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__340.png",
-                    UserName = "TestSUperUser",
-                    Id = new Guid()
-                }
-            };
+        private readonly IUsersService_Hubs usersService_Hubs;
 
-            PendingUsersList.Add(User);
-            PendingUsersList.Add(User);
-            PendingUsersList.Add(User);
-            PendingUsersList.Add(User);
-            PendingUsersList.Add(User);
-            PendingUsersList.Add(User);
-            PendingUsersList.Add(User);
-            PendingUsersList.Add(User);
-            PendingUsersList.Add(User);
-            PendingUsersList.Add(User);
+        public DelegateCommand<BaseUserModel> CancelPendingCommand { get; }
+        public IStaticData StaticData { get; }
+
+        public PendingControlViewModel(IUsersService_Hubs usersService_Hubs, IStaticData staticData)
+        {
+            CancelPendingCommand = new DelegateCommand<BaseUserModel>(CancelPending);
+            this.usersService_Hubs = usersService_Hubs;
+            StaticData = staticData;
         }
 
-        private void CancelPending(SearchModel user)
+        private async void CancelPending(BaseUserModel user)
         {
-
+            try
+            {
+                await usersService_Hubs.Send(UserServiceHubs.Friends, "DeclineFriendRequest", user.UserId);
+            }
+            catch (Exception) { }
         }
     }
 }

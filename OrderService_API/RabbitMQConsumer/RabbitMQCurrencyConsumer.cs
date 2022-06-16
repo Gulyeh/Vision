@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using OrderService_API.Builders;
+using OrderService_API.Dtos;
 using OrderService_API.Helpers;
 using OrderService_API.Messages;
 using OrderService_API.RabbitMQSender;
@@ -18,17 +18,14 @@ namespace OrderService_API.RabbitMQConsumer
     {
         private IConnection connection;
         private IModel channel;
-        private readonly ICacheService cacheService;
-        private readonly IHubContext<OrderHub> hubContext;
+        private readonly IServiceScopeFactory serviceScopeFactory;
         private readonly IRabbitMQSender rabbitMQSender;
         private readonly ILogger<RabbitMQCurrencyConsumer> logger;
 
-        public RabbitMQCurrencyConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory serviceScopeFactory, 
+        public RabbitMQCurrencyConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory serviceScopeFactory,
             IRabbitMQSender rabbitMQSender, ILogger<RabbitMQCurrencyConsumer> logger)
         {
-            using var scope = serviceScopeFactory.CreateScope();
-            this.hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<OrderHub>>();
-            this.cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
+            this.serviceScopeFactory = serviceScopeFactory;
             this.rabbitMQSender = rabbitMQSender;
             this.logger = logger;
             var factory = new ConnectionFactory
@@ -55,7 +52,7 @@ namespace OrderService_API.RabbitMQConsumer
                 HandleMessage(currencyData).GetAwaiter().GetResult();
                 channel.BasicAck(args.DeliveryTag, false);
             };
-            channel.BasicConsume("CurrencyPaymentDoneQueue", true, consumer);
+            channel.BasicConsume("CurrencyPaymentDoneQueue", false, consumer);
 
             return Task.CompletedTask;
         }
@@ -64,10 +61,21 @@ namespace OrderService_API.RabbitMQConsumer
         {
             if (data is not null)
             {
-                var connIds = await cacheService.TryGetFromCache(data.UserId);
-                if (connIds.Count() > 0) await hubContext.Clients.Clients(connIds).SendAsync("CurrencyPaymentDone", new { isSuccess = data.isSuccess, amount = data.Amount });
-                var emailGenerator = new EmailGenerator<CurrencyDoneDto>(data);
-                rabbitMQSender.SendMessage(emailGenerator.Generate(), "SendEmailQueue");
+                List<string> connIds = new();
+                using var scope = serviceScopeFactory.CreateScope();
+                var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<OrderHub>>();
+                try
+                {
+                    var cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
+
+                    connIds = await cacheService.TryGetFromCache(data.UserId);
+                    if (connIds.Count() > 0) await hubContext.Clients.Clients(connIds).SendAsync("CurrencyPaymentDone", new CurrencyPurchasedDto(data.IsSuccess, data.Amount));
+                    scope.Dispose();
+                }
+                catch (Exception)
+                {
+                    if (connIds.Count() > 0) await hubContext.Clients.Clients(connIds).SendAsync("CurrencyPaymentDone", new CurrencyPurchasedDto(data.IsSuccess, data.Amount));
+                }
             }
         }
     }

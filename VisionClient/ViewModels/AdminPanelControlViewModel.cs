@@ -1,23 +1,17 @@
 ﻿using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Regions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace VisionClient.ViewModels
 {
     internal class AdminPanelControlViewModel : BindableBase
     {
         private readonly IRegionManager regionManager;
-        public DelegateCommand BackwardCommand { get; set; }
-        public DelegateCommand<string> AdminPanelContentCommand { get; set; }
+        public DelegateCommand BackwardCommand { get; }
+        public DelegateCommand<string> AdminPanelContentCommand { get; }
         public AdminPanelControlViewModel(IRegionManager regionManager)
         {
-            BackwardCommand = new DelegateCommand(navigateToGames);
+            BackwardCommand = new DelegateCommand(NavigateToGames);
             AdminPanelContentCommand = new DelegateCommand<string>(SwitchContent);
             this.regionManager = regionManager;
         }
@@ -27,7 +21,7 @@ namespace VisionClient.ViewModels
             regionManager.RequestNavigate("AdminPanelRegion", name);
         }
 
-        private void navigateToGames()
+        private void NavigateToGames()
         {
             regionManager.RequestNavigate("LibraryContentRegion", "GamesControl");
         }

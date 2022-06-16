@@ -21,7 +21,7 @@ namespace UsersService_API.RabbitMQConsumer
         private readonly IRabbitMQSender rabbitMQSender;
         private readonly ILogger<RabbitMQCurrencyConsumer> logger;
 
-        public RabbitMQCurrencyConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory serviceScopeFactory, 
+        public RabbitMQCurrencyConsumer(IOptions<RabbitMQSettings> options, IServiceScopeFactory serviceScopeFactory,
             IRabbitMQSender rabbitMQSender, ILogger<RabbitMQCurrencyConsumer> logger)
         {
             this.serviceScopeFactory = serviceScopeFactory;
@@ -62,21 +62,35 @@ namespace UsersService_API.RabbitMQConsumer
         {
             if (data is not null)
             {
+                List<string>? connIds = null;
                 using var scope = serviceScopeFactory.CreateScope();
                 var currencyRepository = scope.ServiceProvider.GetRequiredService<ICurrencyRepository>();
                 var cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
+                var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<UsersHub>>();
 
-                data.isSuccess = await currencyRepository.ChangeFunds(data);
-                var userCache = await cacheService.TryGetFromCache();
-                if (userCache.ContainsKey(data.UserId))
+                try
                 {
-                    var connIds = userCache.GetValueOrDefault(data.UserId);
-                    if (connIds is not null)
+                    data.IsSuccess = await currencyRepository.ChangeFunds(data);
+                    if (!data.IsCode) rabbitMQSender.SendMessage(data, "CurrencyPaymentDoneQueue");
+                    else
                     {
-                        var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<UsersHub>>();
-                        await hubContext.Clients.Clients(connIds).SendAsync("CurrencyPurchased", new CurrencyPurchased { isSuccess = data.isSuccess, Amount = data.Amount});
+                        var userCache = await cacheService.TryGetFromCache(HubTypes.Users);
+                        if (userCache.ContainsKey(data.UserId))
+                        {
+                            connIds = userCache.GetValueOrDefault(data.UserId);
+                            if (connIds is not null) await hubContext.Clients.Clients(connIds).SendAsync("CurrencyCodeUsed", new CurrencyPurchased(data.IsSuccess, data.Amount));
+                        }
                     }
-                    if(!data.isCode) rabbitMQSender.SendMessage(data, "CurrencyPaymentDoneQueue");
+                }
+                catch (Exception)
+                {
+                    data.IsSuccess = false;
+                    if (!data.IsCode) rabbitMQSender.SendMessage(data, "CurrencyPaymentDoneQueue");
+                    else
+                    {
+                        if (connIds is not null && connIds.Count > 0) await hubContext.Clients.Clients(connIds).SendAsync("CodeFailed", new[] { "Currency coupon could not be applied correctly" });
+                        rabbitMQSender.SendMessage(new CodeFailedDto(data.UserId, data.Code), "CouponFailedQueue");
+                    }
                 }
             }
         }

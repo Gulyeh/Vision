@@ -1,5 +1,4 @@
 using MessageService_API.Helpers;
-using MessageService_API.Services.IServices;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
 using System.Text;
@@ -31,7 +30,7 @@ namespace MessageService_API.Services
             client.DefaultRequestHeaders.Clear();
 
             if (apiRequest.Data is not null) request.Content = new StringContent(JsonConvert.SerializeObject(apiRequest.Data), Encoding.UTF8, "application/json");
-            if (!string.IsNullOrEmpty(apiRequest.Access_Token)) client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiRequest.Access_Token);
+            if (!string.IsNullOrEmpty(apiRequest.Access_Token)) client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiRequest.Access_Token.Replace("Bearer ", ""));
 
             HttpResponseMessage apiResponse;
 

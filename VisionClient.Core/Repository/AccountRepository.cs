@@ -1,13 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VisionClient.Core.Builders;
 using VisionClient.Core.Dtos;
 using VisionClient.Core.Enums;
+using VisionClient.Core.Models;
 using VisionClient.Core.Models.Account;
 using VisionClient.Core.Repository.IRepository;
 using VisionClient.Core.Services.IServices;
@@ -17,10 +13,60 @@ namespace VisionClient.Core.Repository
     public class AccountRepository : IAccountRepository
     {
         private readonly IAccountService accountService;
+        private readonly IStaticData StaticData;
 
-        public AccountRepository(IAccountService accountService)
+        public AccountRepository(IAccountService accountService, IStaticData staticData)
         {
             this.accountService = accountService;
+            StaticData = staticData;
+        }
+
+        public async Task<bool> GetServerData()
+        {
+            var response = await accountService.GetServerData(StaticData.SessionId);
+            if (response is null || !response.isSuccess)
+            {
+                StaticData.UserData = new();
+                StaticData.SessionId = Guid.Empty;
+                return false;
+            }
+
+            var stringData = response.Response.ToString();
+            if (!string.IsNullOrEmpty(stringData))
+            {
+                ServerDataModel? serverData = JsonConvert.DeserializeObject<ServerDataModel>(stringData);
+                if (serverData is not null && !serverData.IsAnyNullOrEmpty()) return true;
+            }
+
+            StaticData.UserData = new();
+            StaticData.SessionId = Guid.Empty;
+            return false;
+        }
+
+        public async Task<(bool, string?)> ChangePassword(string currentPassword, string newPassword, string repeatPassword)
+        {
+            var changePasswordBuilder = new ChangePasswordBuilder();
+            changePasswordBuilder.SetNewPassword(newPassword);
+            changePasswordBuilder.SetRepeatPassword(repeatPassword);
+            changePasswordBuilder.SetCurrentPassword(currentPassword);
+
+            ResponseDto response = await accountService.ChangePassword(changePasswordBuilder.Build());
+            return ValidateStringResponse(response);
+        }
+
+        public async Task<(bool, object?)> Generate2FA()
+        {
+            ResponseDto response = await accountService.Get2FACode();
+            if (response is null) return (false, "Something went wrong");
+
+            if (!response.isSuccess) return ValidateStringResponse(response);
+
+            var stringData = response.Response.ToString();
+
+            TFADataModel? json = new();
+            if (stringData is not null) json = JsonConvert.DeserializeObject<TFADataModel>(stringData);
+
+            return (response.isSuccess, json);
         }
 
         public async Task<LoginResponse> LoginUser(string email, string password, string? AuthCode = null)
@@ -31,9 +77,8 @@ namespace VisionClient.Core.Repository
             builder.SetEmail(email);
             builder.SetPassword(password);
             builder.SetAuthCode(AuthCode);
-            var login = builder.Build();
 
-            ResponseDto response = await accountService.Login(login);
+            ResponseDto response = await accountService.Login(builder.Build());
 
             if (response.isSuccess)
             {
@@ -43,8 +88,9 @@ namespace VisionClient.Core.Repository
                     UserDto? userData = JsonConvert.DeserializeObject<UserDto>(stringData);
                     if (userData is not null)
                     {
-                        StaticData.Access_Token = userData.Token;
-                        StaticData.UserData.EmailAddress = userData.Email;
+                        StaticData.UserData.Email = userData.Email;
+                        StaticData.UserData.Access_Token = userData.Token;
+                        StaticData.SessionId = userData.SessionId;
                         loginResponse.SetType(LoginResponseTypes.Success);
                     }
                 }
@@ -65,6 +111,9 @@ namespace VisionClient.Core.Repository
                 case StatusCodes.Status403Forbidden:
                     loginResponse.SetType(LoginResponseTypes.UserBanned);
                     break;
+                default:
+                    loginResponse.SetType(LoginResponseTypes.WrongCredentials);
+                    break;
             };
 
             loginResponse.SetData(response.Response);
@@ -77,9 +126,8 @@ namespace VisionClient.Core.Repository
             registerBuilder.SetEmail(email);
             registerBuilder.SetPassword(password);
             registerBuilder.SetRepeatPassword(repeatpassword);
-            var registerData = registerBuilder.Build();
 
-            var response = await accountService.Register(registerData);
+            var response = await accountService.Register(registerBuilder.Build());
             return ValidateStringResponse(response);
         }
 
@@ -89,7 +137,13 @@ namespace VisionClient.Core.Repository
             return ValidateStringResponse(response);
         }
 
-        private (bool, string?) ValidateStringResponse(ResponseDto response)
+        public async Task<(bool, string?)> Toggle2FA(string code)
+        {
+            var response = await accountService.ToggleTFA(code);
+            return ValidateStringResponse(response);
+        }
+
+        private static (bool, string?) ValidateStringResponse(ResponseDto response)
         {
             if (response is null) return (false, "Something went wrong");
 
@@ -98,6 +152,12 @@ namespace VisionClient.Core.Repository
             if (stringData is not null) json = JsonConvert.DeserializeObject<string>(stringData);
 
             return (response.isSuccess, json);
+        }
+
+        public async Task<(bool, string?)> ResendEmailConfirmation(string email)
+        {
+            var response = await accountService.ResendEmailConfirmation(email);
+            return ValidateStringResponse(response);
         }
     }
 }

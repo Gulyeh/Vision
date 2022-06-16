@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using UsersService_API.DbContexts;
 using UsersService_API.Dtos;
@@ -6,6 +7,7 @@ using UsersService_API.Entites;
 using UsersService_API.Helpers;
 using UsersService_API.Repository.IRepository;
 using UsersService_API.Services.IServices;
+using UsersService_API.SignalR;
 
 namespace UsersService_API.Repository
 {
@@ -16,24 +18,33 @@ namespace UsersService_API.Repository
         private readonly IUploadService uploadService;
         private readonly ICacheService cacheService;
         private readonly ILogger<UserRepository> logger;
+        private readonly IHubContext<UsersHub> usersHub;
 
-        public UserRepository(ApplicationDbContext db, IMapper mapper, IUploadService uploadService, 
-            ICacheService cacheService, ILogger<UserRepository> logger)
+        public UserRepository(ApplicationDbContext db, IMapper mapper, IUploadService uploadService,
+            ICacheService cacheService, ILogger<UserRepository> logger, IHubContext<UsersHub> usersHub)
         {
             this.db = db;
             this.mapper = mapper;
             this.uploadService = uploadService;
             this.cacheService = cacheService;
             this.logger = logger;
+            this.usersHub = usersHub;
         }
 
-        public async Task<string> ChangePhoto(Guid userId, IFormFile file)
+        public Task<ResponseDto> IsUserBlocked(Guid userId, Guid user2Id)
+        {
+            var response = new ResponseDto(true, StatusCodes.Status200OK,
+                db.BlockedUsers.Any(x => (x.BlockedId == userId && x.BlockerId == user2Id) || (x.BlockedId == user2Id && x.BlockerId == userId)));
+            return Task.FromResult(response);
+        }
+
+        public async Task<string> ChangePhoto(Guid userId, string base64)
         {
             string oldPhotoId;
             var user = await db.Users.FirstOrDefaultAsync(x => x.UserId == userId);
             if (user is null) return string.Empty;
 
-            var results = await uploadService.UploadPhoto(file);
+            var results = await uploadService.UploadPhoto(Convert.FromBase64String(base64));
             if (results.Error is not null) return string.Empty;
 
             oldPhotoId = user.PhotoId;
@@ -44,6 +55,10 @@ namespace UsersService_API.Repository
             {
                 if (!string.IsNullOrEmpty(oldPhotoId)) await uploadService.DeletePhoto(oldPhotoId);
                 logger.LogInformation("User with ID: {userId} has changed photo successfully", userId);
+
+                var userFriendsOnline = await GetUserFriendsOnline(userId);
+                if (userFriendsOnline.Count > 0) await usersHub.Clients.Clients(userFriendsOnline).SendAsync("UserChangedPhoto", new ChangedUserPhotoDto(userId, user.PhotoUrl));
+
                 return user.PhotoUrl;
             }
 
@@ -65,6 +80,8 @@ namespace UsersService_API.Repository
         {
             var user = await db.Users.FirstOrDefaultAsync(x => x.UserId == userId);
             if (user is null) return false;
+
+            if (user.Username.ToLower().Equals(data.Username.ToLower()) && user.Description.ToLower().Equals(data.Description.ToLower())) return false;
             mapper.Map(data, user);
             return await SaveChangesAsync("ChangeUserData");
         }
@@ -75,8 +92,6 @@ namespace UsersService_API.Repository
             if (user is null) return new UserDataDto();
 
             var userDto = mapper.Map<UserDataDto>(user);
-            userDto.Status = user.LastOnlineStatus;
-
             return userDto;
         }
 
@@ -85,16 +100,16 @@ namespace UsersService_API.Repository
             var user = await db.Users.FirstOrDefaultAsync(x => x.UserId == userId);
             if (user is not null)
             {
-                var onlineuser = new OnlineUsersData(userId, connectionId);
-                if (await cacheService.TryRemoveFromCache(onlineuser))
-                {
-                    user.LastOnlineStatus = user.Status;
-                    user.Status = Status.Offline;
-                    if (await SaveChangesAsync())
-                    {
-                        return true;
-                    }
-                }
+                var onlineuser = new OnlineUsersData(userId, connectionId, HubTypes.Users);
+                await cacheService.TryRemoveFromCache(onlineuser);
+                var cache = await cacheService.TryGetFromCache(HubTypes.Users);
+
+                if (cache.Any(x => x.Key == userId)) return false;
+
+                user.LastOnlineStatus = user.Status == Status.Offline ? Status.Online : user.Status;
+                user.Status = Status.Offline;
+                await SaveChangesAsync();
+                return true;
             }
             return false;
         }
@@ -104,8 +119,14 @@ namespace UsersService_API.Repository
             var user = await db.Users.FirstOrDefaultAsync(x => x.UserId == userId);
             if (user is not null)
             {
+                if (user.Status != Status.Offline)
+                {
+                    user.Status = Status.Offline;
+                    await SaveChangesAsync();
+                }
+
                 user.Status = user.LastOnlineStatus;
-                var onlineuser = new OnlineUsersData(userId, connectionId);
+                var onlineuser = new OnlineUsersData(userId, connectionId, HubTypes.Users);
                 if (await SaveChangesAsync())
                 {
                     if (await cacheService.TryAddToCache(onlineuser)) return true;
@@ -117,7 +138,7 @@ namespace UsersService_API.Repository
         public async Task<List<string>> GetUserFriendsOnline(Guid userId)
         {
             List<string> connList = new List<string>();
-            var cachedOnline = await cacheService.TryGetFromCache();
+            var cachedOnline = await cacheService.TryGetFromCache(HubTypes.Users);
             var userFriends = await db.UsersFriends.Where(x => x.User1 == userId || x.User2 == userId).ToListAsync();
             foreach (var friend in userFriends)
             {
@@ -133,24 +154,25 @@ namespace UsersService_API.Repository
             return connList;
         }
 
-        public async Task<List<string>> CheckFriendIsOnline(Guid friendId)
+
+        public async Task<List<string>> CheckUserIsOnline(Guid userId, HubTypes hubType)
         {
             List<string> connList = new List<string>();
-            var cachedOnline = await cacheService.TryGetFromCache();
-            if (cachedOnline.ContainsKey(friendId))
+            var cachedOnline = await cacheService.TryGetFromCache(hubType);
+            if (cachedOnline.ContainsKey(userId))
             {
-                var connectionIds = cachedOnline.GetValueOrDefault(friendId);
+                var connectionIds = cachedOnline.GetValueOrDefault(userId);
                 if (connectionIds is not null) connList.AddRange(connectionIds);
             }
             return connList;
         }
 
-        public async Task<IEnumerable<UserDataDto>> FindUsers(string containsString)
+        public async Task<IEnumerable<GetUserDto>> FindUsers(string containsString, Guid userId)
         {
-            IEnumerable<UserDataDto> Users = new List<UserDataDto>();
-            var foundUsers = await db.Users.Where(x => x.Nickname.ToLower().Contains(containsString.ToLower())).ToListAsync();
-            Users = mapper.Map<IEnumerable<UserDataDto>>(foundUsers);
-            return Users;
+            IEnumerable<GetUserDto> Users = new List<GetUserDto>();
+            var foundUsers = await db.Users.Where(x => x.Username.ToLower().Contains(containsString.ToLower())).Take(25).ToListAsync();
+            if (foundUsers.Any(x => x.UserId == userId)) foundUsers.Remove(foundUsers.First(x => x.UserId == userId));
+            return mapper.Map<IEnumerable<GetUserDto>>(foundUsers);
         }
 
         public async Task<ResponseDto> UserExists(Guid userId)
@@ -163,20 +185,21 @@ namespace UsersService_API.Repository
         public async Task CreateUser(Guid userId)
         {
             var newUser = new Users();
-            newUser.UserId = userId;    
-                      
+            newUser.UserId = userId;
+
             await db.Users.AddAsync(newUser);
             await SaveChangesAsync("CreateUser");
         }
 
         private async Task<bool> SaveChangesAsync(string? methodName = null)
         {
-            if (await db.SaveChangesAsync() > 0) {
-                if(methodName != null && !string.IsNullOrEmpty(methodName)) logger.LogInformation("Saved data from {methodName} successfully", methodName);
+            if (await db.SaveChangesAsync() > 0)
+            {
+                if (methodName != null && !string.IsNullOrEmpty(methodName)) logger.LogInformation("Saved data from {methodName} successfully", methodName);
                 return true;
             }
 
-            if(methodName != null && !string.IsNullOrEmpty(methodName)) logger.LogInformation("Could not save data from {methodName}", methodName);
+            if (methodName != null && !string.IsNullOrEmpty(methodName)) logger.LogInformation("Could not save data from {methodName}", methodName);
             return false;
         }
     }

@@ -19,7 +19,7 @@ namespace MessagesService_API.Extensions
                 opts.UseSqlServer(config.GetConnectionString("Connection"));
             });
             services.AddMemoryCache();
-            services.AddSignalR();
+            services.AddSignalR(configure => { configure.MaximumReceiveMessageSize = null; });
             services.Configure<RabbitMQSettings>(config.GetSection("RabbitMQSettings"));
             services.AddHttpClient<IUsersService, UsersService>();
             services.AddScoped<IUsersService, UsersService>();

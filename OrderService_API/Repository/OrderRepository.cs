@@ -1,5 +1,6 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using OrderService_API.Builders;
 using OrderService_API.DbContexts;
 using OrderService_API.Dtos;
 using OrderService_API.Entities;
@@ -17,10 +18,12 @@ namespace OrderService_API.Repository
         private readonly IProductsService productsService;
         private readonly ICouponService couponService;
         private readonly ILogger<OrderRepository> logger;
+        private readonly IGameAccessService accessService;
 
-        public OrderRepository(IMapper mapper, ApplicationDbContext db, IProductsService productsService, 
-            ICouponService couponService, ILogger<OrderRepository> logger)
+        public OrderRepository(IMapper mapper, ApplicationDbContext db, IProductsService productsService,
+            ICouponService couponService, ILogger<OrderRepository> logger, IGameAccessService accessService)
         {
+            this.accessService = accessService;
             this.mapper = mapper;
             this.db = db;
             this.productsService = productsService;
@@ -28,29 +31,30 @@ namespace OrderService_API.Repository
             this.logger = logger;
         }
 
-        public async Task<PaymentMessage?> CreateOrder<T>(CreateOrderData data) where T : BaseProductData
+        public async Task<PaymentMessage?> CreateOrder<T>(CreateOrderData data, T product) where T : BaseProductData
         {
-            var product = await productsService.CheckProductExists<T>(data.ProductId, data.Access_Token, data.OrderType, data.GameId);
-            if (product is null) return null;
+            CouponDataDto couponDiscount = new();
 
-            int couponDiscount = 0;
-            if(!string.IsNullOrEmpty(data.Coupon)) couponDiscount = await couponService.ApplyCoupon(data.Coupon, data.Access_Token, CodeTypes.Discount);
+            if (await accessService.CheckProductAccess(data)) return null;
+            if (!string.IsNullOrEmpty(data.Coupon)) couponDiscount = await couponService.ApplyCoupon(data.Coupon, data.Access_Token, CodeTypes.Discount);
 
             var newOrder = mapper.Map<Order>(data);
-            newOrder.CuponCode = couponDiscount != 0 ? data.Coupon : string.Empty;
+            newOrder.Title = product.Title;
+            newOrder.CuponCode = couponDiscount.CodeValue > 0 ? data.Coupon : string.Empty;
 
-            var message = new PaymentMessage(product.Price, product.Discount, couponDiscount);
-            message.UserId = data.UserId;
-            message.Email = data.Email;
-            message.Title = product.Title;      
-            
+            var messageBuilder = new PaymentMessageBuilder(product.Price, product.Discount, couponDiscount);
+            messageBuilder.SetEmail(data.Email);
+            messageBuilder.SetPaymentMethodId(data.PaymentMethodId);
+            messageBuilder.SetTitle(product.Title);
+            messageBuilder.SetUserId(data.UserId);
+            messageBuilder.SetAccessToken(data.Access_Token);
 
             await db.Orders.AddAsync(newOrder);
             if (await SaveChangesAsync())
             {
-                message.OrderId = newOrder.Id;
+                messageBuilder.SetOrderId(newOrder.Id);
                 logger.LogInformation("User with ID: {userId} has created Order with ID: {orderId}", data.UserId, newOrder.Id);
-                return message;
+                return messageBuilder.Build();
             }
             logger.LogError("Could not create an order for User with ID: {userId}", data.UserId);
             return null;
@@ -62,7 +66,8 @@ namespace OrderService_API.Repository
             if (order is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Order not found" });
 
             db.Orders.Remove(order);
-            if (await SaveChangesAsync()) {
+            if (await SaveChangesAsync())
+            {
                 logger.LogInformation("Deleted Order with Id: {orderId} successfully", orderId);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Deleted order successfuly" });
             }
@@ -89,13 +94,14 @@ namespace OrderService_API.Repository
             return new ResponseDto(true, StatusCodes.Status200OK, mapped);
         }
 
-        public async Task ChangeOrderStatus(Guid orderId, bool isPaid)
+        public async Task ChangeOrderStatus(PaymentCompleted data)
         {
-            var order = await db.Orders.FirstOrDefaultAsync(x => x.Id == orderId);
+            var order = await db.Orders.FirstOrDefaultAsync(x => x.Id == data.OrderId);
             if (order is not null)
             {
-                order.Paid = isPaid;
-                order.PaymentDate = DateTime.UtcNow;
+                order.Paid = data.IsSuccess;
+                order.PaymentId = data.PaymentId;
+                order.PaymentDate = DateTime.Now;
                 await SaveChangesAsync();
             }
         }

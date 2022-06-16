@@ -3,7 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:Static="clr-namespace:VisionClient.Core;assembly=VisionClient.Core"
              xmlns:local="clr-namespace:VisionClient.Views"
+             xmlns:Converter="clr-namespace:VisionClient.Converters"
              mc:Ignorable="d" 
              Background="#164971"
              xmlns:prism="http://prismlibrary.com/" 
@@ -11,6 +13,8 @@
              xmlns:Converters="clr-namespace:VisionClient.Converters"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
+        <Static:StaticData x:Key="StaticData"/>
+        <Converter:StatusToColorConverter x:Key="StatusToColor"/>
         <Converters:BoolNegationConverter x:Key="BoolNegation"/>
         <Style TargetType="Button">
             <Setter Property="BorderBrush" Value="Transparent"/>
@@ -62,19 +66,65 @@
                 <DockPanel>
                     <Button Width="50" Content="Search"
                             Command="{Binding SearchUserCommand}"/>
-                    <TextBox Text="{Binding Username, Mode=OneWayToSource}"
+                    <TextBox Text="{Binding Username, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}"
                              FontSize="15"
                              MaxLength="50"
                              Margin="10,5,10,5"
                              BorderThickness="0"
                              HorizontalAlignment="Stretch"
                              Foreground="White"
-                             Background="Transparent"/>
+                             Background="Transparent">
+                        <TextBox.InputBindings>
+                            <KeyBinding Key="Enter" Command="{Binding SearchUserCommand}"/>
+                        </TextBox.InputBindings>
+                    </TextBox>
                 </DockPanel>
             </Border>
         </DockPanel>
         <DockPanel Grid.Row="1" VerticalAlignment="Top">
+            <Image Source="pack://application:,,,/Images/VisionLogo.png" HorizontalAlignment="Center"
+                   VerticalAlignment="Center" Height="60" 
+                   DockPanel.Dock="Top" RenderTransformOrigin="0.55,0.4"
+                   Visibility="{Binding LoadingVisibility}">
+                <Image.Style>
+                    <Style TargetType="Image">
+                        <Setter Property="Image.RenderTransform">
+                            <Setter.Value>
+                                <RotateTransform CenterX="0" CenterY="0" />
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <EventTrigger RoutedEvent="Image.Loaded">
+                                <EventTrigger.Actions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Duration="0:0:2" BeginTime="0:0:1"
+                                                     Storyboard.TargetProperty="RenderTransform.Angle"
+                                                     From="0" To="720"
+                                                     Timeline.DesiredFrameRate="60"
+                                                     RepeatBehavior="Forever">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <ExponentialEase EasingMode="EaseOut" Exponent="5"/>
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                            <DoubleAnimation Duration="0:0:2" BeginTime="0:0:1"
+                                                     Storyboard.TargetProperty="Opacity"
+                                                     From="0.1" To="1"
+                                                     RepeatBehavior="Forever">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <ExponentialEase EasingMode="EaseOut" Exponent="5"/>
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger.Actions>
+                            </EventTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Image.Style>
+            </Image>
             <ListView Background="Transparent"
+                      Name="SearchUserList"
                       BorderThickness="0"
                       VirtualizingPanel.ScrollUnit="Pixel"
                       ScrollViewer.HorizontalScrollBarVisibility="Disabled" 
@@ -84,7 +134,7 @@
                       SelectionMode="Single"
                       Focusable="False"
                       ScrollViewer.CanContentScroll="False"
-                      ItemsSource="{Binding FoundUsersList}"
+                      ItemsSource="{Binding StaticData.FoundUsersList}"
                       Margin="20,0,20,20">
                     <ListView.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -109,19 +159,32 @@
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <DockPanel VerticalAlignment="Center" HorizontalAlignment="Stretch">
-                                <Ellipse RenderOptions.BitmapScalingMode="HighQuality" 
-                                     Height="40" Width="40">
-                                    <Ellipse.Fill>
-                                        <ImageBrush Stretch="UniformToFill" ImageSource="{Binding User.PhotoUrl}"/>
-                                    </Ellipse.Fill>
-                                </Ellipse>
-                                <TextBlock Text="{Binding User.UserName}" FontSize="12" Foreground="White"
-                                       VerticalAlignment="Center" Margin="5,0,0,0"/>
+                                <DockPanel HorizontalAlignment="Left" Height="40" Width="40">
+                                    <Ellipse RenderOptions.BitmapScalingMode="HighQuality" 
+                                         Height="40" Width="40" 
+                                         Panel.ZIndex="0">
+                                        <Ellipse.Fill>
+                                        <ImageBrush Stretch="UniformToFill" ImageSource="{Binding User.PhotoUrl, IsAsync=True}"/>
+                                        </Ellipse.Fill>
+                                    </Ellipse>
+                                    <Ellipse Panel.ZIndex="1" Fill="{Binding User.Status, Converter={StaticResource StatusToColor}}" 
+                                         VerticalAlignment="Bottom"
+                                         Height="10" Width="10" Margin="-10,0,0,0"/>
+                                </DockPanel>
+                                <DockPanel Margin="5,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding User.Username}" TextTrimming="CharacterEllipsis"
+                                               Foreground="White" FontSize="15" 
+                                               TextAlignment="Left" DockPanel.Dock="Top"/>
+                                    <TextBlock Text="{Binding User.Description}"
+                                               TextAlignment="Left"
+                                               TextTrimming="CharacterEllipsis"
+                                               Foreground="Gray" FontSize="10" VerticalAlignment="Top"/>
+                                </DockPanel>
                                 <Button Content="Send Friend Request" 
-                                        IsEnabled="{Binding IsFriend, Converter={StaticResource BoolNegation}}" 
-                                        HorizontalAlignment="Right"
-                                        Command="{Binding SendRequestCommand}"
-                                        CommandParameter="{Binding}"/>
+                                            IsEnabled="{Binding IsRequestable}" 
+                                            HorizontalAlignment="Right"
+                                            Command="{Binding ElementName=SearchUserList, Path=DataContext.SendRequestCommand}"
+                                            CommandParameter="{Binding}"/>
                             </DockPanel>
                         </DataTemplate>
                     </ListView.ItemTemplate>

@@ -6,11 +6,11 @@ namespace UsersService_API.Dtos
     {
         public ChangedUserStatusDto(Guid userId, Status status)
         {
-            this.userId = userId;
-            this.status = status;
+            this.UserId = userId;
+            this.Status = status;
         }
 
-        public Guid userId { get; private set; }
-        public Status status { get; private set; }
+        public Guid UserId { get; private set; }
+        public Status Status { get; private set; }
     }
 }

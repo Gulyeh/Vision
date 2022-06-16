@@ -2,11 +2,6 @@
 using Prism.Events;
 using Prism.Mvvm;
 using Prism.Regions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VisionClient.Core.Events;
 using VisionClient.Core.Models;
 
@@ -22,7 +17,7 @@ namespace VisionClient.ViewModels
         }
 
         private readonly IRegionManager regionManager;
-        public DelegateCommand GoBackCommand { get; set; } 
+        public DelegateCommand GoBackCommand { get; }
 
         public NewsControlViewModel(IRegionManager regionManager, IEventAggregator eventAggregator)
         {

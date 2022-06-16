@@ -4,6 +4,7 @@ namespace OrderService_API.Helpers
     {
         GET,
         POST,
-        DELETE
+        DELETE,
+        PUT
     }
 }

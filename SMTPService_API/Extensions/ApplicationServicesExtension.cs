@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SMTPService_API.DBContexts;
+using SMTPService_API.Generator;
+using SMTPService_API.Generator.Interfaces;
 using SMTPService_API.Helpers;
 using SMTPService_API.RabbitMQConsumer;
 using SMTPService_API.Repository;
@@ -21,6 +23,7 @@ namespace SMTPService_API.Extensions
             services.AddHostedService<RabbitMQMessageConsumer>();
             services.AddScoped<IEmailRepository, EmailRepository>();
             services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IEmailGenerator, EmailGenerator>();
             return services;
         }
     }

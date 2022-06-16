@@ -13,17 +13,16 @@ namespace GameAccessService_API.RabbitMQConsumer
 {
     public class RabbitMQCouponConsumer : BackgroundService
     {
-        private readonly IAccessRepository accessRepository;
         private readonly ILogger<RabbitMQCouponConsumer> logger;
+        private readonly IServiceScopeFactory scopeFactory;
         private readonly IRabbitMQSender rabbitMQSender;
         private IConnection connection;
         private IModel channel;
 
         public RabbitMQCouponConsumer(IOptions<RabbitMQSettings> options, ILogger<RabbitMQCouponConsumer> logger, IServiceScopeFactory scopeFactory, IRabbitMQSender rabbitMQSender)
         {
-            using var scope = scopeFactory.CreateScope();
-            accessRepository = scope.ServiceProvider.GetRequiredService<IAccessRepository>();
             this.logger = logger;
+            this.scopeFactory = scopeFactory;
             this.rabbitMQSender = rabbitMQSender;
 
             var factory = new ConnectionFactory
@@ -51,7 +50,7 @@ namespace GameAccessService_API.RabbitMQConsumer
 
                 channel.BasicAck(args.DeliveryTag, false);
             };
-            channel.BasicConsume("ProductCuponUsedQueue", true, consumer);
+            channel.BasicConsume("ProductCuponUsedQueue", false, consumer);
 
             return Task.CompletedTask;
         }
@@ -60,13 +59,19 @@ namespace GameAccessService_API.RabbitMQConsumer
         {
             if (data is not null)
             {
-                if(data.productId is not null && data.productId != Guid.Empty){
-                    data.isSuccess = await accessRepository.AddProductOrGame(data.userId, data.gameId, (Guid)data.productId);
-                }else{
-                    data.isSuccess = await accessRepository.AddProductOrGame(data.userId, data.gameId);
+                try
+                {
+                    using var scope = scopeFactory.CreateScope();
+                    var accessRepository = scope.ServiceProvider.GetRequiredService<IAccessRepository>();
+                    data.IsSuccess = await accessRepository.AddProductOrGame(data.UserId, data.GameId, data.ProductId);
+                    rabbitMQSender.SendMessage(data, "AccessCouponProductQueue");
                 }
-          
-                rabbitMQSender.SendMessage(data, "AccessProductQueue");        
+                catch (Exception)
+                {
+                    data.IsSuccess = false;
+                    rabbitMQSender.SendMessage(data, "AccessCouponProductQueue");
+                    rabbitMQSender.SendMessage(new CodeFailedDto(data.UserId, data.Code), "CouponFailedQueue");
+                }
             }
         }
     }

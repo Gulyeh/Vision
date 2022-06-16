@@ -1,12 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using ProductsService_API.DbContexts;
 using ProductsService_API.Dtos;
 using ProductsService_API.Entites;
+using ProductsService_API.Helpers;
 using ProductsService_API.Repository.IRepository;
 using ProductsService_API.Services.IServices;
 
@@ -19,10 +17,14 @@ namespace ProductsService_API.Repository
         private readonly ICacheService cacheService;
         private readonly IGameDataService gameDataService;
         private readonly ILogger<GamesRepository> logger;
+        private readonly IGetCachedGames getCachedGames;
+        private readonly IGameAccessService gameAccessService;
 
-        public GamesRepository(ApplicationDbContext db, IMapper mapper, ICacheService cacheService, 
-            IGameDataService gameDataService, ILogger<GamesRepository> logger)
+        public GamesRepository(ApplicationDbContext db, IMapper mapper, ICacheService cacheService,
+            IGameDataService gameDataService, ILogger<GamesRepository> logger, IGetCachedGames getCachedGames, IGameAccessService gameAccessService)
         {
+            this.getCachedGames = getCachedGames;
+            this.gameAccessService = gameAccessService;
             this.gameDataService = gameDataService;
             this.logger = logger;
             this.db = db;
@@ -30,17 +32,45 @@ namespace ProductsService_API.Repository
             this.cacheService = cacheService;
         }
 
+        public async Task<ResponseDto> GetGame(Guid gameId, string Access_Token)
+        {
+            var cacheGame = await getCachedGames.GetGames();
+            var gameFound = cacheGame.FirstOrDefault(x => x.GameId == gameId);
+            if (gameFound is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Not found game with provided ID" });
+
+            var mapped = mapper.Map<GamesDto>(gameFound);
+
+            var response = await gameAccessService.CheckGameAccess(gameId, Access_Token);
+            if (response is null) return new ResponseDto(false, StatusCodes.Status500InternalServerError, string.Empty);
+
+            var responseString = response.Response.ToString();
+            if (string.IsNullOrEmpty(responseString)) return new ResponseDto(false, StatusCodes.Status500InternalServerError, string.Empty);
+            else
+            {
+                var json = JsonConvert.DeserializeObject<HasAccess>(responseString);
+                if (json is null) mapped.IsPurchased = false;
+                else mapped.IsPurchased = json.hasAccess;
+            }
+
+            return new ResponseDto(true, StatusCodes.Status200OK, mapped);
+        }
+
         public async Task<ResponseDto> AddGame(AddGamesDto data, string Access_Token)
         {
-            if(!await gameDataService.CheckGameExists<bool>(data.GameId, Access_Token)) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game does not exist" });
-            
+            var checkGame = await gameDataService.CheckGameExists(data.GameId, Access_Token);
+            if (!checkGame.isSuccess) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game does not exist" });
+
+            var gameExists = await db.Games.FirstOrDefaultAsync(x => x.GameId == data.GameId);
+            if (gameExists is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Game product already exist" });
+
             var mapped = mapper.Map<Games>(data);
-            
+
             await db.Games.AddAsync(mapped);
-            if(await SaveChangesAsync()) {
+            if (await SaveChangesAsync())
+            {
                 logger.LogInformation("Added Game with ID: {gameId} for purchase successfully", data.GameId);
-                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Game has been added successfuly" }); 
-            }  
+                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Game has been added successfuly" });
+            }
 
             logger.LogError("Could not add Game with ID: {gameId} for purchase", data.GameId);
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not add game" });
@@ -49,14 +79,15 @@ namespace ProductsService_API.Repository
         public async Task<ResponseDto> DeleteGame(Guid gameId)
         {
             var game = await db.Games.FirstOrDefaultAsync(x => x.GameId == gameId);
-            if(game is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game does not exist" });
-            
+            if (game is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game does not exist" });
+
             db.Games.Remove(game);
 
-            if(await SaveChangesAsync()){
+            if (await SaveChangesAsync())
+            {
                 logger.LogInformation("Deleted Game with ID: {gameId}", gameId);
-                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Game has been deleted successfuly" }); 
-            } 
+                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Game has been deleted successfuly" });
+            }
 
             logger.LogError("Could not delete Game with ID: {gameId}", gameId);
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not delete game" });
@@ -65,33 +96,23 @@ namespace ProductsService_API.Repository
         public async Task<ResponseDto> EditGame(GamesDto data)
         {
             var game = await db.Games.FirstOrDefaultAsync(x => x.GameId == data.GameId);
-            if(game is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game does not exist" });
-           
+            if (game is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game does not exist" });
+
             mapper.Map(data, game);
 
-            if(await SaveChangesAsync()){
+            if (await SaveChangesAsync())
+            {
                 logger.LogInformation("Edited Game with ID: {gameId} successfully", data.GameId);
-                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Game has been edited successfuly" }); 
-            }  
+                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Game has been edited successfuly" });
+            }
 
             logger.LogError("Could not edit Game with ID: {gameId}", data.GameId);
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not edit game" });
         }
 
-        public async Task<ResponseDto> GetGames(Guid? gameId = null)
+        private async Task<bool> SaveChangesAsync()
         {
-            if(gameId == null) {
-                var games = await db.Games.ToListAsync();
-                return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<GamesDto>(games));
-            }
-            else {
-                var game = await db.Games.FirstOrDefaultAsync(x => x.Id == gameId);
-                return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<GamesDto>(game));
-            }           
-        }
-
-        private async Task<bool> SaveChangesAsync(){
-            if(await db.SaveChangesAsync() > 0) return true;
+            if (await db.SaveChangesAsync() > 0) return true;
             return false;
         }
     }

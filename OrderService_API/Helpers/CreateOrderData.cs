@@ -1,13 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace OrderService_API.Helpers
 {
     public class CreateOrderData
     {
-        public CreateOrderData(string productId, Guid userId, string? coupon, string email, string access_Token, OrderType orderType, string? gameId)
+        public CreateOrderData(string productId, Guid userId, string? coupon, string email, string access_Token, OrderType orderType, string? gameId, string paymentMethodId)
         {
             ProductId = Guid.Parse(productId);
             UserId = userId;
@@ -15,6 +10,7 @@ namespace OrderService_API.Helpers
             Email = email;
             Access_Token = access_Token;
             OrderType = orderType;
+            PaymentMethodId = Guid.Parse(paymentMethodId);
 
             Guid _gameId = Guid.Empty;
             Guid.TryParse(gameId, out _gameId);
@@ -23,6 +19,7 @@ namespace OrderService_API.Helpers
 
         public Guid ProductId { get; private set; }
         public Guid UserId { get; private set; }
+        public Guid PaymentMethodId { get; private set; }
         public string? Coupon { get; private set; }
         public string Email { get; private set; }
         public string Access_Token { get; private set; }

@@ -13,6 +13,7 @@
              Loaded="ResetControls_Loaded">
     <UserControl.Resources>
         <Converters:DiscountToVisibilityConverter x:Key="DiscountToVis"/>
+        <Converters:NullToBooleanConverter x:Key="NullToBool"/>
         <Style TargetType="Button">
             <Setter Property="HorizontalAlignment" Value="Right"/>
             <Setter Property="Width" Value="100"/>
@@ -84,7 +85,7 @@
                     <Image Source="pack://application:,,,/Images/LeftArrow.png" Height="20"/>
                 </Button>
                 <Image Margin="-30,0,0,0"
-                       Source="{Binding Product.PhotoUrl}"
+                       Source="{Binding Product.PhotoUrl, IsAsync=True}"
                        HorizontalAlignment="Center"                 
                        DockPanel.Dock="Top">
                     <Image.OpacityMask>
@@ -109,7 +110,7 @@
                             <TextBlock Text="{Binding Product.DiscountText}" Foreground="White" FontSize="8"
                                                 VerticalAlignment="Center" HorizontalAlignment="Center"/>
                         </Border>
-                        <TextBlock Text="{Binding Product.Price, StringFormat=C}" FontSize="20" VerticalAlignment="Center" 
+                        <TextBlock Text="{Binding Product.Price, StringFormat=C, UpdateSourceTrigger=PropertyChanged}" FontSize="20" VerticalAlignment="Center" 
                            Foreground="White" HorizontalAlignment="Center" Margin="17,0,0,0"/>
                     </DockPanel>
                 </Border>
@@ -119,7 +120,7 @@
                            Foreground="Gray" HorizontalAlignment="Left" 
                            DockPanel.Dock="Top" Margin="20,10,0,10"/>
                 <Border Background="#0f3452">
-                    <ItemsControl HorizontalAlignment="Center" ItemsSource="{Binding Product.Details}" Margin="10,10,10,30">
+                    <ItemsControl HorizontalAlignment="Center" ItemsSource="{Binding Product.DetailsList}" Margin="10,10,10,30">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <WrapPanel Orientation="Vertical" HorizontalAlignment="Center" ItemWidth="200" MaxWidth="1000" MaxHeight="200"/>
@@ -170,7 +171,7 @@
                         <DataTemplate>
                             <DockPanel Width="100" Height="70" Background="#0AA1DD">
                                 <DockPanel>
-                                    <Image Source="{Binding PhotoUrl}"
+                                    <Image Source="{Binding PhotoUrl, IsAsync=True}"
                                             Height="40" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                 </DockPanel>
                                 <DockPanel.Effect>
@@ -214,14 +215,18 @@
                 </ListView>
             </DockPanel>
             <DockPanel Grid.Row="4" Margin="20,40,20,40" VerticalAlignment="Bottom">
-                <TextBlock Text="Discount Code:" FontSize="13" Margin="0,0,0,5"
-                           Foreground="Gray" DockPanel.Dock="Top"/>
+                <DockPanel DockPanel.Dock="Top">
+                    <TextBlock Text="Discount Code:" FontSize="13" Margin="0,0,0,5"
+                       Foreground="Gray" />
+                    <TextBlock Text="{Binding ErrorText}" FontSize="10" Margin="0,0,0,5"
+                       Foreground="Red" HorizontalAlignment="Right"/>
+                </DockPanel>
                 <Border Width="350"
                         Background="DarkGray"
                         HorizontalAlignment="Left">
-                    <DockPanel>
+                    <DockPanel IsHitTestVisible="{Binding CouponCodeVerified, Converter={StaticResource NullToBool}}">
                         <Button Width="88" Content="Apply Code"
-                                Command="{Binding SearchUserCommand}"/>
+                                Command="{Binding ApplyCodeCommand}"/>
                         <TextBox Text="{Binding Code, Mode=OneWayToSource}"
                                  Name="CodeText"
                                  FontSize="15"
@@ -236,7 +241,8 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Name="PayButton"
                             Content="Pay"
-                            IsEnabled="False"/>
+                            IsEnabled="False"
+                            Command="{Binding ExecutePayment}"/>
                 </StackPanel>
             </DockPanel>
         </Grid>

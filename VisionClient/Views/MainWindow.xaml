@@ -7,6 +7,7 @@
         prism:ViewModelLocator.AutoWireViewModel="True"
         xmlns:local="clr-namespace:VisionClient" 
         xmlns:Converters="clr-namespace:VisionClient.Converters"
+        xmlns:notifications="clr-namespace:Notification.Wpf.Controls;assembly=Notification.Wpf"
         mc:Ignorable="d"
         Title="Vision" 
         WindowStyle="None" WindowState="Normal" ResizeMode="CanResize"
@@ -106,12 +107,13 @@
             </Setter>
         </Style>
     </Window.Resources>
-    
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="50"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
+        <notifications:NotificationArea Panel.ZIndex="3" Grid.Row="1" x:Name="MainWindowArea" Position="BottomRight" MaxItems="3"/>
         <Border Background="Black" Grid.Row="0" Grid.RowSpan="2" 
                 Panel.ZIndex="1" Opacity="0.5"
                 Visibility="{Binding BorderVisibility, Mode=OneWay}">
@@ -230,7 +232,7 @@
                             HorizontalAlignment="Center" 
                             VerticalAlignment="Center"
                             Margin="10,10,10,10">
-                <TextBlock Text="{Binding VisionCoins, Mode=OneWay}" FontSize="14" Foreground="DarkGoldenrod"
+                <TextBlock Text="{Binding StaticData.UserData.CurrencyValue}" FontSize="14" Foreground="DarkGoldenrod"
                            HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,10"/>
                 <Button Content="Buy More"
                         Style="{StaticResource BuyButton}"

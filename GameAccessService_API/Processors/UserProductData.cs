@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using GameAccessService_API.DbContexts;
 using GameAccessService_API.Entites;
 using GameAccessService_API.Helpers;
@@ -28,14 +24,14 @@ namespace GameAccessService_API.Processors
             await cacheService.TryAddToCache<UserProducts>(CacheType.OwnProduct, userProduct);
         }
 
-        public void SetData(Guid userId, Guid gameId, Guid? productId = null)
+        public void SetData(Guid userId, Guid gameId, Guid productId)
         {
-            userProduct.GameId = gameId;
             userProduct.UserId = userId;
-            userProduct.ProductId = productId != null ? (Guid)productId : Guid.Empty;
+            userProduct.ProductId = productId != Guid.Empty && gameId != Guid.Empty ? productId : Guid.Empty;
         }
 
-        public async Task SaveData(){
+        public async Task SaveData()
+        {
             await db.UsersProducts.AddAsync(userProduct);
         }
     }

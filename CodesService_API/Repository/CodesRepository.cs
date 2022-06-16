@@ -20,8 +20,10 @@ namespace CodesService_API.Repository
         private readonly ICacheService cacheService;
         private readonly IRabbitMQSender rabbitMQSender;
         private readonly ILogger<CodesRepository> logger;
+        private readonly ICodeTypeProcessor codeTypeProcessor;
 
-        public CodesRepository(ApplicationDbContext db, IGameAccessService gameAccessService, IMapper mapper, ICacheService cacheService, IRabbitMQSender rabbitMQSender, ILogger<CodesRepository> logger)
+        public CodesRepository(ApplicationDbContext db, IGameAccessService gameAccessService, IMapper mapper, ICacheService cacheService, IRabbitMQSender rabbitMQSender,
+            ILogger<CodesRepository> logger, ICodeTypeProcessor codeTypeProcessor)
         {
             this.db = db;
             this.gameAccessService = gameAccessService;
@@ -29,35 +31,41 @@ namespace CodesService_API.Repository
             this.cacheService = cacheService;
             this.rabbitMQSender = rabbitMQSender;
             this.logger = logger;
+            this.codeTypeProcessor = codeTypeProcessor;
         }
 
-        public async Task<ResponseDto> ApplyCode(string code, Guid userId, CodeTypes codeType, string Access_Token){
-            var dbcode = await db.Codes.Include(x => x.CodesUsed).FirstOrDefaultAsync(x => x.Code == code);
-            if (dbcode is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Code does not exist" });
-            
-            var validate = await ValidateCode(dbcode, codeType);
-            if(validate.isSuccess == false) return validate;
+        public async Task<ResponseDto> ApplyCode(string code, Guid userId, CodeTypes codeType, string Access_Token)
+        {
+            IEnumerable<Codes> Codes = await cacheService.TryGetFromCache<Codes>(CacheType.Codes);
+            var validate = await ValidateCode(Codes, codeType, userId, code);
+            if (validate.isSuccess == false) return validate;
 
-            var codeUsed = dbcode.CodesUsed.FirstOrDefault(x => x.userId == userId);
-            if(codeUsed is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Code has been already used" });      
+            var dbcode = await db.Codes.FirstAsync(x => x.Code.Equals(code));
+            var codeAccess = codeTypeProcessor.CreateAccessCode(codeType);
+            if (codeAccess is not null && await codeAccess.CheckAccess(dbcode.GameId, Access_Token, dbcode.CodeValue)) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "You cannot redeem this coupon" });
 
-            var codeProccessor = new CodeTypeProcessor(gameAccessService, rabbitMQSender);
-            var codeAccess = codeProccessor.CreateAccessCode(codeType);
-            if(codeAccess is not null && await codeAccess.CheckAccess(dbcode.gameId.ToString(), Access_Token, dbcode.CodeValue)) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "You already own this product" });
- 
-            if (dbcode.isLimited == true) dbcode.Uses--;
+            if (dbcode.IsLimited == true) dbcode.Uses--;
 
-            dbcode.CodesUsed.Add(new CodesUsed(){
+            dbcode.CodesUsed.Add(new CodesUsed()
+            {
                 userId = userId
             });
 
-            if (await db.SaveChangesAsync() > 0){
-                var sender = codeProccessor.CreateSenderCode(codeType);
-                if(sender is not null){
-                    sender.SendRabbitMQMessage(userId, dbcode.gameId, dbcode.CodeValue);
-                    logger.LogInformation("User: {userId} has applied code: {code} with a code type: {codeType}", userId, code, codeType);
-                    return sender.GetResponse(dbcode);
+            if (await db.SaveChangesAsync() > 0)
+            {
+                logger.LogInformation("User: {userId} has applied code: {code}", userId, code);
+
+                await cacheService.TryAddToCache(CacheType.CodesUsed, dbcode.CodesUsed.First());
+                var sender = codeTypeProcessor.CreateSenderCode(codeType);
+                if (sender is not null)
+                {
+                    sender.SendRabbitMQMessage(userId, dbcode.GameId, dbcode.CodeValue, dbcode.Code);
+                    return new ResponseDto(true, StatusCodes.Status200OK, new { });
                 }
+
+                string? enumString = string.Empty;
+                if (dbcode.Signature is not null) enumString = Enum.GetName(typeof(Signatures), dbcode.Signature);
+                return new ResponseDto(true, StatusCodes.Status200OK, new { CodeValue = dbcode.CodeValue, Signature = enumString });
             }
 
             logger.LogError("User: {userId} had error while applying code: {code}", userId, code);
@@ -78,20 +86,20 @@ namespace CodesService_API.Repository
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not add code" });
         }
 
-        public async Task<ResponseDto> CheckCode(string code, CodeTypes codeType)
+        public async Task<ResponseDto> CheckCode(string code, CodeTypes codeType, Guid userId)
         {
             IEnumerable<Codes> Codes = await cacheService.TryGetFromCache<Codes>(CacheType.Codes);
-            var checkCode = Codes.FirstOrDefault(c => c.Code == code);
-            if (checkCode is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Code does not exist" });
+            var validate = await ValidateCode(Codes, codeType, userId, code);
+            if (validate.isSuccess == false) return validate;
 
-            var validate = await ValidateCode(checkCode, codeType);
-            if(validate.isSuccess == false) return validate;
+            var checkCode = Codes.First(c => c.Code == code);
 
             var codeResponseBuilder = new ResponseCodeBuilder();
+            codeResponseBuilder.SetCoupon(checkCode.Code);
             codeResponseBuilder.SetCodeType(codeType);
-            codeResponseBuilder.SetGame(checkCode.gameId);
-            codeResponseBuilder.SetProduct(checkCode.CodeValue);
-            codeResponseBuilder.SetTitle(checkCode.Title);
+            codeResponseBuilder.SetGame(checkCode.GameId);
+            codeResponseBuilder.SetCodeValue(checkCode.CodeValue);
+            codeResponseBuilder.SetSignature(checkCode.Signature);
             var codeResponse = codeResponseBuilder.Build();
 
             return new ResponseDto(true, StatusCodes.Status200OK, codeResponse);
@@ -103,7 +111,8 @@ namespace CodesService_API.Repository
             if (checkCode is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Code does not exist" });
 
             mapper.Map(codeData, checkCode);
-            if (await db.SaveChangesAsync() > 0) {
+            if (await db.SaveChangesAsync() > 0)
+            {
                 logger.LogInformation("Code: {code} has been modified", codeData.Code);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Code has been modified successfuly" });
             }
@@ -136,11 +145,34 @@ namespace CodesService_API.Repository
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not delete code" });
         }
 
-        private Task<ResponseDto> ValidateCode(Codes checkCode, CodeTypes codeType){
-            if (checkCode.ExpireDate <= DateTime.Now) return Task.FromResult(new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Code expired" }));
-            if (checkCode.isLimited == true && checkCode.Uses == 0) return Task.FromResult(new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Code expired" }));
-            if (checkCode.CodeType != codeType) return Task.FromResult(new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Code does not exist" }));
-            return Task.FromResult(new ResponseDto(true, StatusCodes.Status200OK, new{}));
+        private async Task<ResponseDto> ValidateCode(IEnumerable<Codes> Codes, CodeTypes codeType, Guid userId, string code)
+        {
+            IEnumerable<CodesUsed> CodesUsed = await cacheService.TryGetFromCache<CodesUsed>(CacheType.CodesUsed);
+            var checkCode = Codes.FirstOrDefault(x => x.Code.Equals(code));
+
+            if (checkCode is null || checkCode.CodeType != codeType) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Code does not exist" });
+            if (checkCode.ExpireDate <= DateTime.Now || (checkCode.IsLimited == true && checkCode.Uses == 0)) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Code expired" });
+            if (CodesUsed.FirstOrDefault(x => x.userId == userId && x.CodeId == checkCode.Id) is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Code has been already used" });
+            return new ResponseDto(true, StatusCodes.Status200OK, new { });
+        }
+
+        public async Task RemoveUsedCode(string code, Guid userId)
+        {
+            var codeFound = await db.Codes.Include(x => x.CodesUsed).FirstOrDefaultAsync(x => x.Code.Equals(code));
+            if (codeFound is not null)
+            {
+                var usedCode = codeFound.CodesUsed.FirstOrDefault(x => x.userId == userId);
+                if (usedCode is not null)
+                {
+                    codeFound.CodesUsed.Remove(usedCode);
+                    if (codeFound.IsLimited) codeFound.Uses++;
+                    if (await db.SaveChangesAsync() > 0)
+                    {
+                        await cacheService.TryRemoveFromCache(CacheType.CodesUsed, usedCode);
+                        logger.LogInformation("Code: {code} has been removed from Used Codes for user: {userId}", code, userId);
+                    }
+                }
+            }
         }
     }
 }

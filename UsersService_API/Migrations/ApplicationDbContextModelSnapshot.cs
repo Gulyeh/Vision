@@ -22,6 +22,23 @@ namespace UsersService_API.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
+            modelBuilder.Entity("UsersService_API.Entites.BlockedUsers", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BlockedId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BlockerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("BlockedUsers");
+                });
+
             modelBuilder.Entity("UsersService_API.Entites.FriendRequests", b =>
                 {
                     b.Property<Guid>("Id")
@@ -54,14 +71,14 @@ namespace UsersService_API.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeletedAccount")
+                        .HasColumnType("bit");
 
                     b.Property<int>("LastOnlineStatus")
                         .HasColumnType("int");
-
-                    b.Property<string>("Nickname")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhotoId")
                         .IsRequired()
@@ -77,6 +94,10 @@ namespace UsersService_API.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Users");
@@ -87,9 +108,6 @@ namespace UsersService_API.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("FriendsSince")
-                        .HasColumnType("datetime2");
 
                     b.Property<Guid>("User1")
                         .HasColumnType("uniqueidentifier");

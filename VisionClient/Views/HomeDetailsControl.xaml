@@ -47,7 +47,7 @@
                     Panel.ZIndex="1">
                 <Image Source="pack://application:,,,/Images/LeftArrow.png" Height="20"/>
             </Button>
-            <Image Grid.Row="0" Source="{Binding GameDetails.PhotoUrl, Mode=OneWay}" 
+            <Image Grid.Row="0" Source="{Binding GameDetails.BannerUrl, IsAsync=True, Mode=OneWay}" 
                    HorizontalAlignment="Center" Margin="-20,0,0,0">
                 <Image.OpacityMask>
                     <RadialGradientBrush RadiusY="3">
@@ -62,9 +62,9 @@
                     <ColumnDefinition Width="300"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Orientation="Vertical" Grid.Column="0" MinHeight="200" VerticalAlignment="Center">
-                    <TextBlock Text="{Binding GameDetails.Title, Mode=OneWay}" FontSize="20" Foreground="White" Margin="0,0,0,20"
+                    <TextBlock Text="{Binding GameDetails.Name, Mode=OneWay}" FontSize="20" Foreground="White" Margin="0,0,0,20"
                            HorizontalAlignment="Center" VerticalAlignment="Top"/>
-                    <TextBlock Text="{Binding GameDetails.Description, Mode=OneWay}" FontSize="14" Foreground="Gray" TextWrapping="Wrap" Width="400"
+                    <TextBlock Text="{Binding GameDetails.Informations.Description, Mode=OneWay}" FontSize="14" Foreground="Gray" TextWrapping="Wrap" Width="400"
                            HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center"/>
                 </StackPanel>
 
@@ -77,19 +77,19 @@
                         <StackPanel Margin="0,0,0,20">
                             <TextBlock FontSize="15" Margin="20,20,0,0" TextWrapping="Wrap">
                                 <Run Text="Genre: " Foreground="White"/>
-                                <Run Text="{Binding GameDetails.ProductInfo.Genre, Mode=OneWay}" Foreground="LightGray"/>
+                                <Run Text="{Binding GameDetails.Informations.Genre, Mode=OneWay}" Foreground="LightGray"/>
                             </TextBlock>
                             <TextBlock FontSize="15" Margin="20,20,0,0" TextWrapping="Wrap">
                                 <Run Text="Developer: " Foreground="White"/>
-                                <Run Text="{Binding GameDetails.ProductInfo.Developer, Mode=OneWay}" Foreground="LightGray"/>
+                                <Run Text="{Binding GameDetails.Informations.Developer, Mode=OneWay}" Foreground="LightGray"/>
                             </TextBlock>
                             <TextBlock FontSize="15" Margin="20,20,0,0" TextWrapping="Wrap">
                                 <Run Text="Publisher: " Foreground="White"/>
-                                <Run Text="{Binding GameDetails.ProductInfo.Publisher, Mode=OneWay}" Foreground="LightGray"/>
+                                <Run Text="{Binding GameDetails.Informations.Publisher, Mode=OneWay}" Foreground="LightGray"/>
                             </TextBlock>
                             <TextBlock FontSize="15" Margin="20,20,0,0" TextWrapping="Wrap">
                                 <Run Text="Language: " Foreground="White"/>
-                                <Run Text="{Binding GameDetails.ProductInfo.Language, Mode=OneWay}" Foreground="LightGray"/>
+                                <Run Text="{Binding GameDetails.Informations.Language, Mode=OneWay}" Foreground="LightGray"/>
                             </TextBlock>
                         </StackPanel>
                         <Border.Effect>
@@ -126,25 +126,25 @@
                                 <TextBlock Text="MINIMUM" FontSize="15" Margin="20,20,0,0" Foreground="LightGray"/>
                                 <TextBlock FontSize="12" Margin="20,20,0,0" TextWrapping="Wrap">
                                 <Run Text="OS: " Foreground="White"/>
-                                <Run Text="{Binding GameDetails.Requirements.OsMinimum, Mode=OneWay}" Foreground="LightGray"/>
+                                <Run Text="{Binding GameDetails.Requirements.MinimumOS, Mode=OneWay}" Foreground="LightGray"/>
                                 </TextBlock>
                                 <TextBlock FontSize="12" Margin="20,20,0,0" TextWrapping="Wrap">
                                 <Run Text="Memory: " Foreground="White"/>
-                                <Run Text="{Binding GameDetails.Requirements.MemoryMinimum, Mode=OneWay}" Foreground="LightGray"/>
+                                <Run Text="{Binding GameDetails.Requirements.MinimumMemory, Mode=OneWay}" Foreground="LightGray"/>
                                 </TextBlock>
                                 <TextBlock FontSize="12" Margin="20,20,0,0" TextWrapping="Wrap">
                                 <Run Text="CPU: " Foreground="White"/>
-                                <Run Text="{Binding GameDetails.Requirements.CpuMinimum, Mode=OneWay}" Foreground="LightGray"/>
+                                <Run Text="{Binding GameDetails.Requirements.MinimumCPU, Mode=OneWay}" Foreground="LightGray"/>
                                 </TextBlock>
                             </StackPanel>
                             <StackPanel Width="200">
                                 <TextBlock FontSize="12" Margin="20,60,0,0" TextWrapping="Wrap">
                                 <Run Text="GPU: " Foreground="White"/>
-                                <Run Text="{Binding GameDetails.Requirements.GpuMinimum, Mode=OneWay}" Foreground="LightGray"/>
+                                <Run Text="{Binding GameDetails.Requirements.MinimumGPU, Mode=OneWay}" Foreground="LightGray"/>
                                 </TextBlock>
                                 <TextBlock FontSize="12" Margin="20,20,0,0" TextWrapping="Wrap">
                                 <Run Text="Storage: " Foreground="White"/>
-                                <Run Text="{Binding GameDetails.Requirements.StorageMinimum, Mode=OneWay}" Foreground="LightGray"/>
+                                <Run Text="{Binding GameDetails.Requirements.MinimumStorage, Mode=OneWay}" Foreground="LightGray"/>
                                 </TextBlock>
                             </StackPanel>
                         </StackPanel>
@@ -153,25 +153,25 @@
                                 <TextBlock Text="RECOMMENDED" FontSize="15" Margin="20,20,0,0" Foreground="LightGray"/>
                                 <TextBlock FontSize="12" Margin="20,20,0,0" TextWrapping="Wrap">
                                 <Run Text="OS: " Foreground="White"/>
-                                <Run Text="{Binding GameDetails.Requirements.OsRecommended, Mode=OneWay}" Foreground="LightGray"/>
+                                <Run Text="{Binding GameDetails.Requirements.RecommendedOS, Mode=OneWay}" Foreground="LightGray"/>
                                 </TextBlock>
                                 <TextBlock FontSize="12" Margin="20,20,0,0" TextWrapping="Wrap">
                                 <Run Text="Memory: " Foreground="White"/>
-                                <Run Text="{Binding GameDetails.Requirements.MemoryRecommended, Mode=OneWay}" Foreground="LightGray"/>
+                                <Run Text="{Binding GameDetails.Requirements.RecommendedMemory, Mode=OneWay}" Foreground="LightGray"/>
                                 </TextBlock>
                                 <TextBlock FontSize="12" Margin="20,20,0,0" TextWrapping="Wrap">
                                 <Run Text="CPU: " Foreground="White"/>
-                                <Run Text="{Binding GameDetails.Requirements.CpuRecommended, Mode=OneWay}" Foreground="LightGray"/>
+                                <Run Text="{Binding GameDetails.Requirements.RecommendedCPU, Mode=OneWay}" Foreground="LightGray"/>
                                 </TextBlock>
                             </StackPanel>
                             <StackPanel Width="200">
                                 <TextBlock FontSize="12" Margin="20,60,0,0" TextWrapping="Wrap">
                                 <Run Text="GPU: " Foreground="White"/>
-                                <Run Text="{Binding GameDetails.Requirements.GpuRecommended, Mode=OneWay}" Foreground="LightGray"/>
+                                <Run Text="{Binding GameDetails.Requirements.RecommendedGPU, Mode=OneWay}" Foreground="LightGray"/>
                                 </TextBlock>
                                 <TextBlock FontSize="12" Margin="20,20,0,0" TextWrapping="Wrap">
                                 <Run Text="Storage: " Foreground="White"/>
-                                <Run Text="{Binding GameDetails.Requirements.StorageRecommended, Mode=OneWay}" Foreground="LightGray"/>
+                                <Run Text="{Binding GameDetails.Requirements.RecommendedStorage, Mode=OneWay}" Foreground="LightGray"/>
                                 </TextBlock>
                             </StackPanel>
                         </StackPanel>

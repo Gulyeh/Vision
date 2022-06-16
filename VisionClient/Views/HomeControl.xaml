@@ -71,7 +71,7 @@
                 <Border Height="114" Width="200" BorderThickness="1" 
                         BorderBrush="Gray" Background="Transparent"
                         Margin="50,0,0,0" Panel.ZIndex="0">
-                    <Image Source="{Binding LeftPhoto.PhotoUrl}" Opacity="0.5"/>
+                    <Image Source="{Binding LeftPhoto.CoverUrl, IsAsync=True}" Opacity="0.5"/>
                 </Border>
                 <Button Height="300" Width="550" BorderThickness="1" 
                         Background="Transparent" Panel.ZIndex="1"
@@ -82,7 +82,7 @@
                         <Border DockPanel.Dock="Top" Panel.ZIndex="1" 
                                 Height="40" Background="Black" 
                                 HorizontalAlignment="Left" Opacity="0.8">
-                            <TextBlock Text="{Binding MainPhoto.ProductInfo.Genre}" 
+                            <TextBlock Text="{Binding MainPhoto.Informations.Genre}" 
                                        Foreground="White" FontSize="15" 
                                        TextAlignment="Center" 
                                        HorizontalAlignment="Center"
@@ -95,7 +95,7 @@
                             <StackPanel Orientation="Horizontal" 
                                         HorizontalAlignment="Center" 
                                         VerticalAlignment="Center">
-                                <TextBlock Text="{Binding MainPhoto.Title}" 
+                                <TextBlock Text="{Binding MainPhoto.Name}" 
                                            FontSize="20" Foreground="White" 
                                            TextAlignment="Center"
                                            VerticalAlignment="Center" 
@@ -114,7 +114,7 @@
                             </StackPanel>
                         </Border>
                         <Image Height="340" Width="550" 
-                               Source="{Binding MainPhoto.PhotoUrl, NotifyOnTargetUpdated=True}" 
+                               Source="{Binding MainPhoto.CoverUrl, IsAsync=True, NotifyOnTargetUpdated=True}" 
                                Margin="0,-40,0,0">
                             <Image.Style>
                                 <Style>
@@ -147,7 +147,7 @@
                 <Border Height="114" Width="200" BorderThickness="1" 
                         BorderBrush="Gray" Background="Transparent" 
                         Panel.ZIndex="0">
-                    <Image Source="{Binding RightPhoto.PhotoUrl}" Opacity="0.5"/>
+                    <Image Source="{Binding RightPhoto.CoverUrl, IsAsync=True}" Opacity="0.5"/>
                 </Border>
                 <StackPanel.Style>
                     <Style>
@@ -184,6 +184,7 @@
                       MaxWidth="1200"
                       Background="Transparent" BorderThickness="0"
                       HorizontalAlignment="Center"
+                      PreviewMouseRightButtonDown="PreventRightMouseButton"
                       PreviewMouseWheel="HandlePreviewMouseWheel"
                       SelectionMode="Single"                  
                       ItemsSource="{Binding GameList}"
@@ -225,7 +226,7 @@
                                     <StackPanel Orientation="Horizontal" 
                                         HorizontalAlignment="Center" 
                                         VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding Title}" 
+                                        <TextBlock Text="{Binding Name}" 
                                            FontSize="12" Foreground="White" 
                                            TextAlignment="Center"
                                            VerticalAlignment="Center" 
@@ -242,7 +243,7 @@
                                         </Border>
                                     </StackPanel>
                                 </Border>
-                                <Image Panel.ZIndex="0" Height="280" Source="{Binding PhotoUrl}" DockPanel.Dock="Top"/>
+                                <Image Panel.ZIndex="0" Height="280" Source="{Binding CoverUrl, IsAsync=True}" DockPanel.Dock="Top"/>
                             </DockPanel>
                         </Border>
                     </DataTemplate>

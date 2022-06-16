@@ -1,37 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace VisionClient.Core.Models
+﻿namespace VisionClient.Core.Models
 {
     public class RequirementsModel
     {
         public RequirementsModel()
         {
-            OsMinimum = string.Empty;
-            MemoryMinimum = string.Empty;
-            CpuMinimum = string.Empty;
-            GpuMinimum = string.Empty;
-            StorageMinimum = string.Empty;
-            OsRecommended = string.Empty;
-            MemoryRecommended = string.Empty;
-            CpuRecommended = string.Empty;
-            GpuRecommended = string.Empty;
-            StorageRecommended = string.Empty;
+            MinimumOS = string.Empty;
+            MinimumMemory = string.Empty;
+            MinimumCPU = string.Empty;
+            MinimumGPU = string.Empty;
+            MinimumStorage = string.Empty;
+            RecommendedOS = string.Empty;
+            RecommendedMemory = string.Empty;
+            RecommendedCPU = string.Empty;
+            RecommendedGPU = string.Empty;
+            RecommendedStorage = string.Empty;
         }
 
-        public string OsMinimum { get; set; }
-        public string MemoryMinimum { get; set; }
-        public string CpuMinimum { get; set; }
-        public string GpuMinimum { get; set; }
-        public string StorageMinimum { get; set; }
-        public string OsRecommended { get; set; }
-        public string MemoryRecommended { get; set; }
-        public string CpuRecommended { get; set; }
-        public string GpuRecommended { get; set; }
-        public string StorageRecommended { get; set; }
+        public string MinimumOS { get; set; }
+        public string MinimumMemory { get; set; }
+        public string MinimumCPU { get; set; }
+        public string MinimumGPU { get; set; }
+        public string MinimumStorage { get; set; }
+        public string RecommendedOS { get; set; }
+        public string RecommendedMemory { get; set; }
+        public string RecommendedCPU { get; set; }
+        public string RecommendedGPU { get; set; }
+        public string RecommendedStorage { get; set; }
 
     }
 }

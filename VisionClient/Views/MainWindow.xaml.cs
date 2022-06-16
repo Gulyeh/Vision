@@ -1,9 +1,7 @@
-﻿using Prism.Regions;
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
-using VisionClient.Core.Helpers;
 using VisionClient.Helpers;
 
 namespace VisionClient.Views

@@ -58,6 +58,6 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.MapHub<UsersHub>("hubs/users");
-app.MapHub<FriendsHub>("hubs/friends");
+app.MapHub<UsersHub>("Hubs/Users");
+app.MapHub<FriendsHub>("Hubs/Friends");
 app.Run();

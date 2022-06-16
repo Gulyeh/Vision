@@ -15,7 +15,7 @@ namespace Identity_API.Entities
         public Guid UserId { get; set; }
         public string? Reason { get; set; }
         [Required]
-        public DateTime BanDate { get; set; }
+        public DateTime BanDate { get; set; } = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
         [Required]
         public DateTime BanExpires { get; set; }
     }

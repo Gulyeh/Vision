@@ -1,12 +1,13 @@
 ﻿using Prism.Commands;
 using Prism.Mvvm;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows;
+using VisionClient.Core;
+using VisionClient.Core.Enums;
 using VisionClient.Core.Models;
+using VisionClient.Core.Repository.IRepository;
+using VisionClient.SignalR;
 
 namespace VisionClient.ViewModels
 {
@@ -16,52 +17,72 @@ namespace VisionClient.ViewModels
         public string Username
         {
             get { return username; }
-            set {  SetProperty(ref username, value); }
+            set { SetProperty(ref username, value); }
         }
 
-        public ObservableCollection<SearchModel> FoundUsersList { get; set; }
-        public DelegateCommand<SearchModel> SendRequestCommand { get; set; }
-        public DelegateCommand SearchUserCommand { get; set; }
-
-        public SearchControlViewModel()
+        private Visibility loadingVisibility = Visibility.Collapsed;
+        public Visibility LoadingVisibility
         {
-            FoundUsersList = new ObservableCollection<SearchModel>();
+            get { return loadingVisibility; }
+            set { SetProperty(ref loadingVisibility, value); }
+        }
+
+        public DelegateCommand<SearchModel> SendRequestCommand { get; }
+        public DelegateCommand SearchUserCommand { get; }
+        public IStaticData StaticData { get; }
+
+        private readonly IUsersRepository usersRepository;
+        private readonly IUsersService_Hubs usersService_Hubs;
+
+        public SearchControlViewModel(IUsersRepository usersRepository, IUsersService_Hubs usersService_Hubs, IStaticData staticData)
+        {
             SendRequestCommand = new DelegateCommand<SearchModel>(SendRequest);
             SearchUserCommand = new DelegateCommand(SearchUser);
+            this.usersRepository = usersRepository;
+            this.usersService_Hubs = usersService_Hubs;
+            StaticData = staticData;
+        }
 
-            var User = new SearchModel()
+        public async void SearchUser()
+        {
+            if (string.IsNullOrEmpty(Username)) return;
+
+            try
             {
-                IsFriend = false,
-                User = new UserModel()
+                StaticData.FoundUsersList.Clear();
+                LoadingVisibility = Visibility.Visible;
+
+                var list = await usersRepository.FindUsers(Username);
+                foreach (var user in list)
                 {
-                    PhotoUrl = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__340.png",
-                    UserName = "TestSUperUser",
-                    Id = new Guid()
+                    var isFriend = StaticData.FriendsList.Any(x => x.UserId == user.UserId);
+                    var isPending = StaticData.PendingFriendsList.Any(x => x.UserId == user.UserId);
+                    var isRequested = StaticData.FriendRequestsList.Any(x => x.UserId == user.UserId);
+
+                    var searchModel = new SearchModel()
+                    {
+                        User = user,
+                        IsRequestable = !isFriend && !isPending && !isRequested
+                    };
+
+                    StaticData.FoundUsersList.Add(searchModel);
                 }
-            };
 
-            FoundUsersList.Add(User);
-            FoundUsersList.Add(User);
-            FoundUsersList.Add(User);
-            FoundUsersList.Add(User);
-            FoundUsersList.Add(User);
-            FoundUsersList.Add(User);
-            FoundUsersList.Add(User);
-            FoundUsersList.Add(User);
-            FoundUsersList.Add(User);
-            FoundUsersList.Add(User);
-            FoundUsersList.Add(User);
-            FoundUsersList.Add(User);
+                LoadingVisibility = Visibility.Collapsed;
+            }
+            catch (Exception)
+            {
+                LoadingVisibility = Visibility.Collapsed;
+            }
         }
 
-        private void SearchUser()
+        private async void SendRequest(SearchModel user)
         {
-
-        }
-
-        private void SendRequest(SearchModel user)
-        {
-
+            try
+            {
+                await usersService_Hubs.Send(UserServiceHubs.Friends, "SendFriendRequest", new { Receiver = user.User.UserId });
+            }
+            catch (Exception) { }
         }
     }
 }

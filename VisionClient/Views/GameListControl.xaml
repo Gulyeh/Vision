@@ -56,8 +56,8 @@
                       ScrollViewer.HorizontalScrollBarVisibility="Hidden" 
                       HorizontalAlignment="Left"
                       SelectionMode="Single"
-                      ItemsSource="{Binding gameList}"
-                      SelectedItem="{Binding SelectedGame, Mode=OneWayToSource}"
+                      ItemsSource="{Binding GameList}"
+                      SelectedItem="{Binding SelectedGame, Mode=TwoWay}"
                       ScrollViewer.CanContentScroll="False"
                       SelectedIndex="0">
                 <ListView.ItemsPanel>
@@ -70,8 +70,8 @@
                         <StackPanel Orientation="Vertical" VerticalAlignment="Center" Background="#143a58">
                             <Border Visibility="{Binding RelativeSource={RelativeSource AncestorType=ListViewItem}, Path=IsSelected, Converter={StaticResource BoolToVis}}" 
                                     Height="5" Background="White" VerticalAlignment="Top" Margin="0,-16,0,0"/>
-                            <Image Height="45" Width="45" Margin="0,0,0,5" Source="{Binding IconUrl}"/>
-                            <TextBlock Text="{Binding Title}" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="200" FontSize="14" Foreground="White"/>
+                            <Image Height="45" Width="45" Margin="0,0,0,5" Source="{Binding IconUrl, IsAsync=True}"/>
+                            <TextBlock Text="{Binding Name}" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="200" FontSize="14" Foreground="White"/>
                         </StackPanel>
                     </DataTemplate>
                 </ListView.ItemTemplate>

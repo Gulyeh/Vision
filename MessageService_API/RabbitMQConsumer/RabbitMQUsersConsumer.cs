@@ -11,7 +11,7 @@ namespace MessageService_API.RabbitMQConsumer
 {
     public class RabbitMQUsersConsumer : BackgroundService
     {
-        private readonly IChatRepository chatRepository;
+        private readonly IServiceScopeFactory scopeFactory;
         private readonly ILogger<RabbitMQUsersConsumer> logger;
         private IConnection connection;
         private IModel channel;
@@ -29,8 +29,7 @@ namespace MessageService_API.RabbitMQConsumer
             channel = connection.CreateModel();
             channel.QueueDeclare(queue: "DeleteChatQueue", false, false, false, arguments: null);
 
-            using var scope = scopeFactory.CreateScope();
-            chatRepository = scope.ServiceProvider.GetRequiredService<IChatRepository>();
+            this.scopeFactory = scopeFactory;
             this.logger = logger;
         }
 
@@ -40,13 +39,13 @@ namespace MessageService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
-                logger.LogInformation("Received message from queue: DeleteChatQueue"); 
+                logger.LogInformation("Received message from queue: DeleteChatQueue");
                 var content = Encoding.UTF8.GetString(args.Body.ToArray());
                 DeleteChat? chatData = JsonConvert.DeserializeObject<DeleteChat>(content);
                 HandleMessage(chatData).GetAwaiter().GetResult();
                 channel.BasicAck(args.DeliveryTag, false);
             };
-            channel.BasicConsume("DeleteChatQueue", true, consumer);
+            channel.BasicConsume("DeleteChatQueue", false, consumer);
 
             return Task.CompletedTask;
         }
@@ -55,7 +54,13 @@ namespace MessageService_API.RabbitMQConsumer
         {
             if (data is not null)
             {
-                await chatRepository.DeleteChat(data.User1, data.User2);
+                try
+                {
+                    using var scope = scopeFactory.CreateScope();
+                    var chatRepository = scope.ServiceProvider.GetRequiredService<IChatRepository>();
+                    await chatRepository.DeleteChat(data.User1, data.User2);
+                }
+                catch (Exception) { }
             }
         }
     }

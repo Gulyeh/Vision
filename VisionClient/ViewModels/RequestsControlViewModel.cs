@@ -1,58 +1,45 @@
 ﻿using Prism.Commands;
 using Prism.Mvvm;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using VisionClient.Core;
+using VisionClient.Core.Enums;
 using VisionClient.Core.Models;
+using VisionClient.SignalR;
 
 namespace VisionClient.ViewModels
 {
     internal class RequestsControlViewModel : BindableBase
     {
-        public ObservableCollection<SearchModel> RequestsList { get; set; }
-        public DelegateCommand<SearchModel> AcceptRequestCommand { get; set; }
-        public DelegateCommand<SearchModel> DeclineRequestCommand { get; set; }
+        private readonly IUsersService_Hubs usersService_Hubs;
 
-        public RequestsControlViewModel()
+        public DelegateCommand<BaseUserModel> AcceptRequestCommand { get; }
+        public DelegateCommand<BaseUserModel> DeclineRequestCommand { get; }
+        public IStaticData StaticData { get; }
+
+        public RequestsControlViewModel(IUsersService_Hubs usersService_Hubs, IStaticData staticData)
         {
-            RequestsList = new ObservableCollection<SearchModel>();
-            AcceptRequestCommand = new DelegateCommand<SearchModel>(AcceptRequest);
-            DeclineRequestCommand = new DelegateCommand<SearchModel>(DeclineRequest);
+            AcceptRequestCommand = new DelegateCommand<BaseUserModel>(AcceptRequest);
+            DeclineRequestCommand = new DelegateCommand<BaseUserModel>(DeclineRequest);
+            this.usersService_Hubs = usersService_Hubs;
+            StaticData = staticData;
+        }
 
-            var User = new SearchModel()
+        private async void AcceptRequest(BaseUserModel user)
+        {
+            try
             {
-                IsFriend = false,
-                User = new UserModel()
-                {
-                    PhotoUrl = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__340.png",
-                    UserName = "TestSUperUser",
-                    Id = new Guid()
-                }
-            };
-
-            RequestsList.Add(User);
-            RequestsList.Add(User);
-            RequestsList.Add(User);
-            RequestsList.Add(User);
-            RequestsList.Add(User);
-            RequestsList.Add(User);
-            RequestsList.Add(User);
-            RequestsList.Add(User);
-            RequestsList.Add(User);
-            RequestsList.Add(User);
+                await usersService_Hubs.Send(UserServiceHubs.Friends, "AcceptFriendRequest", user.UserId);
+            }
+            catch (Exception) { }
         }
 
-        private void AcceptRequest(SearchModel user)
+        private async void DeclineRequest(BaseUserModel user)
         {
-
-        }
-
-        private void DeclineRequest(SearchModel user)
-        {
-
+            try
+            {
+                await usersService_Hubs.Send(UserServiceHubs.Friends, "DeclineFriendRequest", user.UserId);
+            }
+            catch (Exception) { }
         }
     }
 }

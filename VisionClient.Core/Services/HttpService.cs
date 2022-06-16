@@ -1,11 +1,7 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Threading.Tasks;
+using VisionClient.Core.Enums;
 using VisionClient.Core.Helpers;
 
 namespace VisionClient.Core.Services
@@ -13,17 +9,21 @@ namespace VisionClient.Core.Services
     public abstract class HttpService
     {
         private readonly IHttpClientFactory httpClientFactory;
+        private readonly IStaticData staticData;
 
-        protected HttpService(IHttpClientFactory httpClientFactory)
+        protected HttpService(IHttpClientFactory httpClientFactory, IStaticData staticData)
         {
             this.httpClientFactory = httpClientFactory;
+            this.staticData = staticData;
         }
 
         public async Task<T?> SendAsync<T>(ApiRequest apiRequest)
         {
+            apiRequest.Access_Token = staticData.UserData.Access_Token;
             var client = httpClientFactory.CreateClient();
-            HttpRequestMessage request = new HttpRequestMessage();
+            HttpRequestMessage request = new();
             request.Headers.Add("Accept", "application/json");
+
             request.RequestUri = new Uri(apiRequest.ApiUrl);
             client.DefaultRequestHeaders.Clear();
 
@@ -37,6 +37,7 @@ namespace VisionClient.Core.Services
                 APIType.GET => HttpMethod.Get,
                 APIType.POST => HttpMethod.Post,
                 APIType.DELETE => HttpMethod.Delete,
+                APIType.PUT => HttpMethod.Put,
                 _ => HttpMethod.Get,
             };
 

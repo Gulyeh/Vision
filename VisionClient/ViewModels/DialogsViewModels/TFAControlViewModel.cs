@@ -1,12 +1,5 @@
 ﻿using Prism.Events;
-using Prism.Mvvm;
 using Prism.Services.Dialogs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
 using VisionClient.Core.Events;
 using VisionClient.Helpers;
 
@@ -30,15 +23,17 @@ namespace VisionClient.ViewModels.DialogsViewModels
 
         public override void OnDialogClosed()
         {
+            eventAggregator.GetEvent<SendEvent<string>>().Publish("ShadowLoginWindow");
         }
 
         public override void OnDialogOpened(IDialogParameters parameters)
         {
+            eventAggregator.GetEvent<SendEvent<string>>().Publish("ShadowLoginWindow");
             Content = string.Empty;
             Content = parameters.GetValue<string>("content");
         }
 
-        public override void Execute(object? data)
+        protected override void Execute(object? data)
         {
             eventAggregator.GetEvent<SendEvent<string>>().Publish($"authCode:{AuthCode}");
             RaiseRequestClose(new DialogResult(ButtonResult.OK));

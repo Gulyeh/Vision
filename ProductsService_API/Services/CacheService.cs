@@ -1,7 +1,6 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using ProductsService_API.DbContexts;
-using ProductsService_API.Entites;
+using ProductsService_API.Helpers;
 using ProductsService_API.Services.IServices;
 
 namespace ProductsService_API.Services
@@ -17,33 +16,48 @@ namespace ProductsService_API.Services
             this.memoryCache = memoryCache;
         }
 
-        public Task TryAddToCache<T>(Guid gameId, T data) where T : Games
+        public Task TryAddToCache<T>(CacheType type, T data) where T : BaseProducts
         {
-            T value;
-            string cacheName = gameId.ToString();
-            if (memoryCache.TryGetValue(cacheName, out value))
+            List<T> value;
+            memoryCache.TryGetValue(type, out value);
+
+            if (value is null)
             {
-                lock (value)
-                {
-                    SetCache<T>(cacheName, data);
-                }
+                value = new List<T>();
+                value.Add(data);
             }
+            else
+            {
+                var found = value.FirstOrDefault(x => x.Id == data.Id);
+                if (found is null) value.Add(data);
+                else found = data;
+            }
+
+            SetCache<T>(type, value);
             return Task.CompletedTask;
         }
 
-        public async Task<T?> TryGetFromCache<T>(Guid gameId) where T : Games
+        public Task<List<T>> TryGetFromCache<T>(CacheType type) where T : new()
         {
-            T? value;
-            string cacheName = gameId.ToString();
-            if (!memoryCache.TryGetValue(cacheName, out value))
-            {
-                value = await db.Set<T>().Include(x => x.GameProducts).FirstOrDefaultAsync(x => x.GameId == gameId);
-                if (value is not null) SetCache<T>(cacheName, value);
-            }
-            return value;
+            List<T> value;
+            memoryCache.TryGetValue(type, out value);
+            if (value is null) return Task.FromResult(new List<T>());
+            return Task.FromResult(value);
         }
 
-        private void SetCache<T>(string type, T value)
+        public Task DeleteFromCache<T>(CacheType type, T data) where T : BaseProducts
+        {
+            List<T> value;
+            memoryCache.TryGetValue(type, out value);
+            if (value is null) return Task.CompletedTask;
+
+            value.Remove(data);
+            SetCache<T>(type, value);
+
+            return Task.CompletedTask;
+        }
+
+        private void SetCache<T>(CacheType type, IEnumerable<T> value) where T : BaseProducts
         {
             var cacheOptions = new MemoryCacheEntryOptions()
                     .SetSlidingExpiration(TimeSpan.FromMinutes(5));
