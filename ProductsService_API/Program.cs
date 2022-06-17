@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
+using ProdcutsService_API;
 using ProductsService_API.Extensions;
 using ProductsService_API.Middleware;
 using Serilog;
@@ -47,6 +48,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+await DbMigration.Migrate(app);
 app.UseMiddleware<ErrorHandler>();
 app.UseHttpsRedirection();
 app.UseAuthentication();

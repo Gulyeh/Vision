@@ -1,3 +1,4 @@
+using Identity_API;
 using Identity_API.DbContexts;
 using Identity_API.Extensions;
 using Identity_API.Middleware;
@@ -54,8 +55,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+await DbMigration.Migrate(app);
+await RoleSeeder.SeedRoles(app);
 app.UseMiddleware<ErrorHandler>();
-await SeedRoles();
 app.UseCors(x => x
     .AllowAnyOrigin()
     .AllowAnyMethod()
@@ -66,20 +68,3 @@ app.UseAuthorization();
 app.MapControllers();
 app.Run("http://*:7000");
 
-async Task SeedRoles()
-{
-    using (var scope = app.Services.CreateScope())
-    {
-        try
-        {
-            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            var role = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
-            await RoleSeeder.CreateRoles(role, context);
-        }
-        catch (Exception e)
-        {
-            var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-            logger.LogError(e.Message, "An error has occured while migration");
-        }
-    }
-}

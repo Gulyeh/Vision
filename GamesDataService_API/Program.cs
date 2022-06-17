@@ -1,3 +1,4 @@
+using GamesDataService_API;
 using GamesDataService_API.Extensions;
 using GamesDataService_API.Middleware;
 using GamesDataService_API.Statics;
@@ -56,6 +57,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+await DbMigration.Migrate(app);
 app.UseMiddleware<ErrorHandler>();
 app.UseHttpsRedirection();
 app.UseAuthentication();

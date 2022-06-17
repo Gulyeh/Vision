@@ -1,3 +1,4 @@
+using CodesService_API;
 using CodesService_API.Extensions;
 using CodesService_API.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -51,6 +52,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+await DbMigration.Migrate(app);
 app.UseMiddleware<ErrorHandler>();
 app.UseHttpsRedirection();
 app.UseAuthentication();

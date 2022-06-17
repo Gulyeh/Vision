@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
+using OrderService_API;
 using OrderService_API.Extensions;
 using OrderService_API.Middleware;
 using OrderService_API.SignalR;
@@ -53,6 +54,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+await DbMigration.Migrate(app);
 app.UseMiddleware<ErrorHandler>();
 app.UseHttpsRedirection();
 app.UseAuthentication();

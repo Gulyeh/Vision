@@ -1,4 +1,5 @@
 using Serilog;
+using SMTPService_API;
 using SMTPService_API.Extensions;
 using SMTPService_API.Middleware;
 
@@ -23,6 +24,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+await DbMigration.Migrate(app);
 app.UseMiddleware<ErrorHandler>();
 app.UseHttpsRedirection();
 app.UseAuthorization();

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
+using PaymentService_API;
 using PaymentService_API.Extensions;
 using PaymentService_API.Middleware;
 using Serilog;
@@ -53,6 +54,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+await DbMigration.Migrate(app);
 app.UseMiddleware<ErrorHandler>();
 app.UseHttpsRedirection();
 StripeConfiguration.ApiKey = builder.Configuration.GetSection("StripeSettings:ApiKey").Get<string>();

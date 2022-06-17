@@ -134,7 +134,7 @@ namespace Identity_API.Repository
         public async Task<ResponseDto> Login(LoginDto loginData)
         {
             var user = await userManager.Users.FirstOrDefaultAsync(u => u.Email == loginData.Email);
-            if (user is null) return new ResponseDto(false, StatusCodes.Status401Unauthorized, new[] { "Wrong email or password" });
+            if (user is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Wrong email or password" });
 
             var results = await signInManager.CheckPasswordSignInAsync(user, loginData.Password, false);
             if (!results.Succeeded) return new ResponseDto(false, StatusCodes.Status401Unauthorized, new[] { "Wrong email or password" });

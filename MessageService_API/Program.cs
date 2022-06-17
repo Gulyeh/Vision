@@ -1,4 +1,5 @@
 using GameAccessService_API.Extensions;
+using MessageService_API;
 using MessageService_API.Middleware;
 using MessageService_API.SignalR;
 using MessagesService_API.Extensions;
@@ -55,6 +56,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+await DbMigration.Migrate(app);
 app.UseMiddleware<ErrorHandler>();
 app.UseHttpsRedirection();
 app.UseAuthentication();

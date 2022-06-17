@@ -29,7 +29,8 @@ namespace PaymentService_API.RabbitMQConsumer
             {
                 HostName = options.Value.Hostname,
                 UserName = options.Value.Username,
-                Password = options.Value.Password
+                Password = options.Value.Password,
+                Port = options.Value.Port
             };
 
             connection = factory.CreateConnection();

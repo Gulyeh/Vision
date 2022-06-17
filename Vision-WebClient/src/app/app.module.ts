@@ -18,6 +18,7 @@ import { BadRequestComponent } from './errors/bad-request/bad-request.component'
 import { InternalServerComponent } from './errors/internal-server/internal-server.component';
 import { ErrorInterceptor } from './_interceptors/error.interceptor';
 import { UnauthorizedComponent } from './errors/unauthorized/unauthorized.component';
+import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
 @NgModule({
   declarations: [
