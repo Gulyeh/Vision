@@ -93,6 +93,7 @@ namespace VisionClient.ViewModels
         public DelegateCommand<BitmapImage> RemoveAttachmentCommand { get; }
         public DelegateCommand<MessageModel> EditMessageCommand { get; }
         public DelegateCommand<MessageModel> DeleteMessageCommand { get; }
+        public DelegateCommand SendMessageCommand { get; }
         public ObservableCollection<BitmapImage> NewMessageAttachments { get; }
 
         public MessageControlViewModel(IEventAggregator eventAggregator, IRegionManager regionManager, IDialogService dialogService,
@@ -104,6 +105,7 @@ namespace VisionClient.ViewModels
             BackwardCommand = new DelegateCommand(NavigateToGames);
             AddAttachmentCommand = new DelegateCommand(AddAttachments);
             RemoveAttachmentCommand = new DelegateCommand<BitmapImage>(RemoveAttachment);
+            SendMessageCommand = new DelegateCommand(SendMessage);
 
             eventAggregator.GetEvent<SendEvent<UserModel>>().Subscribe(x =>
             {
@@ -211,7 +213,7 @@ namespace VisionClient.ViewModels
             }
         }
 
-        public async Task SendMessage()
+        public async void SendMessage()
         {
             if (string.IsNullOrWhiteSpace(MessageContent) && NewMessageAttachments.Count == 0) return;
             try

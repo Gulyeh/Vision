@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://localhost:7271',
+  apiUrl: 'http://vision.servegame.com:7271',
 };

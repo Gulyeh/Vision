@@ -61,4 +61,4 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHub<MessageHub>("hubs/messages");
-app.Run();
+app.Run("http://*:7015");

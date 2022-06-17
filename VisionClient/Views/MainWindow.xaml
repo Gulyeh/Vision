@@ -6,7 +6,7 @@
         xmlns:prism="http://prismlibrary.com/"
         prism:ViewModelLocator.AutoWireViewModel="True"
         xmlns:local="clr-namespace:VisionClient" 
-        xmlns:Converters="clr-namespace:VisionClient.Converters"
+        xmlns:tb="http://www.hardcodet.net/taskbar"
         xmlns:notifications="clr-namespace:Notification.Wpf.Controls;assembly=Notification.Wpf"
         mc:Ignorable="d"
         Title="Vision" 
@@ -20,7 +20,6 @@
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0"/>
     </WindowChrome.WindowChrome>
-
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <Style TargetType="Button" x:Key="NaviButtons">
@@ -107,47 +106,46 @@
             </Setter>
         </Style>
     </Window.Resources>
-
+    <Window.Visibility>
+        <Binding Path="IsWindowVisible" Mode="TwoWay" Converter="{StaticResource BoolToVis}" />
+    </Window.Visibility>
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="50"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
+        
+        <tb:TaskbarIcon Name="NotfyIcon"
+                        Visibility="Visible"
+                        ToolTipText="Vision"
+                        MenuActivation="RightClick"
+                        LeftClickCommand="{Binding SwitchVisibilityCommand}"
+                        LeftClickCommandParameter="Show"
+                        IconSource="pack://application:,,,/Vision.ico">
+            <tb:TaskbarIcon.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Vision Client" IsEnabled="False"/>
+                    <Separator/>
+                    <MenuItem Header="Show" Command="{Binding SwitchVisibilityCommand}"
+                        CommandParameter="Show"/>
+                    <MenuItem Header="Exit" Click="ExitApplication"/>
+                </ContextMenu>
+            </tb:TaskbarIcon.ContextMenu>
+        </tb:TaskbarIcon>
+        
         <notifications:NotificationArea Panel.ZIndex="3" Grid.Row="1" x:Name="MainWindowArea" Position="BottomRight" MaxItems="3"/>
         <Border Background="Black" Grid.Row="0" Grid.RowSpan="2" 
                 Panel.ZIndex="1" Opacity="0.5"
-                Visibility="{Binding BorderVisibility, Mode=OneWay}">
-            <Border.Style>
-                <Style TargetType="Border">
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=IsVisible}" 
-                         Value="True">
-                            <DataTrigger.EnterActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Duration="0:0:0:0.2"
-                                                             Storyboard.TargetProperty="Opacity"
-                                                             From="0" To="0.5"
-                                                             FillBehavior="Stop">
-                                            <DoubleAnimation.EasingFunction>
-                                                <ExponentialEase EasingMode="EaseOut" Exponent="3"/>
-                                            </DoubleAnimation.EasingFunction>
-                                        </DoubleAnimation>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </DataTrigger.EnterActions>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Border.Style>
-        </Border>
+                Visibility="{Binding BorderVisibility, Mode=OneWay}"/>
         <DockPanel Grid.Row="0" Background="#0f3452" MouseLeftButtonDown="StackPanel_MouseLeftButtonDown">
             <DockPanel Grid.Row="0" DockPanel.Dock="Right">
                 <Button Margin="0,0,10,0" Style="{StaticResource NaviButtons}"
                         DockPanel.Dock="Right" Height="25"
                         Background="Transparent" Width="28"
                         BorderThickness="0"
-                        Click="ExitApplication">
+                        Command="{Binding SwitchVisibilityCommand}"
+                        CommandParameter="Hide">
                     <Image Source="pack://application:,,,/Images/Exit.png" 
                            Height="12"
                            Width="20"

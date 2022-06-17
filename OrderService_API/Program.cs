@@ -60,4 +60,4 @@ app.UseAuthorization();
 app.MapHub<OrderHub>("hubs/orders");
 app.MapControllers();
 
-app.Run();
+app.Run("http://*:7129");

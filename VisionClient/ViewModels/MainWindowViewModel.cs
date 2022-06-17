@@ -25,6 +25,17 @@ namespace VisionClient.ViewModels
             set { SetProperty(ref borderVisibility, value); }
         }
 
+        private bool isWindowVisible = true;
+        public bool IsWindowVisible
+        {
+            get { return isWindowVisible; }
+            set 
+            { 
+                SetProperty(ref isWindowVisible, value);
+                StaticData.IsMainWindowVisible = value;
+            }
+        }
+
         private readonly IRegionManager regionManager;
         private readonly IDialogService dialogService;
         private readonly IMessageService_Hubs messageService_Hubs;
@@ -32,6 +43,7 @@ namespace VisionClient.ViewModels
         public DelegateCommand<string> NavigateCommand { get; }
         public DelegateCommand BuyMoreCommand { get; }
         public DelegateCommand UseCodeCommand { get; }
+        public DelegateCommand<string> SwitchVisibilityCommand { get; }
         public IStaticData StaticData { get; }
 
         public MainWindowViewModel(IRegionManager regionManager, IEventAggregator eventAggregator, IDialogService dialogService, IStaticData staticData,
@@ -45,9 +57,25 @@ namespace VisionClient.ViewModels
             NavigateCommand = new DelegateCommand<string>(Navigate);
             UseCodeCommand = new DelegateCommand(OpenCodeDialog);
             BuyMoreCommand = new DelegateCommand(BuyMoreDialog);
+            SwitchVisibilityCommand = new DelegateCommand<string>(SwitchVisibility);
 
             CheckUpdate.CheckTimer();
             eventAggregator.GetEvent<SendEvent<Visibility>>().Subscribe(x => BorderVisibility = x);
+        }
+
+        private void SwitchVisibility(string state)
+        {
+            switch (state)
+            {
+                case "Show":
+                    IsWindowVisible = true;
+                    break;
+                case "Hide":
+                    IsWindowVisible = false;
+                    break;
+                default:
+                    break;
+            }
         }
 
         private void Navigate(string uri)

@@ -41,7 +41,7 @@ namespace VisionClient.ViewModels.DialogsViewModels
                 await usersService_Hubs.Send(UserServiceHubs.Users, "ChangeUserData", userData);
                 RaiseRequestClose(new DialogResult(ButtonResult.OK));
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 ErrorText = "Something went wrong";
             }

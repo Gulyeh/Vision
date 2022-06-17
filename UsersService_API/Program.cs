@@ -60,4 +60,4 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHub<UsersHub>("Hubs/Users");
 app.MapHub<FriendsHub>("Hubs/Friends");
-app.Run();
+app.Run("http://*:7122");

@@ -1,5 +1,6 @@
 ﻿using Notification.Wpf;
 using System.Windows.Media;
+using VisionClient.Core;
 
 namespace VisionClient.Utility
 {
@@ -10,9 +11,10 @@ namespace VisionClient.Utility
 
     public class ToastNotification : IToastNotification
     {
-        private NotificationContent content = new();
+        private readonly IStaticData staticData;
+        private readonly NotificationContent content = new();
 
-        public ToastNotification()
+        public ToastNotification(IStaticData staticData)
         {
             content = new NotificationContent
             {
@@ -21,15 +23,18 @@ namespace VisionClient.Utility
                 Background = (SolidColorBrush?)new BrushConverter().ConvertFrom("#0f3452"),
                 Foreground = new SolidColorBrush(Colors.White)
             };
+
+            this.staticData = staticData;
         }
 
         public void Show(string title, string message)
         {
             content.Title = title;
             content.Message = message;
+            var areaName = staticData.IsMainWindowVisible ? "MainWindowArea" : string.Empty;
 
             NotificationManager notificationManager = new();
-            notificationManager.Show(content, "MainWindowArea");
+            notificationManager.Show(content, areaName);
         }
     }
 }

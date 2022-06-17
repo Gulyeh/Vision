@@ -16,6 +16,7 @@ namespace VisionClient.Core
         Guid SessionId { get; set; }
         Guid ChatId { get; set; }
         int MaxPages { get; set; }
+        bool IsMainWindowVisible { get; set; }
         void ClearStatics();
     }
 
@@ -31,6 +32,7 @@ namespace VisionClient.Core
         public Guid SessionId { get; set; }
         public Guid ChatId { get; set; }
         public int MaxPages { get; set; }
+        public bool IsMainWindowVisible { get; set; }
 
         public void ClearStatics()
         {

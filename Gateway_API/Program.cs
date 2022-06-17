@@ -11,5 +11,4 @@ var app = builder.Build();
 
 app.UseCors(x => x.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 await app.UseOcelot();
-app.Run();
-//public address http://*:80" vision.servegame.com
+app.Run("http://*:7271");

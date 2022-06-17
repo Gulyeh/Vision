@@ -6,8 +6,10 @@ namespace UsersService_API.Services
 {
     public class MessageService : BaseHttpService, IMessageService
     {
-        public MessageService(IHttpClientFactory httpClientFactory, ILogger<BaseHttpService> logger) : base(httpClientFactory, logger)
+        private readonly string MessageServiceUrl;
+        public MessageService(IHttpClientFactory httpClientFactory, ILogger<BaseHttpService> logger, IConfiguration config) : base(httpClientFactory, logger)
         {
+            MessageServiceUrl = config["MessageServiceUrl"];
         }
 
         public async Task<ResponseDto?> CheckUnreadMessages(string access_token, ICollection<Guid> FriendsList)
@@ -15,7 +17,7 @@ namespace UsersService_API.Services
             var response = await SendAsync<ResponseDto>(new ApiRequest()
             {
                 apiType = APIType.GET,
-                ApiUrl = "https://localhost:7015/api/Message/FriendsUnreadMessages",
+                ApiUrl = $"{MessageServiceUrl}/api/Message/FriendsUnreadMessages",
                 Access_Token = access_token,
                 Data = FriendsList
             });

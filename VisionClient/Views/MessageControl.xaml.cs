@@ -45,7 +45,7 @@ namespace VisionClient.Views
             HandleScrollingToParent.HandlePreviewMouseWheel(sender, e);
         }
 
-        private async void Message_KeyPressed(object sender, KeyEventArgs e)
+        private void Message_KeyPressed(object sender, KeyEventArgs e)
         {
             if (sender is not TextBox textBox) return;
 

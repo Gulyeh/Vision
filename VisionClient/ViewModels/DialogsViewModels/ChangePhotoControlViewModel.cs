@@ -71,7 +71,7 @@ namespace VisionClient.ViewModels.DialogsViewModels
                 await usersRepository.ChangePhoto(image.GetBase64());
                 RaiseRequestClose(new DialogResult(ButtonResult.OK));
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 LoadingVisibility = Visibility.Collapsed;
                 ErrorText = "Something went wrong";

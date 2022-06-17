@@ -12,9 +12,9 @@ namespace VisionClient.Views
     public partial class MainWindow : Window
     {
         public MainWindow()
-        {
-            SourceInitialized += Window_SourceInitialized;
+        { 
             InitializeComponent();
+            SourceInitialized += Window_SourceInitialized;
         }
 
         void Window_SourceInitialized(object? sender, EventArgs e)
@@ -61,10 +61,8 @@ namespace VisionClient.Views
                     break;
             }
         }
-        private void ExitApplication(object sender, RoutedEventArgs e)
-        {
-            Environment.Exit(0);
-        }
+        private void ExitApplication(object sender, RoutedEventArgs e) => Environment.Exit(0);
+
         private void MaximizeApplication(object sender, RoutedEventArgs e)
         {
             if (WindowState == WindowState.Normal) WindowState = WindowState.Maximized;
