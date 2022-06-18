@@ -13,9 +13,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-Log.Logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(builder.Configuration)
-    .CreateLogger();
+builder.Host.UseSerilog((context, config) => {
+    config.WriteTo.Console();
+    config.WriteTo.Seq(builder.Configuration["SeqServer"], apiKey: builder.Configuration["SeqAPI"]);
+    config.MinimumLevel.Information();
+    config.Enrich.FromLogContext();
+    config.Enrich.WithMachineName();
+    config.Enrich.WithProcessId();
+    config.Enrich.WithThreadId();
+    config.MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning);
+});
 builder.Services.AddAuthorization(opts =>
 {
     opts.AddPolicy("HasAdminOrModRole", builder => builder.RequireRole(StaticData.AdminRole, StaticData.ModeratorRole));

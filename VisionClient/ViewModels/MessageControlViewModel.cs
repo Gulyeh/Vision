@@ -32,7 +32,11 @@ namespace VisionClient.ViewModels
             {
                 SetProperty(ref _isActive, value, RaiseIsActiveChanged);
                 Connection(IsActive);
-                if (!IsActive) eventAggregator.GetEvent<SendEvent<string>>().Publish("StopFocus");
+                if (!IsActive)
+                {
+                    ClearData();
+                    eventAggregator.GetEvent<SendEvent<string>>().Publish("StopFocus");
+                }
             }
         }
 
@@ -137,6 +141,7 @@ namespace VisionClient.ViewModels
         {
             CurrentPage = 1;
             StaticData.ChatId = Guid.Empty;
+            SelectedUser = new();
             if (StaticData.Messages.Any()) StaticData.Messages.Clear();
             if (NewMessageAttachments.Any()) NewMessageAttachments.Clear();
             ErrorText = string.Empty;
@@ -247,7 +252,6 @@ namespace VisionClient.ViewModels
                 if (!connect) await messageService_Hubs.Disconnect();
                 else
                 {
-                    ClearData();
                     LoadingVisibility = Visibility.Visible;
                     await messageService_Hubs.CreateHubConnection(SelectedUser.UserId);
                     while (StaticData.ChatId == Guid.Empty)

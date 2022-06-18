@@ -14,10 +14,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddCors();
-Log.Logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(builder.Configuration)
-    .CreateLogger();
+builder.Host.UseSerilog((context, config) => {
+    config.WriteTo.Console();
+    config.WriteTo.Seq(builder.Configuration["SeqServer"], apiKey: builder.Configuration["SeqAPI"]);
+    config.MinimumLevel.Information();
+    config.Enrich.FromLogContext();
+    config.Enrich.WithMachineName();
+    config.Enrich.WithProcessId();
+    config.Enrich.WithThreadId();
+    config.MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning);
+});
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Identity", Version = "v1" });
@@ -58,10 +64,6 @@ if (app.Environment.IsDevelopment())
 await DbMigration.Migrate(app);
 await RoleSeeder.SeedRoles(app);
 app.UseMiddleware<ErrorHandler>();
-app.UseCors(x => x
-    .AllowAnyOrigin()
-    .AllowAnyMethod()
-    .AllowAnyHeader());
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
