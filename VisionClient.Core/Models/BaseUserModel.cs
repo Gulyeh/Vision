@@ -49,6 +49,6 @@ namespace VisionClient.Core.Models
                 status = value;
                 OnPropertyChanged();
             }
-        }
+        }    
     }
 }

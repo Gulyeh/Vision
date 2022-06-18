@@ -222,26 +222,14 @@
                             Orientation="Vertical" HorizontalAlignment="Left">
                     <TextBlock FontSize="12" Foreground="Gray" Margin="10,0,0,0">
                     <Run Text="Online -"/>
-                    <Run>
-                        <Run.Text>
-                            <MultiBinding Converter="{StaticResource CountOnlineFriends}" ConverterParameter="{StaticResource FriendsList}">
-                                <Binding Path="Count" Mode="OneWay" Source="{StaticResource FriendsList}"/>
-                                <Binding Path="Status" Source="{StaticResource FriendsList}"/>
-                            </MultiBinding>
-                        </Run.Text>                      
-                    </Run>
+                    <Run Text="{Binding StaticData.FriendsList, Converter={StaticResource CountOnlineFriends}, UpdateSourceTrigger=PropertyChanged}"/>
                     </TextBlock>
                     <ListView PreviewMouseRightButtonDown="ListView_DisableRightClickSelection"
                               PreviewMouseWheel="HandlePreviewMouseWheel"
                               SelectedItem="{Binding SelectedUser}"
                               ItemTemplate="{StaticResource FriendsTemplate}"
+                              ItemsSource="{Binding StaticData.FriendsList, Converter={StaticResource GetOnlineFriends}, UpdateSourceTrigger=PropertyChanged}"
                               ItemContainerStyle="{StaticResource FriendsContainerStyle}">
-                        <ListView.ItemsSource>
-                            <MultiBinding  Converter="{StaticResource GetOnlineFriends}" ConverterParameter="{StaticResource FriendsList}">
-                                <Binding Path="Count" Mode="OneWay" Source="{StaticResource FriendsList}"/>
-                                <Binding Path="Status" Source="{StaticResource FriendsList}"/>
-                            </MultiBinding>
-                        </ListView.ItemsSource>
                     </ListView>
                 </StackPanel>
 
@@ -249,27 +237,15 @@
                             Orientation="Vertical" HorizontalAlignment="Left">
                     <TextBlock FontSize="12" Foreground="Gray" Margin="10,0,0,0">
                         <Run Text="Offline -"/>
-                        <Run>
-                            <Run.Text>
-                                <MultiBinding Converter="{StaticResource CountOfflineFriends}" ConverterParameter="{StaticResource FriendsList}">
-                                    <Binding Path="Count" Mode="OneWay" Source="{StaticResource FriendsList}"/>
-                                    <Binding Path="Status" Source="{StaticResource FriendsList}"/>
-                                </MultiBinding>
-                            </Run.Text>
-                        </Run>
+                        <Run Text="{Binding StaticData.FriendsList, Converter={StaticResource CountOfflineFriends}, UpdateSourceTrigger=PropertyChanged}"/>
                     </TextBlock>
 
                     <ListView PreviewMouseRightButtonDown="ListView_DisableRightClickSelection"
                               PreviewMouseWheel="HandlePreviewMouseWheel"
                               SelectedItem="{Binding SelectedUser}"
                               ItemTemplate="{StaticResource FriendsTemplate}"
+                              ItemsSource="{Binding StaticData.FriendsList, Converter={StaticResource GetOfflineFriends}, UpdateSourceTrigger=PropertyChanged}"
                               ItemContainerStyle="{StaticResource FriendsContainerStyle}">
-                        <ListView.ItemsSource>
-                            <MultiBinding Converter="{StaticResource GetOfflineFriends}" ConverterParameter="{StaticResource FriendsList}">
-                                <Binding Path="Count" Source="{StaticResource FriendsList}"/>
-                                <Binding Path="Status" Source="{StaticResource FriendsList}"/>
-                            </MultiBinding>
-                        </ListView.ItemsSource>
                     </ListView>
                 </StackPanel>
             </DockPanel>

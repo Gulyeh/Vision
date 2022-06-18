@@ -27,7 +27,7 @@ namespace VisionClient.ViewModels
         {
             GameList = StaticData.GameModels;
             this.eventAggregator = eventAggregator;
-            SelectedGame = GameList[0];
+            if(GameList.Count > 0) SelectedGame = GameList[0];
         }
 
         private void GameSelected(GameModel game)

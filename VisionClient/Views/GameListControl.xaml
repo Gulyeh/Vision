@@ -58,8 +58,7 @@
                       SelectionMode="Single"
                       ItemsSource="{Binding GameList}"
                       SelectedItem="{Binding SelectedGame, Mode=TwoWay}"
-                      ScrollViewer.CanContentScroll="False"
-                      SelectedIndex="0">
+                      ScrollViewer.CanContentScroll="False">
                 <ListView.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel VerticalAlignment="Center" Orientation="Horizontal"/>
