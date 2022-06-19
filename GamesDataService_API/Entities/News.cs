@@ -18,6 +18,8 @@ namespace GamesDataService_API.Entities
         public DateTime CreatedDate { get; set; }
         [Required]
         public string PhotoId { get; set; }
+        [Required]
+        public Guid GameId { get; set; }
         [ForeignKey("GameId")]
         [NotNull]
         public Games? Game { get; set; }

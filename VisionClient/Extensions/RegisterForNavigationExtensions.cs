@@ -1,5 +1,6 @@
 ﻿using Prism.Ioc;
 using VisionClient.Views;
+using VisionClient.Views.AdminPanel.AddControls;
 using VisionClient.Views.SettingsControls;
 
 namespace VisionClient.Extensions
@@ -27,6 +28,7 @@ namespace VisionClient.Extensions
             containerRegistry.RegisterForNavigation<PendingControl>("PendingControl");
             containerRegistry.RegisterForNavigation<RequestsControl>("RequestsControl");
             containerRegistry.RegisterForNavigation<PurchaseControl>("PurchaseControl");
+            containerRegistry.RegisterForNavigation<AddGameControl>("AddGameControl");
         }
     }
 }

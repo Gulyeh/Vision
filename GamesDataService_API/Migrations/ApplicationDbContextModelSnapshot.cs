@@ -36,10 +36,6 @@ namespace GamesDataService_API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ClientVersion")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("CoverId")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -55,6 +51,9 @@ namespace GamesDataService_API.Migrations
                     b.Property<string>("IconUrl")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsAvailable")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()

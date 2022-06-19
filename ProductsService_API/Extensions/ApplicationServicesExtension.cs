@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using ProductsService_API.DbContexts;
 using ProductsService_API.Helpers;
 using ProductsService_API.Middleware;
+using ProductsService_API.RabbitMQConsumer;
 using ProductsService_API.Repository;
 using ProductsService_API.Repository.IRepository;
 using ProductsService_API.Services;
@@ -19,6 +20,10 @@ namespace ProductsService_API.Extensions
             });
             services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));
             services.AddMemoryCache();
+            services.AddHostedService<RabbitMQNewGameConsumer>();
+            services.AddHostedService<RabbitMQDeleteGameConsumer>();
+            services.AddHostedService<RabbitMQEditGameConsumer>();
+            services.Configure<RabbitMQSettings>(config.GetSection("RabbitMQSettings"));
             services.AddHttpClient<IGameDataService, GameDataService>();
             services.AddHttpClient<IGameAccessService, GameAccessService>();
             services.AddScoped<IGameAccessService, GameAccessService>();

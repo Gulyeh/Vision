@@ -12,10 +12,10 @@ builder.Host.UseSerilog((context, config) => {
     config.Enrich.WithThreadId();
     config.MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning);
 });
+
 builder.Services.AddCors();
 builder.Services.AddOcelot();
 var app = builder.Build();
-
 app.UseCors(x => x.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 await app.UseOcelot();
 app.Run("http://*:7271");

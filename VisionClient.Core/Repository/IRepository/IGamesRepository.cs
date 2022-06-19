@@ -1,4 +1,5 @@
-﻿using VisionClient.Core.Models;
+﻿using VisionClient.Core.Dtos;
+using VisionClient.Core.Models;
 
 namespace VisionClient.Core.Repository.IRepository
 {
@@ -9,5 +10,6 @@ namespace VisionClient.Core.Repository.IRepository
         Task<GameProductModel> GetProducts(Guid gameId);
         Task<bool> OwnsProduct(Guid productId, Guid gameId);
         Task<BanModel?> CheckGameAccess(Guid gameId);
+        Task<string> AddGame(AddGameDto data);
     }
 }

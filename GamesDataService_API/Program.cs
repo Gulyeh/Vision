@@ -25,6 +25,7 @@ builder.Host.UseSerilog((context, config) => {
 });
 builder.Services.AddAuthorization(opts =>
 {
+    opts.AddPolicy("HasAdminRole", builder => builder.RequireRole(StaticData.AdminRole));
     opts.AddPolicy("HasAdminOrModRole", builder => builder.RequireRole(StaticData.AdminRole, StaticData.ModeratorRole));
 });
 builder.Services.AddSwaggerGen(c =>

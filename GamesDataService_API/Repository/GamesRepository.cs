@@ -1,8 +1,11 @@
 using AutoMapper;
+using GamesDataService_API.Builder;
 using GamesDataService_API.DbContexts;
 using GamesDataService_API.Dtos;
 using GamesDataService_API.Entities;
 using GamesDataService_API.Helpers;
+using GamesDataService_API.Messages;
+using GamesDataService_API.RabbitMQSender;
 using GamesDataService_API.Repository.IRepository;
 using GamesDataService_API.Services.IServices;
 using Microsoft.EntityFrameworkCore;
@@ -18,10 +21,12 @@ namespace GamesDataService_API.Repository
         private readonly ApplicationDbContext db;
         private readonly IMapper mapper;
         private readonly IMemoryCache memoryCache;
+        private readonly IRabbitMQSender rabbitMQSender;
 
         public GamesRepository(IUploadService uploadService, ILogger<GamesRepository> logger,
-            ICacheService cacheService, ApplicationDbContext db, IMapper mapper, IMemoryCache memoryCache)
+            ICacheService cacheService, ApplicationDbContext db, IMapper mapper, IMemoryCache memoryCache, IRabbitMQSender rabbitMQSender)
         {
+            this.rabbitMQSender = rabbitMQSender;
             this.uploadService = uploadService;
             this.logger = logger;
             this.cacheService = cacheService;
@@ -34,27 +39,39 @@ namespace GamesDataService_API.Repository
         {
             var mapped = mapper.Map<Games>(data);
 
-            //var results = await uploadService.UploadPhoto(data.CoverPhoto);
-            //if (results.Error is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not upload cover image" });
-            //mapped.CoverId = results.PublicId;
-            //mapped.CoverUrl = results.SecureUrl.AbsoluteUri;
+            var results = await uploadService.UploadPhoto(Convert.FromBase64String(data.CoverPhoto));
+            mapped.CoverId = results.PublicId;
+            mapped.CoverUrl = results.SecureUrl.AbsoluteUri;
 
-            //results = await uploadService.UploadPhoto(data.IconPhoto);
-            //if (results.Error is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not upload icon image" });
-            //mapped.IconUrl = results.SecureUrl.AbsoluteUri;
-            //mapped.IconId = results.PublicId;
+            results = await uploadService.UploadPhoto(Convert.FromBase64String(data.IconPhoto));
+            mapped.IconUrl = results.SecureUrl.AbsoluteUri;
+            mapped.IconId = results.PublicId;
 
-            //results = await uploadService.UploadPhoto(data.BannerPhoto);
-            //if (results.Error is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not upload banner image" });
-            //mapped.BannerUrl = results.SecureUrl.AbsoluteUri;
-            //mapped.BannerId = results.PublicId;
+            results = await uploadService.UploadPhoto(Convert.FromBase64String(data.BannerPhoto));
+            mapped.BannerUrl = results.SecureUrl.AbsoluteUri;
+            mapped.BannerId = results.PublicId;
 
-            await db.Games.AddAsync(mapped);
-            if (await db.SaveChangesAsync() > 0)
-            {
-                await cacheService.TryAddToCache<Games>(CacheType.Games, mapped);
-                logger.LogInformation("Added new game successfully");
-                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Added game successfully" });
+
+            if(!string.IsNullOrEmpty(mapped.IconId) && !string.IsNullOrEmpty(mapped.CoverId) && !string.IsNullOrEmpty(mapped.BannerId)){
+                await db.Games.AddAsync(mapped);
+                if (await db.SaveChangesAsync() > 0)
+                {
+                    if(mapped.IsAvailable) await cacheService.TryAddToCache<Games>(CacheType.Games, mapped);
+                    
+                    var builder = new ProductBuilder();
+                    builder.SetTitle(mapped.Name);
+                    builder.SetGameId(mapped.Id);
+                    builder.SetPhotoUrl(mapped.CoverUrl);
+                    builder.SetPhotoId(mapped.CoverId);
+                    builder.SetPrice(data.Price);
+                    builder.SetIsAvailable(data.IsPurchasable);
+                    builder.SetDiscount(data.Discount);
+                    builder.SetDetails(data.Details);
+
+                    rabbitMQSender.SendMessage(builder.Build(), "CreateNewGameProductQueue");
+                    logger.LogInformation("Added new game successfully");
+                    return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Added game successfully" });
+                }
             }
 
             if (!string.IsNullOrEmpty(mapped.IconId)) await uploadService.DeletePhoto(mapped.IconId);
@@ -85,6 +102,8 @@ namespace GamesDataService_API.Repository
                 if (!string.IsNullOrEmpty(game.IconId)) await uploadService.DeletePhoto(game.IconId);
                 if (!string.IsNullOrEmpty(game.CoverId)) await uploadService.DeletePhoto(game.CoverId);
                 if (!string.IsNullOrEmpty(game.BannerId)) await uploadService.DeletePhoto(game.BannerId);
+
+                rabbitMQSender.SendMessage(gameId, "DeleteGameProductQueue");
                 logger.LogInformation("Deleted game with ID: {id} successfully", gameId);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Deleted game successfully" });
             }
@@ -104,47 +123,41 @@ namespace GamesDataService_API.Repository
 
             mapper.Map(data, game);
 
-            if (data.CoverPhoto is not null)
+            if (!string.IsNullOrWhiteSpace(data.CoverPhoto))
             {
-                var results = await uploadService.UploadPhoto(data.CoverPhoto);
-                if (results.Error is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not upload cover photo" });
-
+                var results = await uploadService.UploadPhoto(Convert.FromBase64String(data.CoverPhoto));
                 oldCoverId = game.CoverId;
                 game.CoverId = results.PublicId;
                 game.CoverUrl = results.SecureUrl.AbsoluteUri;
             }
 
-            if (data.IconPhoto is not null)
+            if (!string.IsNullOrWhiteSpace(data.IconPhoto))
             {
-                var results = await uploadService.UploadPhoto(data.IconPhoto);
-                if (results.Error is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not upload icon photo" });
-
+                var results = await uploadService.UploadPhoto(Convert.FromBase64String(data.IconPhoto));
                 oldIconId = game.IconId;
                 game.IconId = results.PublicId;
                 game.IconUrl = results.SecureUrl.AbsoluteUri;
             }
 
-            if (data.BannerPhoto is not null)
+            if (!string.IsNullOrWhiteSpace(data.BannerPhoto))
             {
-                var results = await uploadService.UploadPhoto(data.BannerPhoto);
-                if (results.Error is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not upload banner photo" });
-
+                var results = await uploadService.UploadPhoto(Convert.FromBase64String(data.BannerPhoto));
                 oldBannerId = game.BannerId;
                 game.BannerId = results.PublicId;
                 game.BannerUrl = results.SecureUrl.AbsoluteUri;
             }
 
-            db.Games.Update(game);
-
-            if (await db.SaveChangesAsync() > 0)
+            if(!string.IsNullOrEmpty(game.BannerId) && !string.IsNullOrEmpty(game.IconId) && !string.IsNullOrEmpty(game.CoverId))
             {
-                if (!string.IsNullOrEmpty(oldIconId)) await uploadService.DeletePhoto(oldIconId);
-                if (!string.IsNullOrEmpty(oldCoverId)) await uploadService.DeletePhoto(oldCoverId);
-                if (!string.IsNullOrEmpty(oldBannerId)) await uploadService.DeletePhoto(oldBannerId);
-                logger.LogInformation("Edited game with ID: {id} successfully", data.Id);
-                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Game edited successfully" });
+                db.Games.Update(game);
+                if (await db.SaveChangesAsync() > 0)
+                {
+                    if(!string.IsNullOrWhiteSpace(oldCoverId)) rabbitMQSender.SendMessage(new PhotoData(game.CoverUrl, game.CoverId, game.Id), "EditGameProductPhotoQueue");
+                    logger.LogInformation("Edited game with ID: {id} successfully", data.Id);
+                    return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Game edited successfully" });
+                }
             }
-
+            
             if (!string.IsNullOrEmpty(oldIconId)) await uploadService.DeletePhoto(game.IconId);
             if (!string.IsNullOrEmpty(oldCoverId)) await uploadService.DeletePhoto(game.CoverId);
             if (!string.IsNullOrEmpty(oldBannerId)) await uploadService.DeletePhoto(game.BannerId);
@@ -157,7 +170,7 @@ namespace GamesDataService_API.Repository
             IEnumerable<Games> games = await cacheService.TryGetFromCache<Games>(CacheType.Games);
             if (games.Count() == 0)
             {
-                var dbGames = await db.Games.Include(x => x.Requirements).Include(x => x.Informations).ToListAsync();
+                var dbGames = await db.Games.Include(x => x.Requirements).Include(x => x.Informations).Where(x => x.IsAvailable).ToListAsync();
                 foreach (var game in dbGames) await cacheService.TryAddToCache<Games>(CacheType.Games, game);
                 games = dbGames;
             }

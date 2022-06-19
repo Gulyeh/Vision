@@ -16,7 +16,9 @@
 
   <ItemGroup>
     <None Remove="Images\Add.png" />
-    <None Remove="Images\AddGame.png" />
+    <None Remove="Images\AddBanner.png" />
+    <None Remove="Images\AddHomeBanner.png" />
+    <None Remove="Images\AddIcon.png" />
     <None Remove="Images\AppleStore.png" />
     <None Remove="Images\Exit.png" />
     <None Remove="Images\Facebook.png" />
@@ -33,6 +35,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Images\AddBanner.png" />
+    <Resource Include="Images\AddHomeBanner.png" />
+    <Resource Include="Images\AddIcon.png" />
     <Resource Include="Images\AppleStore.png" />
     <Resource Include="Images\Google.png" />
     <Resource Include="Vision.ico" />
@@ -45,6 +50,7 @@
     <PackageReference Include="Prism.Unity.Extensions" Version="8.0.62" />
     <PackageReference Include="Prism.Wpf" Version="8.1.97" />
     <PackageReference Include="QRCoder" Version="1.4.3" />
+    <PackageReference Include="Syncfusion.SfInput.WPF" Version="20.1.0.60" />
   </ItemGroup>
 
   <ItemGroup>
@@ -53,7 +59,6 @@
 
   <ItemGroup>
     <Resource Include="Images\Add.png" />
-    <Resource Include="Images\AddGame.png" />
     <Resource Include="Images\Exit.png" />
     <Resource Include="Images\Facebook.png" />
     <Resource Include="Images\GooglePlay.png" />
@@ -68,7 +73,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Views\AdminPanel\AddControls\" />
     <Folder Include="Views\AdminPanel\ManageControls\" />
   </ItemGroup>
 

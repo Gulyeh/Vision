@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using VisionClient.Core.Builders;
 using VisionClient.Core.Dtos;
 using VisionClient.Core.Enums;
+using VisionClient.Core.Helpers;
 using VisionClient.Core.Models;
 using VisionClient.Core.Models.Account;
 using VisionClient.Core.Repository.IRepository;
@@ -43,7 +44,7 @@ namespace VisionClient.Core.Repository
             return false;
         }
 
-        public async Task<(bool, string?)> ChangePassword(string currentPassword, string newPassword, string repeatPassword)
+        public async Task<(bool, string)> ChangePassword(string currentPassword, string newPassword, string repeatPassword)
         {
             var changePasswordBuilder = new ChangePasswordBuilder();
             changePasswordBuilder.SetNewPassword(newPassword);
@@ -120,7 +121,7 @@ namespace VisionClient.Core.Repository
             return loginResponse.Build();
         }
 
-        public async Task<(bool, string?)> RegisterUser(string email, string password, string repeatpassword)
+        public async Task<(bool, string)> RegisterUser(string email, string password, string repeatpassword)
         {
             var registerBuilder = new RegisterModelBuilder();
             registerBuilder.SetEmail(email);
@@ -131,30 +132,25 @@ namespace VisionClient.Core.Repository
             return ValidateStringResponse(response);
         }
 
-        public async Task<(bool, string?)> RequestPasswordReset(string email)
+        public async Task<(bool, string)> RequestPasswordReset(string email)
         {
             var response = await accountService.RequestResetPassword(email);
             return ValidateStringResponse(response);
         }
 
-        public async Task<(bool, string?)> Toggle2FA(string code)
+        public async Task<(bool, string)> Toggle2FA(string code)
         {
             var response = await accountService.ToggleTFA(code);
             return ValidateStringResponse(response);
         }
 
-        private static (bool, string?) ValidateStringResponse(ResponseDto response)
+        private static (bool, string) ValidateStringResponse(ResponseDto response)
         {
             if (response is null) return (false, "Something went wrong");
-
-            var stringData = response.Response.ToString()?.Replace("[", "").Replace("]", "");
-            string? json = string.Empty;
-            if (stringData is not null) json = JsonConvert.DeserializeObject<string>(stringData);
-
-            return (response.isSuccess, json);
+            return (response.isSuccess, ResponseToJsonHelper.GetJson(response));
         }
 
-        public async Task<(bool, string?)> ResendEmailConfirmation(string email)
+        public async Task<(bool, string)> ResendEmailConfirmation(string email)
         {
             var response = await accountService.ResendEmailConfirmation(email);
             return ValidateStringResponse(response);

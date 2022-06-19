@@ -30,22 +30,5 @@ namespace ProductsService_API.Controllers
             if (!ModelState.IsValid) return BadRequest();
             return CheckActionResult(await gamesRepository.EditGame(data));
         }
-
-        [HttpDelete("DeleteProductGame")]
-        [Authorize(Roles = StaticData.AdminRole)]
-        public async Task<ActionResult<ResponseDto>> DeleteGame([FromQuery] Guid GameId)
-        {
-            if (GameId == Guid.Empty) return BadRequest();
-            return CheckActionResult(await gamesRepository.DeleteGame(GameId));
-        }
-
-        [HttpPost("AddProductGame")]
-        [Authorize(Roles = StaticData.AdminRole)]
-        public async Task<ActionResult<ResponseDto>> AddGame([FromBody] AddGamesDto data)
-        {
-            if (!ModelState.IsValid) return BadRequest();
-            var token = HttpContext.Request.Headers["Authorization"][0];
-            return CheckActionResult(await gamesRepository.AddGame(data, token));
-        }
     }
 }

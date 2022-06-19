@@ -27,5 +27,9 @@
         public string RecommendedGPU { get; set; }
         public string RecommendedStorage { get; set; }
 
+        public bool Validation() => !string.IsNullOrEmpty(MinimumOS) && !string.IsNullOrEmpty(MinimumMemory) && !string.IsNullOrEmpty(MinimumCPU)
+            && !string.IsNullOrEmpty(MinimumGPU) && !string.IsNullOrEmpty(MinimumStorage) && !string.IsNullOrEmpty(RecommendedMemory)
+            && !string.IsNullOrEmpty(RecommendedCPU) && !string.IsNullOrEmpty(RecommendedGPU) && !string.IsNullOrEmpty(RecommendedStorage) && !string.IsNullOrEmpty(RecommendedOS);
+
     }
 }

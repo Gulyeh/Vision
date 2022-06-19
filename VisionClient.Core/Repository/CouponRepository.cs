@@ -20,31 +20,14 @@ namespace VisionClient.Core.Repository
         {
             var response = await couponService.ApplyCoupon(coupon, type);
             if (response.isSuccess) return string.Empty;
-
-            var responseString = response.Response.ToString()?.Replace("[", "").Replace("]", "");
-            if (!string.IsNullOrWhiteSpace(responseString))
-            {
-                var responseDeserialized = JsonConvert.DeserializeObject<string>(responseString);
-                if (!string.IsNullOrWhiteSpace(responseDeserialized))
-                    return responseDeserialized;
-            }
-
-            return string.Empty;
+            return ResponseToJsonHelper.GetJson(response);
         }
 
         public async Task<(CouponModel, string?)> VerifyCoupon(string coupon, CodeTypes type)
         {
             var response = await couponService.VerifyCoupon(coupon, type);
             var json = ResponseToJsonHelper.GetJson<CouponModel>(response);
-            if (string.IsNullOrWhiteSpace(json.Coupon))
-            {
-                var responseString = response.Response.ToString()?.Replace("[", "").Replace("]", "");
-                if (!string.IsNullOrWhiteSpace(responseString))
-                {
-                    var responseDeserialized = JsonConvert.DeserializeObject<string>(responseString);
-                    return (json, responseDeserialized);
-                }
-            }
+            if (string.IsNullOrWhiteSpace(json.Coupon)) return (json, ResponseToJsonHelper.GetJson(response));       
             return (json, null);
         }
     }

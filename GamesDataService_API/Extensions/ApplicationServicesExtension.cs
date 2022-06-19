@@ -1,6 +1,7 @@
 using GamesDataService_API.DbContexts;
 using GamesDataService_API.Helpers;
 using GamesDataService_API.Middleware;
+using GamesDataService_API.RabbitMQSender;
 using GamesDataService_API.Repository;
 using GamesDataService_API.Repository.IRepository;
 using GamesDataService_API.Services;
@@ -18,6 +19,8 @@ namespace GamesDataService_API.Extensions
                 opt.UseSqlServer(config.GetConnectionString("Connection"));
             });
             services.AddMemoryCache();
+            services.AddSingleton<IRabbitMQSender, RabbitMQMessageSender>();
+            services.Configure<RabbitMQSettings>(config.GetSection("RabbitMQSettings"));
             services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<ErrorHandler>();

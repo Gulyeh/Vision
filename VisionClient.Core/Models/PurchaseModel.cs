@@ -18,11 +18,8 @@ namespace VisionClient.Core.Models
         public string DiscountText { get; private set; }
         public List<string> DetailsList { get; private set; }
 
-        public void SetDetails(string data)
-        {
-            DetailsList = data.Split("#").ToList();
-        }
-
+        public void SetDetails(string data) => DetailsList = data.Split(",").ToList();
+        
         public void CreateDiscountText()
         {
             if (Discount > 0) DiscountText = $"-{Discount}%";

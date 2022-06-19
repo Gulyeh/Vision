@@ -52,7 +52,8 @@ namespace VisionClient.ViewModels.DialogsViewModels
 
         private void SelectFile()
         {
-            ImageSource = FileDialogHelper.OpenFile(false).First();
+            var image = FileDialogHelper.OpenFile(false);
+            if(image.Any()) ImageSource = image.First();
         }
 
         protected override async void Execute(object? data)

@@ -35,19 +35,22 @@ namespace GamesDataService_API.Repository
             var game = await db.Games.Include(x => x.News).FirstOrDefaultAsync(x => x.Id == data.GameId);
             if (game is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game not found" });
 
-            var results = await uploadService.UploadPhoto(data.Photo);
+            var results = await uploadService.UploadPhoto(Convert.FromBase64String(data.Photo));
             if (results.Error is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not upload image" });
 
             var mapped = mapper.Map<News>(data);
             mapped.PhotoId = results.PublicId;
             mapped.PhotoUrl = results.SecureUrl.AbsoluteUri;
 
-            game.News?.Add(mapped);
-            if (await db.SaveChangesAsync() > 0)
+            if(!string.IsNullOrWhiteSpace(results.PublicId))
             {
-                await cacheService.TryAddToCache<News>(CacheType.News, mapped);
-                logger.LogInformation("Added new News to Game with ID: {id} successfully", data.GameId);
-                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Added news successfuly" });
+                game.News?.Add(mapped);
+                if (await db.SaveChangesAsync() > 0)
+                {
+                    await cacheService.TryAddToCache<News>(CacheType.News, mapped);
+                    logger.LogInformation("Added new News to Game with ID: {id} successfully", data.GameId);
+                    return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Added news successfuly" });
+                }
             }
 
             await uploadService.DeletePhoto(results.PublicId);
@@ -86,9 +89,9 @@ namespace GamesDataService_API.Repository
             var news = game.News?.FirstOrDefault(x => x.Id == data.Id);
             if (news is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "News does not exist" });
 
-            if (data.Photo is not null)
+            if (!string.IsNullOrWhiteSpace(data.Photo))
             {
-                var results = await uploadService.UploadPhoto(data.Photo);
+                var results = await uploadService.UploadPhoto(Convert.FromBase64String(data.Photo));
                 if (results.Error is null)
                 {
                     oldPhotoId = news.PhotoId;

@@ -17,6 +17,13 @@ namespace VisionClient.Core.Repository
             this.StaticData = staticData;
         }
 
+        public async Task<string> AddGame(AddGameDto data)
+        {
+            var response = await gamesService.AddGame(data);
+            if (response is null) throw new Exception();
+            return ResponseToJsonHelper.GetJson(response);
+        }
+
         public async Task GetGames()
         {
             var games = await gamesService.GetGames();
@@ -33,12 +40,16 @@ namespace VisionClient.Core.Repository
         public async Task<IEnumerable<NewsModel>> GetNews(Guid gameId)
         {
             var news = await gamesService.GetNews(gameId);
+            if (news is null) throw new Exception();
+
             return ResponseToJsonHelper.GetJson<List<NewsModel>>(news);
         }
 
         public async Task<GameProductModel> GetProducts(Guid gameId)
         {
             var products = await gamesService.GetProducts(gameId);
+            if (products is null) throw new Exception();
+
             return ResponseToJsonHelper.GetJson<GameProductModel>(products);
         }
 

@@ -5,7 +5,9 @@ using System.Windows;
 using VisionClient.Extensions;
 using VisionClient.SignalR;
 using VisionClient.ViewModels;
+using VisionClient.ViewModels.AdminPanelViewModels;
 using VisionClient.Views;
+using VisionClient.Views.AdminPanel.AddControls;
 using VisionClient.Views.SettingsControls;
 
 namespace VisionClient
@@ -31,6 +33,7 @@ namespace VisionClient
             ViewModelLocationProvider.Register(typeof(ProfileControl).ToString(), typeof(ProfileControlViewModel));
             ViewModelLocationProvider.Register(typeof(SecurityControl).ToString(), typeof(SecurityControlViewModel));
             ViewModelLocationProvider.Register(typeof(AuthenticationControl).ToString(), typeof(AuthenticationControlViewModel));
+            ViewModelLocationProvider.Register(typeof(AddGameControl).ToString(), typeof(AddGameControlViewModel));
         }
     }
 }

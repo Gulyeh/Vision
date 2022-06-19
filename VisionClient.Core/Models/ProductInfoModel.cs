@@ -16,5 +16,7 @@
         public string Publisher { get; set; }
         public string Language { get; set; }
         public string Description { get; set; }
+
+        public bool Validation() => !string.IsNullOrEmpty(Genre) && !string.IsNullOrEmpty(Developer) && !string.IsNullOrEmpty(Publisher) && !string.IsNullOrEmpty(Language) && !string.IsNullOrEmpty(Description);
     }
 }

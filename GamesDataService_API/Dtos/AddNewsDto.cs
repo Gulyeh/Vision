@@ -7,10 +7,16 @@ namespace GamesDataService_API.Dtos
 {
     public class AddNewsDto : BaseNews
     {
+        public AddNewsDto()
+        {
+            Photo = string.Empty;
+        }
+
         [Required]
-        [NotNull]
-        public IFormFile? Photo { get; set; }
+        public string Photo { get; set; }
         [JsonIgnore]
         public DateTime CreatedDate { get; set; } = DateTime.Now;
+        [Required]
+        public Guid GameId { get; set; }
     }
 }

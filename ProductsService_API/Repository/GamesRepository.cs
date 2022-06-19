@@ -5,6 +5,7 @@ using ProductsService_API.DbContexts;
 using ProductsService_API.Dtos;
 using ProductsService_API.Entites;
 using ProductsService_API.Helpers;
+using ProductsService_API.Messages;
 using ProductsService_API.Repository.IRepository;
 using ProductsService_API.Services.IServices;
 
@@ -55,42 +56,42 @@ namespace ProductsService_API.Repository
             return new ResponseDto(true, StatusCodes.Status200OK, mapped);
         }
 
-        public async Task<ResponseDto> AddGame(AddGamesDto data, string Access_Token)
+        public async Task AddGame(NewProductDto data)
         {
-            var checkGame = await gameDataService.CheckGameExists(data.GameId, Access_Token);
-            if (!checkGame.isSuccess) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game does not exist" });
-
             var gameExists = await db.Games.FirstOrDefaultAsync(x => x.GameId == data.GameId);
-            if (gameExists is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Game product already exist" });
+            if (gameExists is not null) return;
 
             var mapped = mapper.Map<Games>(data);
 
             await db.Games.AddAsync(mapped);
-            if (await SaveChangesAsync())
-            {
+            if (await SaveChangesAsync()) {
                 logger.LogInformation("Added Game with ID: {gameId} for purchase successfully", data.GameId);
-                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Game has been added successfuly" });
+                return;
             }
-
             logger.LogError("Could not add Game with ID: {gameId} for purchase", data.GameId);
-            return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not add game" });
         }
 
-        public async Task<ResponseDto> DeleteGame(Guid gameId)
+        public async Task DeleteGame(Guid gameId)
         {
             var game = await db.Games.FirstOrDefaultAsync(x => x.GameId == gameId);
-            if (game is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game does not exist" });
+            if (game is null) return;
 
             db.Games.Remove(game);
 
-            if (await SaveChangesAsync())
-            {
+            if (await SaveChangesAsync()) {
                 logger.LogInformation("Deleted Game with ID: {gameId}", gameId);
-                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Game has been deleted successfuly" });
-            }
-
+                return;  
+            }                
             logger.LogError("Could not delete Game with ID: {gameId}", gameId);
-            return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not delete game" });
+        }
+
+        public async Task UpdatePhotoData(PhotoData data){
+            var game = await db.Games.FirstOrDefaultAsync(x => x.GameId == data.GameId);
+            if (game is null) return;
+
+            game.PhotoUrl = data.PhotoUrl;
+            game.PhotoId = data.PhotoId;
+            await SaveChangesAsync();
         }
 
         public async Task<ResponseDto> EditGame(GamesDto data)

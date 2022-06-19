@@ -17,8 +17,5 @@ namespace GamesDataService_API.Helpers
         public string PhotoUrl { get; set; }
         [Required]
         public string Content { get; set; }
-        [Required]
-        public Guid GameId { get; set; }
-
     }
 }

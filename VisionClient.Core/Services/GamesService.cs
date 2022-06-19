@@ -11,6 +11,19 @@ namespace VisionClient.Core.Services
         {
         }
 
+        public async Task<ResponseDto?> AddGame(AddGameDto data)
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.POST,
+                ApiUrl = $"{ConnectionData.GatewayUrl}/Games/AddGame",
+                Data = data
+            });
+
+            if (response is null) return null;
+            return response;
+        }
+
         public async Task<ResponseDto?> BoughtPackage(Guid productId, Guid gameId)
         {
             var response = await SendAsync<ResponseDto>(new ApiRequest()
@@ -35,7 +48,7 @@ namespace VisionClient.Core.Services
             return response;
         }
 
-        public async Task<ResponseDto> GetNews(Guid gameId)
+        public async Task<ResponseDto?> GetNews(Guid gameId)
         {
             var response = await SendAsync<ResponseDto>(new ApiRequest()
             {
@@ -44,10 +57,10 @@ namespace VisionClient.Core.Services
             });
 
             if (response is not null) return response;
-            return new ResponseDto();
+            return null;
         }
 
-        public async Task<ResponseDto> GetProducts(Guid gameId)
+        public async Task<ResponseDto?> GetProducts(Guid gameId)
         {
             var response = await SendAsync<ResponseDto>(new ApiRequest()
             {
@@ -56,7 +69,7 @@ namespace VisionClient.Core.Services
             });
 
             if (response is not null) return response;
-            return new ResponseDto();
+            return null;
         }
 
         public async Task<ResponseDto?> CheckGameAccess(Guid gameId)

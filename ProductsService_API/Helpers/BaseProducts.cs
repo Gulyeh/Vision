@@ -21,7 +21,7 @@ namespace ProductsService_API.Helpers
         public decimal Price { get; set; }
         [Required]
         public bool IsAvailable { get; set; }
-        public int? Discount { get; set; }
+        public int Discount { get; set; }
         [Required]
         public string Details { get; set; }
     }
