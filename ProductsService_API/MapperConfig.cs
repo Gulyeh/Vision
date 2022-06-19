@@ -15,6 +15,7 @@ namespace ProductsService_API
             CreateMap<Currency, CurrencyDto>().ReverseMap();
             CreateMap<NewProductDto, Games>();
             CreateMap<NewProductDto, Products>();
+            CreateMap<AddCurrencyDto, Currency>();
         }
     }
 }

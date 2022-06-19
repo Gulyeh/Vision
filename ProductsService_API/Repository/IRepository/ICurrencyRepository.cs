@@ -5,5 +5,6 @@ namespace ProductsService_API.Repository.IRepository
     public interface ICurrencyRepository
     {
         Task<ResponseDto> GetPackages();
+        Task<ResponseDto> AddPackage(AddCurrencyDto data);
     }
 }

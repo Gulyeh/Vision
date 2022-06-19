@@ -17,15 +17,15 @@ using VisionClient.Extensions;
 namespace VisionClient.Views.AdminPanel.AddControls
 {
     /// <summary>
-    /// Logika interakcji dla klasy AddGameControl.xaml
+    /// Logika interakcji dla klasy AddCurrencyControl.xaml
     /// </summary>
-    public partial class AddGameControl : UserControl
+    public partial class AddCurrencyControl : UserControl
     {
-        public AddGameControl()
+        public AddCurrencyControl()
         {
             InitializeComponent();
         }
 
-        private void CheckNumeric(object sender, TextCompositionEventArgs e) => e.Handled = e.Text.IsNumeric();     
+        private void CheckNumeric(object sender, TextCompositionEventArgs e) => e.Handled = e.Text.IsNumeric();
     }
 }

@@ -97,13 +97,15 @@
                 <StackPanel Margin="0,20,0,0" Orientation="Horizontal" HorizontalAlignment="Center">
                     <editors:SfTextBoxExt 
                         HorizontalAlignment="Center" 
+                        PreviewTextInput="CheckNumeric"
                         Width="100" 
                         FontSize="12"
                         Height="25"
                         MaxLength="7"
                         Text="{Binding GameModel.Price, StringFormat=C, UpdateSourceTrigger=PropertyChanged}"
-                        Watermark="Price $"/>
+                        Watermark="Price"/>
                     <editors:SfTextBoxExt 
+                        PreviewTextInput="CheckNumeric"
                         HorizontalAlignment="Center" 
                         Width="100"
                         MaxLength="4"

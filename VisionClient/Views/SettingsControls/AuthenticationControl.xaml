@@ -91,7 +91,8 @@
                                    Foreground="Gray"
                                    DockPanel.Dock="Top"
                                    Margin="0,0,0,5"/>
-                            <TextBox Text="{Binding SecurityCode, Mode=TwoWay}"/>
+                            <TextBox Text="{Binding SecurityCode, Mode=TwoWay}"
+                                     PreviewTextInput="CheckNumeric"/>
                             <TextBlock Text="{Binding CodeError}" FontSize="10" Foreground="Red"/>
                             <Button Content="Save"
                                     Margin="0,15,0,0"

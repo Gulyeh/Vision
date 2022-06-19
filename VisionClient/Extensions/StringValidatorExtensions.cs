@@ -19,5 +19,11 @@ namespace VisionClient.Extensions
             if (data.Equals(RepeatPassword)) return true;
             return false;
         }
+
+        internal static bool IsNumeric(this string data)
+        {
+            Regex regex = new Regex("[^0-9]+");
+            return regex.IsMatch(data);
+        }
     }
 }

@@ -24,6 +24,17 @@ namespace ProductsService_API.Repository
             this.logger = logger;
         }
 
+        public async Task<ResponseDto> AddPackage(AddCurrencyDto data)
+        {
+            var mapped = mapper.Map<Currency>(data);
+            await db.Currencies.AddAsync(mapped);
+            if(await db.SaveChangesAsync() > 0) {
+                await cacheService.TryAddToCache<Currency>(CacheType.Currencies, mapped);
+                return new ResponseDto(true, StatusCodes.Status200OK, new[] {"Package has been added successfully"});
+            }
+            return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] {"Could not add package"});
+        }
+
         public async Task<ResponseDto> GetPackages()
         {
             IEnumerable<Currency> packages = await cacheService.TryGetFromCache<Currency>(CacheType.Currencies);

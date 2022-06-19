@@ -126,7 +126,7 @@
                 </ListView.ItemsPanel>
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <DockPanel Width="100" Height="70" Background="#0AA1DD">
+                        <DockPanel Width="150" Height="70" Background="#0AA1DD">
                             <Border Background="DarkRed" CornerRadius="16" Height="25" Width="25"
                                     Margin="0,-12,-10,0" VerticalAlignment="Top" DockPanel.Dock="Right"
                                     Visibility="{Binding Discount, Converter={StaticResource DiscountToVis}}">

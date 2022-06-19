@@ -22,5 +22,18 @@ namespace VisionClient.Core.Services
             if (response is not null) return response;
             return new ResponseDto();
         }
+
+        public async Task<ResponseDto?> AddCurrencyPackage(AddCurrencyDto data)
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.POST,
+                ApiUrl = $"{ConnectionData.GatewayUrl}/currency/addpackage",
+                Data = data
+            });
+
+            if (response is not null) return response;
+            return null;
+        }
     }
 }
