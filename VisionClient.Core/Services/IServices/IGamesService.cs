@@ -10,5 +10,6 @@ namespace VisionClient.Core.Services.IServices
         Task<ResponseDto?> BoughtPackage(Guid productId, Guid gameId);
         Task<ResponseDto?> CheckGameAccess(Guid gameId);
         Task<ResponseDto?> AddGame(AddGameDto data);
+        Task<ResponseDto?> AddNews(AddNewsDto data);
     }
 }

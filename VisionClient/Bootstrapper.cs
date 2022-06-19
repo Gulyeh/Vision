@@ -34,6 +34,7 @@ namespace VisionClient
             ViewModelLocationProvider.Register(typeof(SecurityControl).ToString(), typeof(SecurityControlViewModel));
             ViewModelLocationProvider.Register(typeof(AuthenticationControl).ToString(), typeof(AuthenticationControlViewModel));
             ViewModelLocationProvider.Register(typeof(AddGameControl).ToString(), typeof(AddGameControlViewModel));
+            ViewModelLocationProvider.Register(typeof(AddNewsControl).ToString(), typeof(AddNewsControlViewModel));
         }
     }
 }

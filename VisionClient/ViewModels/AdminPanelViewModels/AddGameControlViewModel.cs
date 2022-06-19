@@ -122,6 +122,7 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
 
                 ErrorText = await gamesRepository.AddGame(GameModel);
                 IsButtonEnabled = true;
+                ClearData();
             }
             catch (Exception)
             {

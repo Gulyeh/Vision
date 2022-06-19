@@ -4,13 +4,18 @@
     {
         public NewsModel()
         {
-            PhotoUrl = String.Empty;
-            Title = String.Empty;
-            Content = String.Empty;
+            PhotoUrl = string.Empty;
+            Title = string.Empty;
+            Content = string.Empty;
         }
         public Guid Id { get; set; }
         public string PhotoUrl { get; set; }
-        public DateTime CreatedDate { get; set; }
+        private DateTime createdDate;
+        public DateTime CreatedDate 
+        {
+            get => createdDate;
+            set => createdDate = value.ToLocalTime();
+        }
         public string Title { get; set; }
         public string Content { get; set; }
         public Guid GameId { get; set; }

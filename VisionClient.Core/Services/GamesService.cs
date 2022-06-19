@@ -83,5 +83,18 @@ namespace VisionClient.Core.Services
             if (response is not null) return response;
             return null;
         }
+
+        public async Task<ResponseDto?> AddNews(AddNewsDto data)
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.POST,
+                ApiUrl = $"{ConnectionData.GatewayUrl}/news/AddNews",
+                Data = data
+            });
+
+            if (response is not null) return response;
+            return null;
+        }
     }
 }

@@ -74,5 +74,12 @@ namespace VisionClient.Core.Repository
             if (json is null) throw new Exception();
             return json;
         }
+
+        public async Task<string> AddNews(AddNewsDto data)
+        {
+            var response = await gamesService.AddNews(data);
+            if (response is null) throw new Exception();
+            return ResponseToJsonHelper.GetJson(response);
+        }
     }
 }

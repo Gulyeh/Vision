@@ -15,7 +15,7 @@ namespace GamesDataService_API.Entities
         [Key]
         public Guid Id { get; set; }
         [Required]
-        public DateTime CreatedDate { get; set; }
+        public DateTime CreatedDate { get; init; } = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
         [Required]
         public string PhotoId { get; set; }
         [Required]
