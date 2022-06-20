@@ -54,8 +54,9 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
 
             try
             {
-                ErrorText = await currencyRepository.AddPackage(CurrencyModel);
+                (bool success, ErrorText) = await currencyRepository.AddPackage(CurrencyModel);
                 IsButtonEnabled = true;
+                if(success) CurrencyModel = new();
             }
             catch (Exception)
             {

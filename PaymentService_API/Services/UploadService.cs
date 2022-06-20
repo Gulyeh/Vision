@@ -1,10 +1,10 @@
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Microsoft.Extensions.Options;
-using ProductsService_API.Helpers;
-using ProductsService_API.Services.IServices;
+using PaymentService_API.Helpers;
+using PaymentService_API.Services.IServices;
 
-namespace ProductsService_API.Services
+namespace PaymentService_API.Services
 {
     public class UploadService : IUploadService
     {

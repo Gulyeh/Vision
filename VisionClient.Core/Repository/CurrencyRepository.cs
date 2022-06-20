@@ -15,12 +15,12 @@ namespace VisionClient.Core.Repository
             this.currencyService = currencyService;
         }
 
-        public async Task<string> AddPackage(AddCurrencyDto data)
+        public async Task<(bool,string)> AddPackage(AddCurrencyDto data)
         {
             var response = await currencyService.AddCurrencyPackage(data);
             if (response is null) throw new Exception();
 
-            return ResponseToJsonHelper.GetJson(response);
+            return (response.isSuccess, ResponseToJsonHelper.GetJson(response));
         }
 
         public async Task<IEnumerable<CoinPackageModel>> GetPackages()

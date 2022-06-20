@@ -40,7 +40,7 @@ namespace ProductsService_API.Repository
             IEnumerable<Currency> packages = await cacheService.TryGetFromCache<Currency>(CacheType.Currencies);
             if (packages.Count() == 0)
             {
-                var packagesDB = await db.Currencies.ToListAsync();
+                var packagesDB = await db.Currencies.OrderBy(x => x.Amount).ToListAsync();
                 foreach (var package in packagesDB) await cacheService.TryAddToCache<Currency>(CacheType.Currencies, package);
                 packages = packagesDB;
             }

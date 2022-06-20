@@ -6,6 +6,6 @@ namespace VisionClient.Core.Repository.IRepository
     public interface ICurrencyRepository
     {
         Task<IEnumerable<CoinPackageModel>> GetPackages();
-        Task<string> AddPackage(AddCurrencyDto data);
+        Task<(bool, string)> AddPackage(AddCurrencyDto data);
     }
 }

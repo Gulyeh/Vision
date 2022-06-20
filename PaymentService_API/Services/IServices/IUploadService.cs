@@ -1,6 +1,6 @@
 using CloudinaryDotNet.Actions;
 
-namespace ProductsService_API.Services.IServices
+namespace PaymentService_API.Services.IServices
 {
     public interface IUploadService
     {

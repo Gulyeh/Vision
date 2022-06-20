@@ -20,7 +20,7 @@ namespace GamesDataService_API.Controllers
             return CheckActionResult(await gamesRepository.GetGames());
         }
 
-        [Authorize(Policy = "HasAdminRole")]
+        [Authorize(Roles = StaticData.AdminRole)]
         [HttpPost("AddGame")]
         public async Task<ActionResult<ResponseDto>> AddGame([FromBody] AddGamesDto data)
         {
@@ -28,7 +28,7 @@ namespace GamesDataService_API.Controllers
             return CheckActionResult(await gamesRepository.AddGame(data));
         }
 
-        [Authorize(Policy = "HasAdminRole")]
+        [Authorize(Roles = StaticData.AdminRole)]
         [HttpPut("EditGame")]
         public async Task<ActionResult<ResponseDto>> EditGame([FromBody] GamesDto data)
         {

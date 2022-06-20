@@ -22,11 +22,13 @@ namespace PaymentService_API.Repository
         private readonly ICacheService cacheService;
         private readonly IPaymentProcessor paymentProcessor;
         private readonly IValidateJWT validateJWT;
+        private readonly IUploadService uploadService;
 
         public PaymentRepository(ApplicationDbContext db, IMapper mapper,
             IStripeService stripeService, IRabbitMQSender rabbitMQSender, ILogger<PaymentRepository> logger, ICacheService cacheService,
-            IPaymentProcessor paymentProcessor, IValidateJWT validateJWT)
+            IPaymentProcessor paymentProcessor, IValidateJWT validateJWT, IUploadService uploadService)
         {
+            this.uploadService = uploadService;
             this.mapper = mapper;
             this.stripeService = stripeService;
             this.rabbitMQSender = rabbitMQSender;
@@ -35,6 +37,27 @@ namespace PaymentService_API.Repository
             this.paymentProcessor = paymentProcessor;
             this.validateJWT = validateJWT;
             this.db = db;
+        }
+
+        public async Task<ResponseDto> AddPaymentMethod(AddPaymentMethodDto data)
+        {
+            var mapped = mapper.Map<PaymentMethods>(data);
+
+            var results = await uploadService.UploadPhoto(Convert.FromBase64String(data.Photo));
+            mapped.PhotoId = results.PublicId;
+            mapped.PhotoUrl = results.SecureUrl.AbsoluteUri;
+
+            if(!string.IsNullOrWhiteSpace(mapped.PhotoId) && !string.IsNullOrWhiteSpace(mapped.PhotoUrl)){
+                db.PaymentMethods.Add(mapped);
+                if(await db.SaveChangesAsync() > 0){
+                    await cacheService.AddMethodsToCache(mapped);
+                    logger.LogInformation("New method: {x} - has been added successfully", data.Provider);
+                    return new ResponseDto(true, StatusCodes.Status200OK, new[] {"New method has been added successfully"});
+                }
+            }
+
+            logger.LogInformation("Method: {x} - could not be added", data.Provider);
+            return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] {"Method could not be added"});
         }
 
         public async Task CreatePayment(PaymentMessage data)
@@ -49,6 +72,20 @@ namespace PaymentService_API.Repository
             await db.Payments.AddAsync(mapped);
             await db.SaveChangesAsync();
             logger.LogInformation("Created Payment for Order with ID: {orderId}", data.OrderId);
+        }
+
+        public async Task<IEnumerable<string>> GetNewProviders()
+        {
+            var usedProviders = await cacheService.GetMethodsFromCache();
+            var usedProvidersName = new List<string>();
+            var allProviders = Enum.GetNames(typeof(PaymentProvider));
+
+            foreach(var provider in usedProviders){
+                var name = Enum.GetName(typeof(PaymentProvider), provider.Provider);
+                if(!string.IsNullOrWhiteSpace(name)) usedProvidersName.Add(name);
+            }
+
+            return allProviders.Except(usedProvidersName);
         }
 
         public async Task<ResponseDto> GetPaymentMethods()

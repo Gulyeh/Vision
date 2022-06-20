@@ -31,8 +31,8 @@ namespace VisionClient.ViewModels
             set
             {
                 SetProperty(ref _isActive, value, RaiseIsActiveChanged);
-                Connection(IsActive);
-                if (!IsActive)
+                Connection(value);
+                if (!value)
                 {
                     ClearData();
                     eventAggregator.GetEvent<SendEvent<string>>().Publish("StopFocus");

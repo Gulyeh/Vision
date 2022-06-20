@@ -31,6 +31,8 @@ namespace VisionClient.Extensions
             containerRegistry.RegisterForNavigation<AddGameControl>("AddGameControl");
             containerRegistry.RegisterForNavigation<AddNewsControl>("AddNewsControl");
             containerRegistry.RegisterForNavigation<AddCurrencyControl>("AddCurrencyControl");
+            containerRegistry.RegisterForNavigation<AddGamePackageControl>("AddGamePackageControl");
+            containerRegistry.RegisterForNavigation<AddPaymentControl>("AddPaymentControl");
         }
     }
 }

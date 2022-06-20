@@ -68,11 +68,8 @@ namespace VisionClient.ViewModels.DialogsViewModels
             try
             {
                 var response = await couponRepository.ApplyCoupon(CouponCode, CodeType);
-                if (!string.IsNullOrWhiteSpace(response))
-                {
-                    ErrorText = response;
-                    IsEnabledButton = true;
-                }
+                if (!string.IsNullOrWhiteSpace(response)) ErrorText = response;           
+                IsEnabledButton = true;
             }
             catch (Exception)
             {

@@ -56,9 +56,9 @@
             </Grid.RowDefinitions>
             <Button Background="Transparent" BorderThickness="0"
                     Command="{Binding OpenImageCommand}"
-                    CommandParameter="Banner">
-                <Image Grid.Row="0"
-                       Source="{Binding BannerImage}"
+                    CommandParameter="Banner"
+                    Grid.Row="0">
+                <Image Source="{Binding BannerImage}"
                        HorizontalAlignment="Center">
                     <Image.OpacityMask>
                         <RadialGradientBrush RadiusY="3">

@@ -8,6 +8,7 @@ namespace ProductsService_API.Dtos
         public ProductsDto()
         {
             PhotoUrl = string.Empty;
+            Photo = string.Empty;
         }
 
         [Required]
@@ -16,6 +17,6 @@ namespace ProductsService_API.Dtos
         public string PhotoUrl { get; set; }
         [Required]
         public bool IsPurchased { get; set; }
-        public IFormFile? Photo { get; set; }
+        public string Photo { get; set; }
     }
 }

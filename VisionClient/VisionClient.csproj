@@ -27,6 +27,7 @@
     <None Remove="Images\LeftArrow.png" />
     <None Remove="Images\Maximize.png" />
     <None Remove="Images\Minimize.png" />
+    <None Remove="Images\NoAttachment.png" />
     <None Remove="Images\NotFound.png" />
     <None Remove="Images\RightArrow.png" />
     <None Remove="Images\SendMessage.png" />
@@ -40,6 +41,7 @@
     <Resource Include="Images\AddIcon.png" />
     <Resource Include="Images\AppleStore.png" />
     <Resource Include="Images\Google.png" />
+    <Resource Include="Images\NoAttachment.png" />
     <Resource Include="Vision.ico" />
   </ItemGroup>
 

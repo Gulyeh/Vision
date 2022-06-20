@@ -10,5 +10,7 @@ namespace PaymentService_API.Repository.IRepository
         Task CreatePayment(PaymentMessage data);
         Task<PaymentUrlData> RequestPayment(PaymentMessage data);
         Task<ResponseDto> PaymentCompleted(string sessionId, PaymentStatus status, string Access_Token);
+        Task<IEnumerable<string>> GetNewProviders();
+        Task<ResponseDto> AddPaymentMethod(AddPaymentMethodDto data);
     }
 }

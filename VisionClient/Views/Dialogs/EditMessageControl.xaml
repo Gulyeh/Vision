@@ -26,6 +26,7 @@
     </prism:Dialog.WindowStyle>
     <UserControl.Resources>
         <Converters:CountToVisibilityCovnerter x:Key="CountToVis"/>
+        <Converters:NegationCountToVisibilityCovnerter x:Key="NegationCountToVis"/>
         <Style TargetType="Button" x:Key="ArrowButton">
             <Setter Property="Template">
                 <Setter.Value>
@@ -143,8 +144,8 @@
                      Width="400"
                      MaxHeight="200"
                      TextWrapping="Wrap"/>
-            <ListView HorizontalAlignment="Left" 
-                      Name="AttachmentList"
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
+                <ListView Name="AttachmentList"
                       Background="Transparent"
                       BorderThickness="0"
                       ScrollViewer.HorizontalScrollBarVisibility="Auto"
@@ -153,46 +154,51 @@
                       SelectionMode="Single"
                       Focusable="False"
                       Visibility="{Binding EditMessage.Attachments.Count, Converter={StaticResource CountToVis}}" 
-                      Margin="0,5,0,0"
                       ItemsSource="{Binding EditMessage.Attachments}">
-                <ListView.ItemContainerStyle>
-                    <Style TargetType="ListViewItem">
-                        <Setter Property="Background" Value="Transparent" />
-                        <Setter Property="Margin" Value="5,5,10,10"/>
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="{x:Type ListViewItem}">
-                                    <ContentPresenter />
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="true">
-                                            <Setter Property="Opacity" Value="0.5"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </ListView.ItemContainerStyle>
-                <ListView.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Horizontal"/>
-                    </ItemsPanelTemplate>
-                </ListView.ItemsPanel>
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <DockPanel>
-                            <Button DockPanel.Dock="Top" 
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="Margin" Value="5,5,10,10"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                        <ContentPresenter />
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="true">
+                                                <Setter Property="Opacity" Value="0.5"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <DockPanel>
+                                <Button DockPanel.Dock="Top" 
                                     HorizontalAlignment="Right" Height="20" Width="20" Panel.ZIndex="1"
                                     Style="{StaticResource ArrowButton}" 
                                     Command="{Binding Path=DataContext.DeletePhotoCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}"
                                     CommandParameter="{Binding}"
                                     Content="X" FontSize="15" 
                                     Foreground="DarkRed"/>
-                            <Image Source="{Binding AttachmentUrl, IsAsync=True}" Height="100" Margin="0,-20,0,0"/>
-                        </DockPanel>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+                                <Image Source="{Binding AttachmentUrl, IsAsync=True}" Height="100" Margin="0,-20,0,0"/>
+                            </DockPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+                <Image Source="pack://application:,,,/Images/NoAttachment.png" 
+                       Height="100"
+                       Visibility="{Binding EditMessage.Attachments.Count, Converter={StaticResource NegationCountToVis}}"/>
+            </StackPanel>
+
+            
         </StackPanel>
         
         <DockPanel Grid.Row="2" 

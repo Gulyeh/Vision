@@ -11,5 +11,6 @@ namespace VisionClient.Core.Services.IServices
         Task<ResponseDto?> CheckGameAccess(Guid gameId);
         Task<ResponseDto?> AddGame(AddGameDto data);
         Task<ResponseDto?> AddNews(AddNewsDto data);
+        Task<ResponseDto?> AddGamePackage(AddPackageDto data);
     }
 }

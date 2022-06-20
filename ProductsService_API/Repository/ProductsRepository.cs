@@ -44,22 +44,20 @@ namespace ProductsService_API.Repository
 
             var mapped = mapper.Map<Products>(data);
 
-            if (data.Photo is not null)
+            var results = await uploadService.UploadPhoto(Convert.FromBase64String(data.Photo));
+            if (results.Error is null)
             {
-                var results = await uploadService.UploadPhoto(data.Photo);
-                if (results.Error is null)
-                {
-                    mapped.PhotoId = results.PublicId;
-                    mapped.PhotoUrl = results.SecureUrl.AbsoluteUri;
-                }
+                mapped.PhotoId = results.PublicId;
+                mapped.PhotoUrl = results.SecureUrl.AbsoluteUri;
             }
-
-            game.Products?.Add(mapped);
-
-            if (await SaveChangesAsync())
-            {
-                logger.LogInformation("Added Product to Game with ID: {gameId} for purchase successfully", data.GameId);
-                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Product has been added successfuly" });
+            
+            if(!string.IsNullOrWhiteSpace(mapped.PhotoUrl)){
+                game.Products?.Add(mapped);
+                if (await SaveChangesAsync())
+                {
+                    logger.LogInformation("Added Product to Game with ID: {gameId} for purchase successfully", data.GameId);
+                    return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Product has been added successfuly" });
+                }
             }
 
             await uploadService.DeletePhoto(mapped.PhotoId);
@@ -97,9 +95,9 @@ namespace ProductsService_API.Repository
 
             mapper.Map(data, product);
 
-            if (data.Photo is not null)
+            if (!string.IsNullOrWhiteSpace(data.Photo))
             {
-                var results = await uploadService.UploadPhoto(data.Photo);
+                var results = await uploadService.UploadPhoto(Convert.FromBase64String(data.Photo));
                 if (results.Error is null)
                 {
                     oldPhotoId = product.PhotoId;

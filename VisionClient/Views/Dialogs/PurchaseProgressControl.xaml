@@ -138,7 +138,7 @@
                 </Image.Style>
             </Image>
             <TextBlock TextAlignment="Center" Text="{Binding ProgressText}"
-                       Foreground="White" FontSize="10"/>
+                       Foreground="White" FontSize="10" Width="250" TextWrapping="Wrap"/>
         </DockPanel>
         <Button Content="OK"
                 Style="{StaticResource ButtonTemplate}"

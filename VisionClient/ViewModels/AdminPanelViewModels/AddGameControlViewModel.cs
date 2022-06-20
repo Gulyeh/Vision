@@ -3,6 +3,7 @@ using Prism.Mvvm;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -120,9 +121,9 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
                 GameModel.CoverPhoto = home.GetBase64();
                 GameModel.IconPhoto = icon.GetBase64();
 
-                ErrorText = await gamesRepository.AddGame(GameModel);
+                (bool success, ErrorText) = await gamesRepository.AddGame(GameModel);
                 IsButtonEnabled = true;
-                ClearData();
+                if(success) ClearData();
             }
             catch (Exception)
             {

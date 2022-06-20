@@ -21,7 +21,7 @@
         <Converters:CountToVisibilityCovnerter x:Key="CountToVis"/>
         <Converters:NegationUserIdToVisibilityConverter x:Key="IdToVisNegation"/>
         <Converters:NullToVisibility x:Key="NullToVis"/>
-        
+
         <Style TargetType="Button" x:Key="ArrowButton">
             <Setter Property="Template">
                 <Setter.Value>

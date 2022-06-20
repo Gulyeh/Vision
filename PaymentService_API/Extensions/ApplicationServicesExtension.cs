@@ -23,11 +23,13 @@ namespace PaymentService_API.Extensions
             });
             services.AddMemoryCache();
             services.Configure<RabbitMQSettings>(config.GetSection("RabbitMQSettings"));
+            services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<ErrorHandler>();
             services.AddSingleton<IRabbitMQSender, RabbitMQMessageSender>();
             services.AddHostedService<RabbitMQOrderConsumer>();
             services.AddScoped<IStripeService, StripeService>();
+            services.AddScoped<IUploadService, UploadService>();
             services.AddScoped<IPaymentRepository, PaymentRepository>();
             services.AddScoped<ICacheService, CacheService>();
             services.AddScoped<IPaymentProcessor, PaymentUrlProcessor>();

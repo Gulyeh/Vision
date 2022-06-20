@@ -20,19 +20,9 @@ namespace ProductsService_API.Services
         {
             List<T> value;
             memoryCache.TryGetValue(type, out value);
-
-            if (value is null)
-            {
-                value = new List<T>();
-                value.Add(data);
-            }
-            else
-            {
-                var found = value.FirstOrDefault(x => x.Id == data.Id);
-                if (found is null) value.Add(data);
-                else found = data;
-            }
-
+            if (value is null) value = new List<T>();
+            value.Add(data);
+            
             SetCache<T>(type, value);
             return Task.CompletedTask;
         }

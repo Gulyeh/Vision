@@ -12,20 +12,17 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using VisionClient.Extensions;
 
 namespace VisionClient.Views.AdminPanel.AddControls
 {
     /// <summary>
-    /// Logika interakcji dla klasy AddGamePackageControl.xaml
+    /// Logika interakcji dla klasy AddPaymentControl.xaml
     /// </summary>
-    public partial class AddGamePackageControl : UserControl
+    public partial class AddPaymentControl : UserControl
     {
-        public AddGamePackageControl()
+        public AddPaymentControl()
         {
             InitializeComponent();
         }
-
-        private void CheckNumeric(object sender, TextCompositionEventArgs e) => e.Handled = e.Text.IsNumeric();
     }
 }

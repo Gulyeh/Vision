@@ -15,7 +15,7 @@
         Height="700" Width="1250"
         WindowStartupLocation="CenterScreen"
         BorderThickness="2" BorderBrush="#0f3452"
-        PreviewKeyDown="Window_PreviewKeyDown">
+        PreviewKeyDown="Window_PreviewKeyDown" KeyboardNavigation.TabNavigation="None">
 
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0"/>

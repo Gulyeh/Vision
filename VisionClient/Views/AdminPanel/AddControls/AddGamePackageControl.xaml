@@ -5,8 +5,147 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:VisionClient.Views.AdminPanel.AddControls"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-            
-    </Grid>
+             xmlns:prism="http://prismlibrary.com/"
+             xmlns:editors="http://schemas.syncfusion.com/wpf"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             d:DesignHeight="850" d:DesignWidth="600" 
+             Background="#0c3c60">
+    <UserControl.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border" 
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Background="{TemplateBinding Background}">
+                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Opacity" Value="0.8"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="editors:SfTextBoxExt">
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Padding" Value="5,4,0,0"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Width" Value="250"/>
+            <Setter Property="Background" Value="#164971"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+    </UserControl.Resources>
+    <ScrollViewer CanContentScroll="False" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="200"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Button Background="Transparent" BorderThickness="0"
+                    Command="{Binding OpenImageCommand}"
+                    CommandParameter="Banner"
+                    Grid.Row="0">
+                <Image Source="{Binding CoverImage}"
+                       HorizontalAlignment="Center">
+                    <Image.OpacityMask>
+                        <RadialGradientBrush RadiusY="3">
+                            <GradientStop Color="#00000000" Offset="1"/>
+                            <GradientStop Color="Black" Offset="0.5"/>
+                        </RadialGradientBrush>
+                    </Image.OpacityMask>
+                </Image>
+            </Button>
+            <Separator Grid.Row="1" Height="1" VerticalAlignment="Top"/>
+            <StackPanel Grid.Row="1" Orientation="Vertical" Margin="0,20,0,0">
+                <editors:SfTextBoxExt 
+                        HorizontalAlignment="Center" 
+                        Width="250" 
+                        FontSize="12"
+                        Height="25"
+                        MaxLength="50"
+                        Text="{Binding PackageData.Title}"
+                        Watermark="Package Name"/>
+                <editors:ComboBoxAdv 
+                    Width="200" 
+                    Height="25"
+                    ItemsSource="{Binding StaticData.GameModels}"
+                    DisplayMemberPath="Name"
+                    SelectedItem="{Binding SelectedGame}"
+                    HorizontalAlignment="Center"
+                    Background="#164971"
+                    Foreground="Black" 
+                    DefaultText="Game List" Margin="0,20,0,0"/>
+                <StackPanel Orientation="Horizontal" Margin="0,20,0,0"
+                            HorizontalAlignment="Center">
+                    <editors:SfTextBoxExt 
+                        HorizontalAlignment="Center" 
+                        Width="100" 
+                        PreviewTextInput="CheckNumeric"
+                        FontSize="12"
+                        MaxLength="50"
+                        Height="25"
+                        Margin="0,0,20,0"
+                        Text="{Binding PackageData.Price, StringFormat=C, UpdateSourceTrigger=PropertyChanged}"
+                        Watermark="Price"/>
+                    <editors:SfTextBoxExt 
+                        HorizontalAlignment="Center" 
+                        Width="100" 
+                        PreviewTextInput="CheckNumeric"
+                        FontSize="12"
+                        MaxLength="50"
+                        Height="25"
+                        Margin="0,0,20,0"
+                        Text="{Binding PackageData.Discount, UpdateSourceTrigger=PropertyChanged}"
+                        Watermark="Discount %"/>
+                    <editors:ComboBoxAdv 
+                              Width="100" 
+                              Height="25"
+                              Background="#164971"
+                              Foreground="Black"     
+                              DefaultText="Is Available"
+                              SelectedValue="{Binding PackageData.IsAvailable}"
+                              SelectedValuePath="Tag">
+                        <editors:ComboBoxItemAdv Content="Is Available" FontSize="10" IsEnabled="False"/>
+                        <editors:ComboBoxItemAdv Content="True" Tag="True" FontSize="10"/>
+                        <editors:ComboBoxItemAdv Content="False" Tag="False" FontSize="10"/>
+                    </editors:ComboBoxAdv>
+                </StackPanel>
+                <editors:SfTextBoxExt 
+                        Margin="0,20,0,0"
+                        HorizontalAlignment="Center" 
+                        Width="350" 
+                        FontSize="12"
+                        MaxLength="500"
+                        Height="65"
+                        TextWrapping="Wrap"
+                        Text="{Binding PackageData.Details}"
+                        Watermark="What package includes (separate each with comma)"/>
+                <StackPanel Orientation="Vertical" Margin="0,20,0,0" Grid.Row="1">
+                    <TextBlock Text="{Binding ErrorText}"
+                       FontSize="10" Foreground="Red"
+                       Margin="0,0,0,10"
+                       HorizontalAlignment="Center"/>
+                    <Button Width="100"
+                            Height="30" 
+                            IsHitTestVisible="{Binding IsButtonEnabled}"
+                            Content="Save"
+                            Background="#0AA1DD"
+                            Foreground="White"
+                            Command="{Binding ExecuteCommand}"
+                            BorderThickness="0"/>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
 </UserControl>

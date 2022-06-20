@@ -54,7 +54,6 @@ namespace VisionClient.Views
                 case Key.Right:
                 case Key.Up:
                 case Key.Down:
-                case Key.Tab:
                     e.Handled = true;
                     break;
                 default:

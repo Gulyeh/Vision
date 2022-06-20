@@ -17,11 +17,11 @@ namespace VisionClient.Core.Repository
             this.StaticData = staticData;
         }
 
-        public async Task<string> AddGame(AddGameDto data)
+        public async Task<(bool, string)> AddGame(AddGameDto data)
         {
             var response = await gamesService.AddGame(data);
             if (response is null) throw new Exception();
-            return ResponseToJsonHelper.GetJson(response);
+            return (response.isSuccess, ResponseToJsonHelper.GetJson(response));
         }
 
         public async Task GetGames()
@@ -75,11 +75,18 @@ namespace VisionClient.Core.Repository
             return json;
         }
 
-        public async Task<string> AddNews(AddNewsDto data)
+        public async Task<(bool, string)> AddNews(AddNewsDto data)
         {
             var response = await gamesService.AddNews(data);
             if (response is null) throw new Exception();
-            return ResponseToJsonHelper.GetJson(response);
+            return (response.isSuccess, ResponseToJsonHelper.GetJson(response));
+        }
+
+        public async Task<(bool, string)> AddGamePackage(AddPackageDto data)
+        {
+            var response = await gamesService.AddGamePackage(data);
+            if (response is null) throw new Exception();
+            return (response.isSuccess, ResponseToJsonHelper.GetJson(response));
         }
     }
 }

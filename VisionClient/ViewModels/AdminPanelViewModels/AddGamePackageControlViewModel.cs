@@ -15,7 +15,7 @@ using VisionClient.Utility;
 
 namespace VisionClient.ViewModels.AdminPanelViewModels
 {
-    internal class AddNewsControlViewModel : BindableBase
+    internal class AddGamePackageControlViewModel : BindableBase
     {
         private object coverImage = new();
         public object CoverImage
@@ -45,13 +45,12 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
             set { SetProperty(ref selectedGame, value); }
         }
 
-        private AddNewsDto newsData = new();
-        public AddNewsDto NewsData
+        private AddPackageDto packageData = new();
+        public AddPackageDto PackageData
         {
-            get { return newsData; }
-            set { SetProperty(ref newsData, value); }
+            get { return packageData; }
+            set { SetProperty(ref packageData, value); }
         }
-
 
         private readonly IGamesRepository gamesRepository;
 
@@ -59,7 +58,7 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
         public DelegateCommand ExecuteCommand { get; }
         public IStaticData StaticData { get; }
 
-        public AddNewsControlViewModel(IStaticData StaticData, IGamesRepository gamesRepository)
+        public AddGamePackageControlViewModel(IStaticData StaticData, IGamesRepository gamesRepository)
         {
             ExecuteCommand = new DelegateCommand(Execute);
             OpenImageCommand = new DelegateCommand(OpenImage);
@@ -76,12 +75,10 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
 
         private bool Validator()
         {
-            if(SelectedGame.Id != Guid.Empty && NewsData.Validation() && CoverImage.GetType() == typeof(BitmapImage)) return true;
-
+            if (SelectedGame.Id != Guid.Empty && PackageData.Validator() && CoverImage.GetType() == typeof(BitmapImage)) return true;
             ErrorText = "Please fill all data";
             return false;
         }
-        
 
         private async void Execute()
         {
@@ -91,10 +88,10 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
             try
             {
                 BitmapImage cover = (BitmapImage)CoverImage;
-                NewsData.GameId = SelectedGame.Id;
-                NewsData.Photo = cover.GetBase64();
+                PackageData.GameId = SelectedGame.Id;
+                PackageData.Photo = cover.GetBase64();
 
-                (bool success, ErrorText) = await gamesRepository.AddNews(NewsData);
+                (bool success, ErrorText) = await gamesRepository.AddGamePackage(PackageData);
                 IsButtonEnabled = true;
                 if(success) ClearData();
             }
@@ -108,7 +105,7 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
         private void ClearData()
         {
             CoverImage = "pack://application:,,,/Images/AddBanner.png";
-            NewsData = new();
+            PackageData = new();
             SelectedGame = new();
         }
     }

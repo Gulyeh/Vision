@@ -122,7 +122,7 @@ namespace GamesDataService_API.Repository
                 foreach (var item in dbNews) await cacheService.TryAddToCache<News>(CacheType.News, item);
                 news = dbNews;
             }
-            IEnumerable<News> gameNews = news.Where(x => x.GameId == gameId).OrderByDescending(x => x.Id).Take(10);
+            IEnumerable<News> gameNews = news.Where(x => x.GameId == gameId).OrderBy(x => x.Id).Take(10);
 
             return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<NewsDto>>(gameNews));
         }

@@ -18,6 +18,7 @@ namespace VisionClient.Core.Repository
 
         public async Task<string> ApplyCoupon(string coupon, CodeTypes type)
         {
+            if (string.IsNullOrEmpty(coupon)) return "Field cannot be empty";
             var response = await couponService.ApplyCoupon(coupon, type);
             if (response.isSuccess) return string.Empty;
             return ResponseToJsonHelper.GetJson(response);
@@ -25,6 +26,7 @@ namespace VisionClient.Core.Repository
 
         public async Task<(CouponModel, string?)> VerifyCoupon(string coupon, CodeTypes type)
         {
+            if (string.IsNullOrEmpty(coupon)) return (new(), "Field cannot be empty");
             var response = await couponService.VerifyCoupon(coupon, type);
             var json = ResponseToJsonHelper.GetJson<CouponModel>(response);
             if (string.IsNullOrWhiteSpace(json.Coupon)) return (json, ResponseToJsonHelper.GetJson(response));       

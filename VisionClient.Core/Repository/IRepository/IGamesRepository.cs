@@ -10,7 +10,8 @@ namespace VisionClient.Core.Repository.IRepository
         Task<GameProductModel> GetProducts(Guid gameId);
         Task<bool> OwnsProduct(Guid productId, Guid gameId);
         Task<BanModel?> CheckGameAccess(Guid gameId);
-        Task<string> AddGame(AddGameDto data);
-        Task<string> AddNews(AddNewsDto data);
+        Task<(bool, string)> AddGame(AddGameDto data);
+        Task<(bool, string)> AddNews(AddNewsDto data);
+        Task<(bool, string)> AddGamePackage(AddPackageDto data);
     }
 }

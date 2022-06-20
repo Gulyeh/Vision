@@ -63,7 +63,7 @@
                         Width="100" 
                         FontSize="12"
                         Height="25"
-                        MaxLength="6"
+                        MaxLength="8"
                         Margin="0,0,20,0"
                         Text="{Binding CurrencyModel.Price, StringFormat=C, UpdateSourceTrigger=PropertyChanged}"
                         Watermark="Price"/>

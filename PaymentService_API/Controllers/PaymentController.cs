@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PaymentService_API.Dtos;
 using PaymentService_API.Helpers;
 using PaymentService_API.Repository.IRepository;
+using PaymentService_API.Statics;
 
 namespace PaymentService_API.Controllers
 {
@@ -37,6 +38,20 @@ namespace PaymentService_API.Controllers
         {
             if (string.IsNullOrEmpty(data.SessionId)) return BadRequest();
             return CheckActionResult(await paymentRepository.PaymentCompleted(data.SessionId, PaymentStatus.Cancelled, string.Empty));
+        }
+
+        [HttpGet("GetNewProviders")]
+        [Authorize(Roles = StaticData.AdminRole)]
+        public async Task<ActionResult<ResponseDto>> GetNewProviders(){
+            return new ResponseDto(true, StatusCodes.Status200OK, await paymentRepository.GetNewProviders());
+        }
+
+        [HttpPost("AddPaymentMethod")]
+        [Authorize(Roles = StaticData.AdminRole)]
+        public async Task<ActionResult<ResponseDto>> AddPaymentMethod([FromBody] AddPaymentMethodDto data)
+        {
+            if(!ModelState.IsValid) return BadRequest(ModelState);
+            return CheckActionResult(await paymentRepository.AddPaymentMethod(data));
         }
     }
 }
