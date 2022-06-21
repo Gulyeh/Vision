@@ -88,5 +88,12 @@ namespace VisionClient.Core.Repository
             if (response is null) throw new Exception();
             return (response.isSuccess, ResponseToJsonHelper.GetJson(response));
         }
+
+        public async Task<string> EditGame(EditGameDto data)
+        {
+            var response = await gamesService.EditGame(data);
+            if (response is null) throw new Exception();
+            return ResponseToJsonHelper.GetJson(response);
+        }
     }
 }

@@ -109,5 +109,18 @@ namespace VisionClient.Core.Services
             if (response is not null) return response;
             return null;
         }
+
+        public async Task<ResponseDto?> EditGame(EditGameDto data)
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.PUT,
+                ApiUrl = $"{ConnectionData.GatewayUrl}/games/EditGame",
+                Data = data
+            });
+
+            if (response is not null) return response;
+            return null;
+        }
     }
 }

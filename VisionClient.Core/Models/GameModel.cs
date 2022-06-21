@@ -1,6 +1,8 @@
-﻿namespace VisionClient.Core.Models
+﻿using VisionClient.Core.Helpers;
+
+namespace VisionClient.Core.Models
 {
-    public class GameModel
+    public class GameModel : ICloneable
     {
         public GameModel()
         {
@@ -8,7 +10,6 @@
             IconUrl = string.Empty;
             CoverUrl = string.Empty;
             BannerUrl = string.Empty;
-            ClientVersion = string.Empty;
             Requirements = new();
             Informations = new();
         }
@@ -18,8 +19,10 @@
         public string IconUrl { get; set; }
         public string CoverUrl { get; set; }
         public string BannerUrl { get; set; }
-        public string ClientVersion { get; set; }
+        public bool IsAvailable { get; set; }
         public RequirementsModel Requirements { get; set; }
         public ProductInfoModel Informations { get; set; }
+
+        public object Clone() => MemberwiseClone();        
     }
 }

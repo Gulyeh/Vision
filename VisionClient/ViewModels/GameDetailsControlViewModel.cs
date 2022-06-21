@@ -5,6 +5,7 @@ using Prism.Regions;
 using Prism.Services.Dialogs;
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using VisionClient.Core.Builders;
 using VisionClient.Core.Enums;
@@ -96,6 +97,7 @@ namespace VisionClient.ViewModels
             this.regionManager = regionManager;
             this.dialogService = dialogService;
             this.gamesRepository = gamesRepository;
+            usersService_Hubs.CouponProductEvent += UsedProductCoupon;
 
             eventAggregator.GetEvent<SendEvent<string>>().Subscribe(async (x) =>
             {
@@ -109,9 +111,27 @@ namespace VisionClient.ViewModels
             };
         }
 
+        private void UsedProductCoupon(object? sender, CouponProductEventArgs e)
+        {
+            if (!e.Data.IsSuccess) return;
+            if (e.Data.GameId != Guid.Empty && GameModel.Id != e.Data.GameId) return;
+            else if (e.Data.GameId == Guid.Empty && GameModel.Id != e.Data.ProductId) return;
+
+            if (e.Data.GameId != Guid.Empty) {
+                var product = GameProducts.Products.FirstOrDefault(x => x.Id == e.Data.ProductId);
+                if (product is null) return;
+
+                product.IsAvailable = false;
+                return;
+            }
+
+            GameProducts.IsPurchased = true;
+            EnabledProducts = true;
+        }
+
         private async void MainButtonPressed()
         {
-            switch (GameProducts?.IsPurchased)
+            switch (GameProducts.IsPurchased)
             {
                 case true:
                     MainButtonEnabled = false;

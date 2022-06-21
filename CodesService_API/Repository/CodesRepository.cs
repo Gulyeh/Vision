@@ -74,7 +74,17 @@ namespace CodesService_API.Repository
 
         public async Task<ResponseDto> AddCode(AddCodesDto code)
         {
+            IEnumerable<Codes> Codes = await cacheService.TryGetFromCache<Codes>(CacheType.Codes);
+            if(Codes.Any(x => x.Code.Equals(code.Code))) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Code already exists" });
+            
+            var isTypeParsed = Enum.TryParse(code.CodeType, true, out CodeTypes typeParsed);
+            var isSignatureParsed = Enum.TryParse(code.Signature, true, out Signatures signatureParsed);
+            if(!isTypeParsed || (typeParsed == CodeTypes.Discount && !isSignatureParsed)) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not parse data" });
+            
             var mapped = mapper.Map<Codes>(code);
+            mapped.CodeType = typeParsed;
+            if(typeParsed == CodeTypes.Discount) mapped.Signature = signatureParsed;
+
             await db.Codes.AddAsync(mapped);
             if (await db.SaveChangesAsync() > 0)
             {

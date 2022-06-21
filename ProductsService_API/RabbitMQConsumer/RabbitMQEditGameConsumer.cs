@@ -32,7 +32,7 @@ namespace ProductsService_API.RabbitMQConsumer
 
             connection = factory.CreateConnection();
             channel = connection.CreateModel();
-            channel.QueueDeclare(queue: "EditGameProductPhotoQueue", false, false, false, arguments: null);
+            channel.QueueDeclare(queue: "EditGameProductQueue", false, false, false, arguments: null);
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -41,18 +41,18 @@ namespace ProductsService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
-                logger.LogInformation("Received message from queue: EditGameProductPhotoQueue");
+                logger.LogInformation("Received message from queue: EditGameProductQueue");
                 var content = Encoding.UTF8.GetString(args.Body.ToArray());
-                PhotoData? data = JsonConvert.DeserializeObject<PhotoData>(content);
+                GameProductData? data = JsonConvert.DeserializeObject<GameProductData>(content);
                 HandleMessage(data).GetAwaiter().GetResult();
                 channel.BasicAck(args.DeliveryTag, false);
             };
-            channel.BasicConsume("EditGameProductPhotoQueue", false, consumer);
+            channel.BasicConsume("EditGameProductQueue", false, consumer);
 
             return Task.CompletedTask;
         }
 
-        private async Task HandleMessage(PhotoData? data)
+        private async Task HandleMessage(GameProductData? data)
         {
             try
             {
@@ -60,7 +60,7 @@ namespace ProductsService_API.RabbitMQConsumer
                 {
                     using var scope = serviceScopeFactory.CreateScope();
                     var gamesRepository = scope.ServiceProvider.GetRequiredService<IGamesRepository>();
-                    await gamesRepository.UpdatePhotoData(data);
+                    await gamesRepository.UpdateGameData(data);
                     scope.Dispose();
                     return;
                 }

@@ -85,12 +85,13 @@ namespace ProductsService_API.Repository
             logger.LogError("Could not delete Game with ID: {gameId}", gameId);
         }
 
-        public async Task UpdatePhotoData(PhotoData data){
+        public async Task UpdateGameData(GameProductData data){
             var game = await db.Games.FirstOrDefaultAsync(x => x.GameId == data.GameId);
             if (game is null) return;
 
             game.PhotoUrl = data.PhotoUrl;
             game.PhotoId = data.PhotoId;
+            game.Title = data.Name;
             await SaveChangesAsync();
         }
 

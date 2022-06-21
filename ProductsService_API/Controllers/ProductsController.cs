@@ -35,7 +35,7 @@ namespace ProductsService_API.Controllers
         [Authorize(Roles = StaticData.AdminRole)]
         public async Task<ActionResult<ResponseDto>> EditProduct([FromBody] ProductsDto data)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid) return BadRequest();
             return CheckActionResult(await productsRepository.EditProduct(data));
         }
 
@@ -43,7 +43,7 @@ namespace ProductsService_API.Controllers
         [Authorize(Roles = StaticData.AdminRole)]
         public async Task<ActionResult<ResponseDto>> AddProduct([FromBody] AddProductsDto data)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid) return BadRequest();
             var token = HttpContext.Request.Headers["Authorization"][0];
             return CheckActionResult(await productsRepository.AddProduct(data, token));
         }

@@ -94,7 +94,7 @@
                          CommandParameter="AddPaymentControl"/>
                 <RadioButton Content="Add Coupon Code" 
                          Command="{Binding AdminPanelContentCommand}"
-                         CommandParameter="AddPaymentControl"/>
+                         CommandParameter="AddCouponControl"/>
                 <Separator Width="170" Height="1" 
                        HorizontalAlignment="Right" Margin="0,10,0,0"/>
                 <RadioButton Content="Manage Games"  

@@ -25,10 +25,9 @@ namespace VisionClient.Utility
                 {
                     FileInfo fi = new(file);
                     if (fi.Length > 3000000 || (!fi.Extension.Equals(".png") && !fi.Extension.Equals(".jpg") && !fi.Extension.Equals(".jpeg"))) continue;
-                    ImageSource.Add(new BitmapImage(new Uri(op.FileName)));
+                    ImageSource.Add(BitmapImageFromFile(op.FileName));
                 }
             }
-
             return ImageSource;
         }
 
@@ -52,6 +51,23 @@ namespace VisionClient.Utility
             stream.Flush();
             stream.Close();
             client.Dispose();
+        }
+
+        private static BitmapImage BitmapImageFromFile(string filepath)
+        {
+            var bi = new BitmapImage();
+
+            using (var fs = new FileStream(filepath, FileMode.Open))
+            {
+                bi.BeginInit();
+                bi.StreamSource = fs;
+                bi.CacheOption = BitmapCacheOption.OnLoad;
+                bi.EndInit();
+            }
+
+            bi.Freeze();
+
+            return bi;
         }
     }
 }

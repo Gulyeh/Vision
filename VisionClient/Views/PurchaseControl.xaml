@@ -121,18 +121,13 @@
                            DockPanel.Dock="Top" Margin="20,10,0,10"/>
                 <Border Background="#0f3452">
                     <ItemsControl HorizontalAlignment="Center" ItemsSource="{Binding Product.DetailsList}" Margin="10,10,10,30">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <WrapPanel Orientation="Vertical" HorizontalAlignment="Center" ItemWidth="200" MaxWidth="1000" MaxHeight="200"/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <BulletDecorator Width="Auto">
                                     <BulletDecorator.Bullet>
                                         <Ellipse Fill="DarkGray" Stroke="DarkGray" StrokeThickness="1" Width="8" Height="8"/>
                                     </BulletDecorator.Bullet>
-                                    <TextBlock Text="{Binding}" Foreground="LightGray" FontSize="18" Margin="10,0,0,0"/>
+                                    <TextBlock Text="{Binding}" Foreground="LightGray" FontSize="18" Margin="10,0,0,0" TextWrapping="Wrap"/>
                                 </BulletDecorator>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>

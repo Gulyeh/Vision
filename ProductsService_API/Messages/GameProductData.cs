@@ -5,16 +5,18 @@ using System.Threading.Tasks;
 
 namespace ProductsService_API.Messages
 {
-    public class PhotoData
+    public class GameProductData
     {
-        public PhotoData()
+        public GameProductData()
         {
             PhotoUrl = string.Empty;
             PhotoId = string.Empty;
+            Name = string.Empty;
         }
 
         public Guid GameId { get; set; }
         public string PhotoUrl { get; set; }
         public string PhotoId { get; set; }
+        public string Name { get; set; }
     }
 }

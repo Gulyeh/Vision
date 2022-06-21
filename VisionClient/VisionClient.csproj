@@ -75,14 +75,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Views\AdminPanel\ManageControls\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Views\AdminPanel\ManageControls\ManageGamesControl.xaml.cs">
+      <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\Dialogs\PurchaseProgressControl.xaml.cs">
       <SubType>Code</SubType>
@@ -106,6 +105,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Page Update="Views\AdminPanel\ManageControls\ManageGamesControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Views\Dialogs\PurchaseProgressControl.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>

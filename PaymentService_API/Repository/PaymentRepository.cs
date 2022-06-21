@@ -41,7 +41,11 @@ namespace PaymentService_API.Repository
 
         public async Task<ResponseDto> AddPaymentMethod(AddPaymentMethodDto data)
         {
+            var isProviderParsed = Enum.TryParse(data.Provider, out PaymentProvider providerParsed);
+            if(!isProviderParsed) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] {"Provider does not exist"});
+
             var mapped = mapper.Map<PaymentMethods>(data);
+            mapped.Provider = providerParsed;
 
             var results = await uploadService.UploadPhoto(Convert.FromBase64String(data.Photo));
             mapped.PhotoId = results.PublicId;

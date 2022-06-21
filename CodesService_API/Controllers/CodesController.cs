@@ -56,7 +56,7 @@ namespace CodesService_API.Controllers
         [HttpPut("EditCode")]
         public async Task<ActionResult<ResponseDto>> EditCode([FromBody] CodesDataDto data)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid) return BadRequest();
             return CheckActionResult(await codesRepository.EditCode(data));
         }
 
@@ -64,7 +64,7 @@ namespace CodesService_API.Controllers
         [HttpPost("AddCode")]
         public async Task<ActionResult<ResponseDto>> AddCode([FromBody] AddCodesDto data)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid) return BadRequest();
             return CheckActionResult(await codesRepository.AddCode(data));
         }
     }

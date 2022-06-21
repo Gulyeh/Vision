@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using VisionClient.Core.Dtos;
 using VisionClient.Core.Enums;
 using VisionClient.Core.Helpers;
 using VisionClient.Core.Models;
@@ -14,6 +15,13 @@ namespace VisionClient.Core.Repository
         public CouponRepository(ICouponService couponService)
         {
             this.couponService = couponService;
+        }
+
+        public async Task<string> AddCoupon(AddCouponDto data)
+        {
+            var response = await couponService.AddCoupon(data);
+            if (response is null) throw new Exception();
+            return ResponseToJsonHelper.GetJson(response);
         }
 
         public async Task<string> ApplyCoupon(string coupon, CodeTypes type)

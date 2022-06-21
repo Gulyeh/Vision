@@ -1,6 +1,7 @@
 ﻿using Prism.Ioc;
 using VisionClient.Views;
 using VisionClient.Views.AdminPanel.AddControls;
+using VisionClient.Views.AdminPanel.ManageControls;
 using VisionClient.Views.SettingsControls;
 
 namespace VisionClient.Extensions
@@ -33,6 +34,8 @@ namespace VisionClient.Extensions
             containerRegistry.RegisterForNavigation<AddCurrencyControl>("AddCurrencyControl");
             containerRegistry.RegisterForNavigation<AddGamePackageControl>("AddGamePackageControl");
             containerRegistry.RegisterForNavigation<AddPaymentControl>("AddPaymentControl");
+            containerRegistry.RegisterForNavigation<AddCouponControl>("AddCouponControl");
+            containerRegistry.RegisterForNavigation<ManageGamesControl>("ManageGamesControl");
         }
     }
 }

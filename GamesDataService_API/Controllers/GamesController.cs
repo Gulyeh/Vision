@@ -24,15 +24,15 @@ namespace GamesDataService_API.Controllers
         [HttpPost("AddGame")]
         public async Task<ActionResult<ResponseDto>> AddGame([FromBody] AddGamesDto data)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid) return BadRequest();
             return CheckActionResult(await gamesRepository.AddGame(data));
         }
 
         [Authorize(Roles = StaticData.AdminRole)]
         [HttpPut("EditGame")]
-        public async Task<ActionResult<ResponseDto>> EditGame([FromBody] GamesDto data)
+        public async Task<ActionResult<ResponseDto>> EditGame([FromBody] EditGameDto data)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid) return BadRequest();
             return CheckActionResult(await gamesRepository.EditGameData(data));
         }
 

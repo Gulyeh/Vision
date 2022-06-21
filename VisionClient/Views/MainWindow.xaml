@@ -109,8 +109,8 @@
     <Window.Visibility>
         <Binding Path="IsWindowVisible" Mode="TwoWay" Converter="{StaticResource BoolToVis}" />
     </Window.Visibility>
-    
-    <Grid>
+
+    <Grid UseLayoutRounding="True">
         <Grid.RowDefinitions>
             <RowDefinition Height="50"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>

@@ -8,6 +8,7 @@ using VisionClient.ViewModels;
 using VisionClient.ViewModels.AdminPanelViewModels;
 using VisionClient.Views;
 using VisionClient.Views.AdminPanel.AddControls;
+using VisionClient.Views.AdminPanel.ManageControls;
 using VisionClient.Views.SettingsControls;
 
 namespace VisionClient
@@ -38,6 +39,8 @@ namespace VisionClient
             ViewModelLocationProvider.Register(typeof(AddCurrencyControl).ToString(), typeof(AddCurrencyControlViewModel));
             ViewModelLocationProvider.Register(typeof(AddGamePackageControl).ToString(), typeof(AddGamePackageControlViewModel));
             ViewModelLocationProvider.Register(typeof(AddPaymentControl).ToString(), typeof(AddPaymentControlViewModel));
+            ViewModelLocationProvider.Register(typeof(AddCouponControl).ToString(), typeof(AddCouponControlViewModel));
+            ViewModelLocationProvider.Register(typeof(ManageGamesControl).ToString(), typeof(ManageGamesControlViewModel));
         }
     }
 }

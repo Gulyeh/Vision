@@ -9,6 +9,6 @@ namespace ProductsService_API.Repository.IRepository
         Task DeleteGame(Guid gameId);
         Task<ResponseDto> EditGame(GamesDto data);
         Task<ResponseDto> GetGame(Guid gameId, string Access_Token);
-        Task UpdatePhotoData(PhotoData data);
+        Task UpdateGameData(GameProductData data);
     }
 }

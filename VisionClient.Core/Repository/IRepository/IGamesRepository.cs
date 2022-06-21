@@ -13,5 +13,6 @@ namespace VisionClient.Core.Repository.IRepository
         Task<(bool, string)> AddGame(AddGameDto data);
         Task<(bool, string)> AddNews(AddNewsDto data);
         Task<(bool, string)> AddGamePackage(AddPackageDto data);
+        Task<string> EditGame(EditGameDto data);
     }
 }

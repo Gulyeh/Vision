@@ -11,6 +11,19 @@ namespace VisionClient.Core.Services
         {
         }
 
+        public async Task<ResponseDto?> AddCoupon(AddCouponDto data)
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.POST,
+                ApiUrl = $"{ConnectionData.GatewayUrl}/codes/AddCode",
+                Data = data
+            });
+
+            if (response is not null) return response;
+            return null;
+        }
+
         public async Task<ResponseDto> ApplyCoupon(string coupon, CodeTypes type)
         {
             var codeType = Enum.GetName(typeof(CodeTypes), type);

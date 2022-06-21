@@ -20,5 +20,7 @@ namespace GamesDataService_API.Helpers
         public string CoverUrl { get; set; }
         [Required]
         public string BannerUrl { get; set; }
+        [Required]
+        public bool IsAvailable { get; set; }
     }
 }

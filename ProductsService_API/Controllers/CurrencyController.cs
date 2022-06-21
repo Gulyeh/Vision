@@ -26,7 +26,7 @@ namespace ProductsService_API.Controllers
         [Authorize(Roles = StaticData.AdminRole)]
         public async Task<ActionResult<ResponseDto>> AddPackage([FromBody] AddCurrencyDto data)
         {
-            if(!ModelState.IsValid) return BadRequest(ModelState);
+            if(!ModelState.IsValid) return BadRequest();
             return CheckActionResult(await currencyRepository.AddPackage(data));
         }
     }

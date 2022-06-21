@@ -29,7 +29,7 @@ namespace GameAccessService_API.Controllers
         [HttpPost("BanUser")]
         public async Task<ActionResult<ResponseDto>> BanUser([FromBody] UserAccessDto data)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid) return BadRequest();
             if (User?.GetId() == data.UserId) return BadRequest(new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "You cannot ban yourself" }));
             return CheckActionResult(await accessRepository.BanUserAccess(data));
         }
@@ -38,7 +38,7 @@ namespace GameAccessService_API.Controllers
         [HttpDelete("UnbanUser")]
         public async Task<ActionResult<ResponseDto>> UnbanUser([FromBody] AccessDataDto data)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid) return BadRequest();
             return CheckActionResult(await accessRepository.UnbanUserAccess(data));
         }
 

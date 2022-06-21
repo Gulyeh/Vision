@@ -12,6 +12,7 @@ namespace CodesService_API.Helpers
 
         [Required]
         public string Code { get; set; }
+        [Required]
         public string CodeValue { get; set; }
         [Required]
         public DateTime ExpireDate { get; set; }
@@ -20,7 +21,8 @@ namespace CodesService_API.Helpers
         public Signatures? Signature { get; set; }
         [Required]
         public bool IsLimited { get; set; }
-        public int? Uses { get; set; }
+        [Required]
+        public int Uses { get; set; }
         public Guid? GameId { get; set; }
     }
 }

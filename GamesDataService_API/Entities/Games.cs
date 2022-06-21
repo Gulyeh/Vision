@@ -21,8 +21,6 @@ namespace GamesDataService_API.Entities
         public string CoverId { get; set; }
         [Required]
         public string BannerId { get; set; }
-        [Required]
-        public bool IsAvailable { get; set; }
         public ICollection<News>? News { get; set; }
         [Required]
         [NotNull]

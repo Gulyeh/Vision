@@ -9,7 +9,7 @@ namespace GamesDataService_API
         public MapperConfig()
         {
             CreateMap<Games, GamesDto>();
-            CreateMap<GamesDto, Games>().ForMember(x => x.Name, z => z.Ignore());
+            CreateMap<EditGameDto, Games>().ForMember(x => x.Id, src => src.Ignore());
             CreateMap<Games, AddGamesDto>().ReverseMap();
             CreateMap<AddNewsDto, News>().ReverseMap();
             CreateMap<News, NewsDto>().ReverseMap();

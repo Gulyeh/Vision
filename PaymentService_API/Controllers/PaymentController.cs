@@ -50,7 +50,7 @@ namespace PaymentService_API.Controllers
         [Authorize(Roles = StaticData.AdminRole)]
         public async Task<ActionResult<ResponseDto>> AddPaymentMethod([FromBody] AddPaymentMethodDto data)
         {
-            if(!ModelState.IsValid) return BadRequest(ModelState);
+            if(!ModelState.IsValid) return BadRequest();
             return CheckActionResult(await paymentRepository.AddPaymentMethod(data));
         }
     }

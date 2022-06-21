@@ -97,7 +97,7 @@ namespace VisionClient.ViewModels
 
         private void ShowGameDetails(GameModel? game)
         {
-            if (game is not null)
+            if (game is not null && game.Id != Guid.Empty)
             {
                 regionManager.RequestNavigate("ContentRegion", "HomeDetailsControl");
                 eventAggregator.GetEvent<SendEvent<HomeToDetails>>().Publish(new HomeToDetails(game));
