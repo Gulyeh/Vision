@@ -48,12 +48,12 @@ namespace VisionClient.Core.Services
             return response;
         }
 
-        public async Task<ResponseDto?> GetNews(Guid gameId)
+        public async Task<ResponseDto?> GetNews(Guid gameId, int? pageNumber = null)
         {
             var response = await SendAsync<ResponseDto>(new ApiRequest()
             {
                 ApiType = APIType.GET,
-                ApiUrl = $"{ConnectionData.GatewayUrl}/News/GetNews?gameId={gameId}",
+                ApiUrl = $"{ConnectionData.GatewayUrl}/News/GetNews?gameId={gameId}&pageNumber={pageNumber}",
             });
 
             if (response is not null) return response;
@@ -116,6 +116,31 @@ namespace VisionClient.Core.Services
             {
                 ApiType = APIType.PUT,
                 ApiUrl = $"{ConnectionData.GatewayUrl}/games/EditGame",
+                Data = data
+            });
+
+            if (response is not null) return response;
+            return null;
+        }
+
+        public async Task<ResponseDto?> DeleteNews(Guid gameId, Guid newsId)
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.DELETE,
+                ApiUrl = $"{ConnectionData.GatewayUrl}/news/deletenews?newsId={newsId}&gameId={gameId}"
+            });
+
+            if (response is not null) return response;
+            return null;
+        }
+
+        public async Task<ResponseDto?> EditNews(EditNewsDto data)
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.PUT,
+                ApiUrl = $"{ConnectionData.GatewayUrl}/news/editnews",
                 Data = data
             });
 

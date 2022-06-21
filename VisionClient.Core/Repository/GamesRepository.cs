@@ -95,5 +95,26 @@ namespace VisionClient.Core.Repository
             if (response is null) throw new Exception();
             return ResponseToJsonHelper.GetJson(response);
         }
+
+        public async Task<GetPagedNewsDto> GetPagedNews(Guid gameId, int pageNumber)
+        {
+            var response = await gamesService.GetNews(gameId, pageNumber);
+            if(response is null) throw new Exception();
+            return ResponseToJsonHelper.GetJson<GetPagedNewsDto>(response);
+        }
+
+        public async Task<(bool, string)> DeleteNews(Guid gameId, Guid newsId)
+        {
+            var response = await gamesService.DeleteNews(gameId, newsId);
+            if (response is null) throw new Exception();
+            return (response.isSuccess, ResponseToJsonHelper.GetJson(response));
+        }
+
+        public async Task<(bool, string)> EditNews(EditNewsDto data)
+        {
+            var response = await gamesService.EditNews(data);
+            if (response is null) throw new Exception();
+            return (response.isSuccess, ResponseToJsonHelper.GetJson(response));
+        }
     }
 }

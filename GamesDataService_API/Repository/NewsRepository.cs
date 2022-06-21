@@ -69,7 +69,9 @@ namespace GamesDataService_API.Repository
             game.News?.Remove(news);
             if (await db.SaveChangesAsync() > 0)
             {
-                await cacheService.TryRemoveFromCache<News>(CacheType.News, news);
+                var newsCache = await GetNewsFromCache(newsId);
+                if(newsCache is not null) await cacheService.TryRemoveFromCache<News>(CacheType.News, newsCache);
+
                 await uploadService.DeletePhoto(news.PhotoId);
                 logger.LogInformation("Deleted News with ID: {newsId} from Game with ID: {gameId} successfully", newsId, gameId);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Deleted news successfuly" });
@@ -79,7 +81,7 @@ namespace GamesDataService_API.Repository
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not delete news" });
         }
 
-        public async Task<ResponseDto> EditNews(NewsDto data)
+        public async Task<ResponseDto> EditNews(EditNewsDto data)
         {
             string oldPhotoId = string.Empty;
 
@@ -100,10 +102,14 @@ namespace GamesDataService_API.Repository
                 }
             }
 
-            mapper.Map(data, news);
+            var mapped = mapper.Map(data, news);
             if (await db.SaveChangesAsync() > 0)
             {
                 if (!string.IsNullOrEmpty(oldPhotoId)) await uploadService.DeletePhoto(oldPhotoId);
+                
+                var newsCached = await GetNewsFromCache(mapped.Id);
+                if(newsCached is not null) await cacheService.TryReplaceCache<News>(CacheType.News, newsCached, mapped);
+
                 logger.LogInformation("Edited News with ID: {newsId} in Game with ID: {gameId} successfully", data.Id, data.GameId);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Edited news successfuly" });
             }
@@ -113,7 +119,7 @@ namespace GamesDataService_API.Repository
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not edit news" });
         }
 
-        public async Task<ResponseDto> GetGameNews(Guid gameId)
+        public async Task<ResponseDto> GetGameNews(Guid gameId, int? pageNumber = null)
         {
             IEnumerable<News> news = await cacheService.TryGetFromCache<News>(CacheType.News);
             if (news.Count() == 0)
@@ -122,9 +128,16 @@ namespace GamesDataService_API.Repository
                 foreach (var item in dbNews) await cacheService.TryAddToCache<News>(CacheType.News, item);
                 news = dbNews;
             }
-            IEnumerable<News> gameNews = news.Where(x => x.GameId == gameId).OrderBy(x => x.Id).Take(10);
+            IEnumerable<News> gameNews = pageNumber is null ? news.Where(x => x.GameId == gameId).OrderByDescending(x => x.CreatedDate).Take(10) 
+                : news.Where(x => x.GameId == gameId).OrderByDescending(x => x.CreatedDate).Skip(10 * (int)pageNumber).Take(10);
 
-            return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<NewsDto>>(gameNews));
+            if(pageNumber is null) return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<NewsDto>>(gameNews));
+            return new ResponseDto(true, StatusCodes.Status200OK, new GetPagedNewsDto(mapper.Map<IEnumerable<NewsDto>>(gameNews)));
+        }
+
+        private async Task<News?> GetNewsFromCache(Guid newsId){
+            IEnumerable<News> news = await cacheService.TryGetFromCache<News>(CacheType.News);
+            return news.FirstOrDefault(x => x.Id == newsId);
         }
     }
 }

@@ -8,6 +8,7 @@
             Title = string.Empty;
             Content = string.Empty;
         }
+
         public Guid Id { get; set; }
         public string PhotoUrl { get; set; }
         private DateTime createdDate;

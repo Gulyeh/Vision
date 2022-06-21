@@ -39,10 +39,25 @@ namespace GamesDataService_API.Services
         public Task TryRemoveFromCache<T>(CacheType type, T data) where T : class
         {
             List<T> value;
-            if (memoryCache.TryGetValue(type, out value))
-            {
-                value.Remove(data);
-                SetCache<T>(type, value);
+            memoryCache.TryGetValue(type, out value);
+            if(value is null) return Task.CompletedTask;
+            
+            value.Remove(data);
+            SetCache<T>(type, value);
+            
+            return Task.CompletedTask;
+        }
+
+        public Task TryReplaceCache<T>(CacheType type, T source, T data) where T : class
+        {
+            List<T> value;
+            memoryCache.TryGetValue(type, out value);
+            if(value is null) return Task.CompletedTask;
+
+            var found = value.FirstOrDefault(source);
+            if(found is not null) {
+                value.Remove(found);
+                value.Add(data);
             }
             return Task.CompletedTask;
         }

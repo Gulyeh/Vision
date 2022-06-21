@@ -7,6 +7,7 @@ namespace VisionClient.Core.Repository.IRepository
     {
         Task GetGames();
         Task<IEnumerable<NewsModel>> GetNews(Guid gameId);
+        Task<GetPagedNewsDto> GetPagedNews(Guid gameId, int pageNumber);
         Task<GameProductModel> GetProducts(Guid gameId);
         Task<bool> OwnsProduct(Guid productId, Guid gameId);
         Task<BanModel?> CheckGameAccess(Guid gameId);
@@ -14,5 +15,7 @@ namespace VisionClient.Core.Repository.IRepository
         Task<(bool, string)> AddNews(AddNewsDto data);
         Task<(bool, string)> AddGamePackage(AddPackageDto data);
         Task<string> EditGame(EditGameDto data);
+        Task<(bool, string)> DeleteNews(Guid gameId, Guid newsId);
+        Task<(bool, string)> EditNews(EditNewsDto data);
     }
 }

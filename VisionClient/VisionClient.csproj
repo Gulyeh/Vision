@@ -52,6 +52,7 @@
     <PackageReference Include="Prism.Unity.Extensions" Version="8.0.62" />
     <PackageReference Include="Prism.Wpf" Version="8.1.97" />
     <PackageReference Include="QRCoder" Version="1.4.3" />
+    <PackageReference Include="Syncfusion.SfGrid.WPF" Version="20.1.0.61" />
     <PackageReference Include="Syncfusion.SfInput.WPF" Version="20.1.0.60" />
   </ItemGroup>
 

@@ -1,0 +1,177 @@
+﻿<UserControl x:Class="VisionClient.Views.AdminPanel.ManageControls.ManageNewsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:local="clr-namespace:VisionClient.Views.AdminPanel.ManageControls"
+             mc:Ignorable="d" 
+             xmlns:prism="http://prismlibrary.com/"
+             xmlns:editors="http://schemas.syncfusion.com/wpf"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             d:DesignHeight="850" d:DesignWidth="600" 
+             Background="#0c3c60">
+    <UserControl.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border" 
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Background="{TemplateBinding Background}">
+                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Opacity" Value="0.8"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="editors:SfTextBoxExt">
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Padding" Value="5,4,0,0"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Width" Value="250"/>
+            <Setter Property="Background" Value="#164971"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+    </UserControl.Resources>
+    <Grid>
+        <Border Background="Black" 
+                   Grid.Row="1" 
+                   Grid.RowSpan="2" 
+                   Opacity="0.7"
+                   Panel.ZIndex="1"
+                   Visibility="{Binding LoadingVisibility, Mode=OneWay}">
+            <Image Source="pack://application:,,,/Images/VisionLogo.png" HorizontalAlignment="Center"
+                   VerticalAlignment="Center" Height="60" 
+                   DockPanel.Dock="Top" RenderTransformOrigin="0.55,0.4">
+                <Image.Style>
+                    <Style TargetType="Image">
+                        <Setter Property="Image.RenderTransform">
+                            <Setter.Value>
+                                <RotateTransform CenterX="0" CenterY="0" />
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <EventTrigger RoutedEvent="Image.Loaded">
+                                <EventTrigger.Actions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Duration="0:0:2" BeginTime="0:0:1"
+                                                     Storyboard.TargetProperty="RenderTransform.Angle"
+                                                     From="0" To="720"
+                                                     Timeline.DesiredFrameRate="60"
+                                                     RepeatBehavior="Forever">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <ExponentialEase EasingMode="EaseOut" Exponent="5"/>
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                            <DoubleAnimation Duration="0:0:2" BeginTime="0:0:1"
+                                                     Storyboard.TargetProperty="Opacity"
+                                                     From="0.1" To="1"
+                                                     RepeatBehavior="Forever">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <ExponentialEase EasingMode="EaseOut" Exponent="5"/>
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger.Actions>
+                            </EventTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Image.Style>
+            </Image>
+        </Border>
+        <StackPanel Orientation="Vertical" VerticalAlignment="Top" 
+                    HorizontalAlignment="Center" Margin="10,20,10,20">
+            <editors:ComboBoxAdv 
+                Width="200" 
+                Height="25"
+                Background="#164971"
+                Foreground="Black"     
+                DefaultText="Select Game"
+                ItemsSource="{Binding StaticData.GameModels}"
+                SelectedValuePath="Id"
+                SelectedValue="{Binding SelectedGameId}"
+                DisplayMemberPath="Name"/>
+            <TextBlock Text="{Binding ErrorText}"
+                       FontSize="10" Foreground="Red"
+                       Margin="0,40,0,0"
+                       HorizontalAlignment="Right"/>
+            <editors:SfDataGrid 
+                x:Name="sfGrid"
+                Margin="0,5,0,0"
+                AutoGenerateColumns="False"
+                ItemsSource="{Binding ElementName=dataPager,Path=PagedSource}"
+                EnableDataVirtualization="True"
+                ColumnSizer="Star"
+                SelectionMode="None"
+                HeaderRowHeight="30"
+                RowHeight="40"
+                QueryRowHeight="dataGrid_QueryRowHeight"
+                ShowRowHeader="False"
+                AllowEditing="False"
+                Foreground="White">
+                <editors:SfDataGrid.Columns>
+                    <editors:GridImageColumn MappingName="PhotoUrl" HeaderText="Photo" Width="160" TextAlignment="Center"/>
+                    <editors:GridTextColumn MappingName="Title" HeaderText="Title" TextWrapping="Wrap" TextAlignment="Center"/>
+                    <editors:GridTextColumn MappingName="CreatedDate" HeaderText="Created Date" TextWrapping="Wrap" TextAlignment="Center"/>
+                    <editors:GridTextColumn HeaderText="" Width="150">
+                        <editors:GridTextColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <Button Content="Edit" Margin="0,0,10,0"
+                                            Background="#0AA1DD"
+                                            Foreground="White"
+                                            BorderThickness="0"
+                                            Width="60"
+                                            Height="25"
+                                            Command="{Binding Path=DataContext.EditNewsCommand, ElementName=sfGrid}"
+                                            CommandParameter="{Binding}"/>
+                                    <Button Content="Delete"
+                                            Width="60"
+                                            Height="25"
+                                            BorderThickness="0"
+                                            Foreground="White"
+                                            Background="DarkRed"
+                                            Command="{Binding Path=DataContext.DeleteNewsCommand, ElementName=sfGrid}"
+                                            CommandParameter="{Binding Path=Id}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </editors:GridTextColumn.CellTemplate>
+                    </editors:GridTextColumn>
+                </editors:SfDataGrid.Columns>
+            </editors:SfDataGrid>
+            <editors:SfDataPager 
+                x:Name="dataPager"
+                PageSize="10"
+                AutoEllipsisText="..."
+                AutoEllipsisMode="Both"
+                NumericButtonCount="5"
+                HorizontalAlignment="Center" 
+                Margin="0,10,0,0"
+                PageCount="{Binding MaxPages, Mode=TwoWay}"
+                PageIndex="{Binding PageNumber}"
+                Source="{Binding NewsList}">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="PageIndexChanged">
+                        <prism:InvokeCommandAction Command="{Binding PageChangingCommand}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </editors:SfDataPager>
+        </StackPanel>
+    </Grid>
+</UserControl>

@@ -15,10 +15,10 @@ namespace GamesDataService_API.Controllers
         }
 
         [HttpGet("GetNews")]
-        public async Task<ActionResult<ResponseDto>> GetGameNews([FromQuery] Guid gameId)
+        public async Task<ActionResult<ResponseDto>> GetGameNews([FromQuery] Guid gameId, [FromQuery] int? pageNumber = null)
         {
             if (gameId == Guid.Empty) return BadRequest();
-            return CheckActionResult(await newsRepository.GetGameNews(gameId));
+            return CheckActionResult(await newsRepository.GetGameNews(gameId, pageNumber));
         }
 
         [HttpPost("AddNews")]
@@ -39,7 +39,7 @@ namespace GamesDataService_API.Controllers
 
         [HttpPut("EditNews")]
         [Authorize(Policy = "HasAdminOrModRole")]
-        public async Task<ActionResult<ResponseDto>> EditGameNews([FromBody] NewsDto data)
+        public async Task<ActionResult<ResponseDto>> EditGameNews([FromBody] EditNewsDto data)
         {
             if (!ModelState.IsValid) return BadRequest();
             return CheckActionResult(await newsRepository.EditNews(data));
