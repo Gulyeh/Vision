@@ -106,7 +106,7 @@
                          CommandParameter="ManageNewsControl"/>
                 <RadioButton Content="Manage Coins" 
                          Command="{Binding AdminPanelContentCommand}"
-                         CommandParameter="ManageCoinsControl"/>
+                         CommandParameter="ManageCurrencyControl"/>
                 <RadioButton Content="Manage Packages" 
                          Command="{Binding AdminPanelContentCommand}"
                          CommandParameter="ManagePackagesControl"/>

@@ -18,7 +18,7 @@ namespace VisionClient.Utility
             OpenFileDialog op = new();
             List<BitmapImage>? ImageSource = new List<BitmapImage>();
             op.Multiselect = IsMultiselect;
-            op.Filter = "JPG(*.jpg, *.jpeg) | *.jpg; *.jpeg |PNG(*.png) | *.png";
+            op.Filter = "JPG(*.jpg, *.jpeg) | *.jpg; *.jpeg; |PNG(*.png) | *.png;";
             if (op.ShowDialog() == true && op.FileNames.Length < 4)
             {
                 foreach (var file in op.FileNames)

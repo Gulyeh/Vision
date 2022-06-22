@@ -158,6 +158,12 @@ namespace GamesDataService_API.Repository
                     if (!string.IsNullOrEmpty(oldCoverId)) await uploadService.DeletePhoto(oldCoverId);
                     if (!string.IsNullOrEmpty(oldBannerId)) await uploadService.DeletePhoto(oldBannerId);
 
+                    var cachedGame = await cacheService.TryGetFromCache<Games>(CacheType.Games);
+                    if(cachedGame is not null){
+                        var game = cachedGame.FirstOrDefault(x => x.Id == gameDb.Id);
+                        if(game is not null) await cacheService.TryReplaceCache<Games>(CacheType.Games, game, gameDb);
+                    }
+
                     logger.LogInformation("Edited game with ID: {id} successfully", data.Id);
                     return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Game edited successfully" });
                 }

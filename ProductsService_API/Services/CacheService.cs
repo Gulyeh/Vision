@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using ProductsService_API.DbContexts;
 using ProductsService_API.Helpers;
@@ -53,6 +54,13 @@ namespace ProductsService_API.Services
                     .SetSlidingExpiration(TimeSpan.FromMinutes(5));
 
             memoryCache.Set(type, value, cacheOptions);
+        }
+
+        public async Task<List<T>> TryUpdateCache<T>(CacheType type) where T : BaseProducts
+        {
+            List<T> value = await db.Set<T>().OrderBy(x => x.Price).ToListAsync();
+            SetCache<T>(type, value);
+            return value;
         }
     }
 }

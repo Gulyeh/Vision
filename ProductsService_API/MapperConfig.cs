@@ -16,6 +16,7 @@ namespace ProductsService_API
             CreateMap<NewProductDto, Games>();
             CreateMap<NewProductDto, Products>();
             CreateMap<AddCurrencyDto, Currency>();
+            CreateMap<EditCurrencyDto, Currency>();
         }
     }
 }

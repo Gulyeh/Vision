@@ -7,5 +7,7 @@ namespace VisionClient.Core.Repository.IRepository
     {
         Task<IEnumerable<CoinPackageModel>> GetPackages();
         Task<(bool, string)> AddPackage(AddCurrencyDto data);
+        Task<(bool, string)> DeletePackage(Guid packageId);
+        Task<(bool, string)> EditPackage(EditCurrencyDto data);
     }
 }

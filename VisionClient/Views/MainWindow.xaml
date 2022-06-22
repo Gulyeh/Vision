@@ -15,6 +15,7 @@
         Height="700" Width="1250"
         WindowStartupLocation="CenterScreen"
         BorderThickness="2" BorderBrush="#0f3452"
+        Closed="Window_Closed"
         PreviewKeyDown="Window_PreviewKeyDown" KeyboardNavigation.TabNavigation="None">
 
     <WindowChrome.WindowChrome>
@@ -122,6 +123,7 @@
                         MenuActivation="RightClick"
                         LeftClickCommand="{Binding SwitchVisibilityCommand}"
                         LeftClickCommandParameter="Show"
+                        
                         IconSource="pack://application:,,,/Vision.ico">
             <tb:TaskbarIcon.ContextMenu>
                 <ContextMenu>

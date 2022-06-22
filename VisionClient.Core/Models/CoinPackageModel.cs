@@ -14,8 +14,8 @@ namespace VisionClient.Core.Models
         public Guid Id { get; set; }
         public string Title { get; set; }
         public int Amount { get; set; }
-        private int? discount;
-        public int? Discount
+        private int discount;
+        public int Discount
         {
             get => discount;
             set

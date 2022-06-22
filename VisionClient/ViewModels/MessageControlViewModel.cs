@@ -56,7 +56,7 @@ namespace VisionClient.ViewModels
             set
             {
                 SetProperty(ref selecteduser, value);
-                if (selecteduser.UserId == Guid.Empty) NavigateToGames();
+                if (selecteduser.UserId == Guid.Empty && StaticData.ChatId == Guid.Empty) NavigateToGames();
             }
         }
 
@@ -141,7 +141,6 @@ namespace VisionClient.ViewModels
         {
             CurrentPage = 1;
             StaticData.ChatId = Guid.Empty;
-            SelectedUser = new();
             if (StaticData.Messages.Any()) StaticData.Messages.Clear();
             if (NewMessageAttachments.Any()) NewMessageAttachments.Clear();
             ErrorText = string.Empty;
@@ -192,12 +191,8 @@ namespace VisionClient.ViewModels
             }, null);
         }
 
-        private void NavigateToGames()
-        {
-            eventAggregator.GetEvent<SendEvent<string>>().Publish("StopFocus");
-            regionManager.RequestNavigate("LibraryContentRegion", "GamesControl");
-        }
-
+        private void NavigateToGames() => regionManager.RequestNavigate("LibraryContentRegion", "GamesControl");
+        
         public async Task GetMoreMessages()
         {
             if (StaticData.MaxPages <= CurrentPage || LoadingVisibility == Visibility.Visible) return;

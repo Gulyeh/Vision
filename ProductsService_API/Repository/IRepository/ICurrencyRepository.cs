@@ -6,5 +6,7 @@ namespace ProductsService_API.Repository.IRepository
     {
         Task<ResponseDto> GetPackages();
         Task<ResponseDto> AddPackage(AddCurrencyDto data);
+        Task<ResponseDto> DeletePackage(Guid packageId);
+        Task<ResponseDto> EditPackage(EditCurrencyDto data);
     }
 }

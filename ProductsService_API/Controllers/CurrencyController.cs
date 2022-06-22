@@ -29,5 +29,19 @@ namespace ProductsService_API.Controllers
             if(!ModelState.IsValid) return BadRequest();
             return CheckActionResult(await currencyRepository.AddPackage(data));
         }
+
+        [HttpDelete("DeletePackage")]
+        [Authorize(Roles = StaticData.AdminRole)]
+        public async Task<ActionResult<ResponseDto>> DeletePackage([FromQuery] Guid packageId){
+            if(packageId == Guid.Empty) return BadRequest();
+            return CheckActionResult(await currencyRepository.DeletePackage(packageId));
+        }
+
+        [HttpPut("EditPackage")]
+        [Authorize(Roles = StaticData.AdminRole)]
+        public async Task<ActionResult<ResponseDto>> EditPackage([FromBody] EditCurrencyDto data){
+            if(!ModelState.IsValid) return BadRequest();
+            return CheckActionResult(await currencyRepository.EditPackage(data));
+        }
     }
 }

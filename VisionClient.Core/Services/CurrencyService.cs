@@ -35,5 +35,30 @@ namespace VisionClient.Core.Services
             if (response is not null) return response;
             return null;
         }
+
+        public async Task<ResponseDto?> DeletePackage(Guid packageId)
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.DELETE,
+                ApiUrl = $"{ConnectionData.GatewayUrl}/currency/deletepackage?packageId={packageId}"
+            });
+
+            if (response is not null) return response;
+            return null;
+        }
+
+        public async Task<ResponseDto?> EditPackage(EditCurrencyDto data)
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.PUT,
+                ApiUrl = $"{ConnectionData.GatewayUrl}/currency/editpackage",
+                Data = data
+            });
+
+            if (response is not null) return response;
+            return null;
+        }
     }
 }

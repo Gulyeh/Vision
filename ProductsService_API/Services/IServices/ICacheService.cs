@@ -7,5 +7,6 @@ namespace ProductsService_API.Services.IServices
         Task TryAddToCache<T>(CacheType type, T data) where T : BaseProducts;
         Task<List<T>> TryGetFromCache<T>(CacheType type) where T : new();
         Task DeleteFromCache<T>(CacheType type, T data) where T : BaseProducts;
+        Task<List<T>> TryUpdateCache<T>(CacheType type) where T : BaseProducts;
     }
 }

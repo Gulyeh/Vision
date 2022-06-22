@@ -60,7 +60,11 @@ namespace VisionClient.Views
                     break;
             }
         }
-        private void ExitApplication(object sender, RoutedEventArgs e) => Environment.Exit(0);
+        private void ExitApplication(object sender, RoutedEventArgs e)
+        {
+            DisposeNotify();
+            Environment.Exit(0);
+        }
 
         private void MaximizeApplication(object sender, RoutedEventArgs e)
         {
@@ -72,5 +76,8 @@ namespace VisionClient.Views
             WindowState = WindowState.Minimized;
         }
 
+        private void Window_Closed(object sender, EventArgs e) => DisposeNotify();
+
+        private void DisposeNotify() => NotfyIcon.Dispose();
     }
 }

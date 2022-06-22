@@ -2,6 +2,7 @@
 using Prism.Events;
 using Prism.Mvvm;
 using Prism.Regions;
+using Prism.Services.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -61,6 +62,7 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
         private readonly IGamesRepository gamesRepository;
         private readonly IEventAggregator eventAggregator;
         private readonly IRegionManager regionManager;
+        private readonly IDialogService dialogService;
 
         public DelegateCommand PageChangingCommand { get; }
         public DelegateCommand<NewsModel> EditNewsCommand { get; }
@@ -68,7 +70,8 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
         public ObservableCollection<NewsModel> NewsList { get; set; }
         public IStaticData StaticData { get; }
 
-        public ManageNewsControlViewModel(IStaticData staticData, IGamesRepository gamesRepository, IEventAggregator eventAggregator, IRegionManager regionManager)
+        public ManageNewsControlViewModel(IStaticData staticData, IGamesRepository gamesRepository, IEventAggregator eventAggregator, IRegionManager regionManager,
+            IDialogService dialogService)
         {
             NewsList = new();
             PageChangingCommand = new DelegateCommand(GetNewsFromPage);
@@ -78,7 +81,7 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
             this.gamesRepository = gamesRepository;
             this.eventAggregator = eventAggregator;
             this.regionManager = regionManager;
-
+            this.dialogService = dialogService;
             eventAggregator.GetEvent<SendEvent<string>>().Subscribe(x =>
             {
                 GetNewsFromPage();
@@ -93,22 +96,38 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
 
         private async void DeleteNews(Guid? newsId)
         {
-            if(newsId != Guid.Empty && newsId is not null && SelectedGameId != Guid.Empty)
+            if (newsId == Guid.Empty || newsId is null || SelectedGameId == Guid.Empty) return;
+            
+            bool result = false;
+            dialogService.ShowDialog("ConfirmControl", new DialogParameters
             {
-                ErrorText = string.Empty;
-                LoadingVisibility = Visibility.Visible;
-                try
+                { "title", "Confirm Delete" },
+                { "message", "Are you sure, you want delete this news?" }
+            }, x =>
+            {
+                result = x.Result switch
                 {
-                    (bool success, ErrorText) = await gamesRepository.DeleteNews(SelectedGameId, (Guid)newsId);
-                    if (success) NewsList.Remove(NewsList.First(x => x.Id == newsId));
-                    LoadingVisibility = Visibility.Collapsed;
-                }
-                catch (Exception)
-                {
-                    ErrorText = "Something went wrong";
-                    LoadingVisibility = Visibility.Collapsed;
-                }
+                    ButtonResult.OK => true,
+                    ButtonResult.Cancel => false,
+                    _ => false,
+                };
+            });
+
+            if (!result) return;
+
+            ErrorText = string.Empty;
+            LoadingVisibility = Visibility.Visible;
+            try
+            {
+                (bool success, ErrorText) = await gamesRepository.DeleteNews(SelectedGameId, (Guid)newsId);
+                if (success) NewsList.Remove(NewsList.First(x => x.Id == newsId));
+                LoadingVisibility = Visibility.Collapsed;
             }
+            catch (Exception)
+            {
+                ErrorText = "Something went wrong";
+                LoadingVisibility = Visibility.Collapsed;
+            }          
         }
 
         private async void GetNewsFromPage()

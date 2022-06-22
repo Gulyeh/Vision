@@ -42,6 +42,6 @@ namespace VisionClient.Core.Dtos
         public string Details { get; set; }
         public int Amount { get; set; }
 
-        public bool Validator() => !string.IsNullOrWhiteSpace(Title) && Price > 0;
+        public bool Validator() => !string.IsNullOrWhiteSpace(Title) && Price > 0 && Amount > 0;
     }
 }

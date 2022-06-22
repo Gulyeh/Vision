@@ -6,5 +6,7 @@ namespace VisionClient.Core.Services.IServices
     {
         Task<ResponseDto> GetCurrencies();
         Task<ResponseDto?> AddCurrencyPackage(AddCurrencyDto data);
+        Task<ResponseDto?> DeletePackage(Guid packageId);
+        Task<ResponseDto?> EditPackage(EditCurrencyDto data);
     }
 }

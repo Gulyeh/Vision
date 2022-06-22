@@ -35,15 +35,47 @@ namespace ProductsService_API.Repository
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] {"Could not add package"});
         }
 
+        public async Task<ResponseDto> DeletePackage(Guid packageId)
+        {
+            var package = await db.Currencies.FirstOrDefaultAsync(x => x.Id == packageId);
+            if(package is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] {"Package does not exist"});
+
+            db.Currencies.Remove(package);
+            if(await db.SaveChangesAsync() > 0){
+                var packagesCached = await cacheService.TryGetFromCache<Currency>(CacheType.Currencies);
+                if(packagesCached is not null){
+                    var cached = packagesCached.FirstOrDefault(x => x.Id == packageId);
+                    if(cached is not null) await cacheService.DeleteFromCache<Currency>(CacheType.Currencies, cached);
+                }
+
+                logger.LogInformation("Package with ID: {x} - has been deleted successfully", packageId);
+                return new ResponseDto(true, StatusCodes.Status200OK, new[] {"Package has been deleted"});
+            }
+
+            logger.LogWarning("Package with ID: {x} - could not be deleted", packageId);
+            return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] {"Package could not be deleted"});
+        }
+
+        public async Task<ResponseDto> EditPackage(EditCurrencyDto data)
+        {
+            var package = await db.Currencies.FirstOrDefaultAsync(x => x.Id == data.Id);
+            if(package is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] {"Package does not exist"});
+
+            mapper.Map(data, package);
+            if(await db.SaveChangesAsync() > 0){
+                await cacheService.TryUpdateCache<Currency>(CacheType.Currencies);
+                logger.LogInformation("Package with ID: {x} - has been edited successfully", data.Id);
+                return new ResponseDto(true, StatusCodes.Status200OK, new[] {"Package has been edited"});
+            }
+
+            logger.LogWarning("Package with ID: {x} - could not be edited", data.Id);
+            return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] {"Package could not be edited"});
+        }
+
         public async Task<ResponseDto> GetPackages()
         {
             IEnumerable<Currency> packages = await cacheService.TryGetFromCache<Currency>(CacheType.Currencies);
-            if (packages.Count() == 0)
-            {
-                var packagesDB = await db.Currencies.OrderBy(x => x.Amount).ToListAsync();
-                foreach (var package in packagesDB) await cacheService.TryAddToCache<Currency>(CacheType.Currencies, package);
-                packages = packagesDB;
-            }
+            if (packages.Count() == 0) packages = await cacheService.TryUpdateCache<Currency>(CacheType.Currencies);
             return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<CurrencyDto>>(packages));
         }
     }
