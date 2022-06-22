@@ -1,6 +1,7 @@
 using GameAccessService_API.DbContexts;
 using GameAccessService_API.Helpers;
 using GameAccessService_API.Services.IServices;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using System.Data;
 
@@ -60,6 +61,12 @@ namespace GameAccessService_API.Services
                     .SetSlidingExpiration(TimeSpan.FromMinutes(5));
 
             memoryCache.Set(type, value, cacheOptions);
+        }
+
+        public async Task TryUpdateCache<T>(CacheType type) where T : BaseUser
+        {
+            List<T> value = await db.Set<T>().ToListAsync();
+            SetCache<T>(type, value);
         }
     }
 }

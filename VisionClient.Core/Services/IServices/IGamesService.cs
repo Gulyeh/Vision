@@ -15,5 +15,6 @@ namespace VisionClient.Core.Services.IServices
         Task<ResponseDto?> EditGame(EditGameDto data);
         Task<ResponseDto?> DeleteNews(Guid gameId, Guid newsId);
         Task<ResponseDto?> EditNews(EditNewsDto data);
+        Task<ResponseDto?> DeleteGame(Guid gameId);
     }
 }

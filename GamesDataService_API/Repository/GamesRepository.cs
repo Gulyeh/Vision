@@ -97,11 +97,19 @@ namespace GamesDataService_API.Repository
             db.Games.Remove(game);
             if (await db.SaveChangesAsync() > 0)
             {
-                await cacheService.TryRemoveFromCache<Games>(CacheType.Games, game);
                 if (!string.IsNullOrEmpty(game.IconId)) await uploadService.DeletePhoto(game.IconId);
                 if (!string.IsNullOrEmpty(game.CoverId)) await uploadService.DeletePhoto(game.CoverId);
                 if (!string.IsNullOrEmpty(game.BannerId)) await uploadService.DeletePhoto(game.BannerId);
 
+                var cachedGame = await cacheService.TryGetFromCache<Games>(CacheType.Games);
+                if(cachedGame is not null){
+                    var gameFound = cachedGame.FirstOrDefault(x => x.Id == game.Id);
+                    if(gameFound is not null) await cacheService.TryRemoveFromCache<Games>(CacheType.Games, gameFound);
+                }
+              
+                var newsCached = await cacheService.TryGetFromCache<News>(CacheType.News);
+                foreach(var news in newsCached.Where(x => x.GameId == gameId)) await uploadService.DeletePhoto(news.PhotoId);
+                
                 rabbitMQSender.SendMessage(gameId, "DeleteGameProductQueue");
                 logger.LogInformation("Deleted game with ID: {id} successfully", gameId);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Deleted game successfully" });

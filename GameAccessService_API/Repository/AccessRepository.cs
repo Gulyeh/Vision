@@ -3,9 +3,11 @@ using GameAccessService_API.DbContexts;
 using GameAccessService_API.Dtos;
 using GameAccessService_API.Entites;
 using GameAccessService_API.Helpers;
+using GameAccessService_API.Messages;
 using GameAccessService_API.Processors;
 using GameAccessService_API.Repository.IRepository;
 using GameAccessService_API.Services.IServices;
+using Microsoft.EntityFrameworkCore;
 
 namespace GameAccessService_API.Repository
 {
@@ -48,14 +50,16 @@ namespace GameAccessService_API.Repository
 
         public async Task<(bool, BanModelDto?)> CheckUserAccess(Guid gameId, Guid userId)
         {
+            var userHasGame = await CheckUserHasGame(gameId, userId);
+            if(!userHasGame) return (false, null);
+
             (var hasAccess, var bannedData) = await CheckAccessCacheAndGetData<UserAccess>(gameId, userId, CacheType.GameAccess);
             if (hasAccess) return (true, null);
+            
             return (false, mapper.Map<BanModelDto>(bannedData));
         }
 
-
         public async Task<bool> CheckUserHasGame(Guid gameId, Guid userId) => await CheckAccessCache<UserGames>(gameId, userId, CacheType.OwnGame);
-
 
         public async Task<bool> CheckUserHasProduct(Guid productId, Guid gameId, Guid userId)
         {
@@ -172,6 +176,23 @@ namespace GameAccessService_API.Repository
                 default:
                     return false;
             }
+        }
+
+        public async Task RemoveGameAndProducts(DeleteGameDto data)
+        {
+            var game = await db.UsersGames.Where(x => x.GameId == data.GameId).ToListAsync();
+            var gameAccess = await db.UsersGameAccess.Where(x => x.GameId == data.GameId).ToListAsync();
+            var products = await db.UsersProducts.Where(x => data.ProductsId.Contains(x.ProductId)).ToListAsync();
+            
+            if(game is not null && game.Any()) db.UsersGames.RemoveRange(game);
+            if(products is not null && products.Any()) db.UsersProducts.RemoveRange(products);
+            if(gameAccess is not null && gameAccess.Any()) db.UsersGameAccess.RemoveRange(gameAccess);
+        
+            if(await db.SaveChangesAsync() > 0){
+                await cacheService.TryUpdateCache<UserGames>(CacheType.OwnGame);
+                await cacheService.TryUpdateCache<UserProducts>(CacheType.OwnProduct);
+                await cacheService.TryUpdateCache<UserAccess>(CacheType.GameAccess);
+            }        
         }
     }
 }

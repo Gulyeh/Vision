@@ -63,7 +63,7 @@ namespace ProductsService_API.Repository
 
             mapper.Map(data, package);
             if(await db.SaveChangesAsync() > 0){
-                await cacheService.TryUpdateCache<Currency>(CacheType.Currencies);
+                await cacheService.TryUpdateCurrency();
                 logger.LogInformation("Package with ID: {x} - has been edited successfully", data.Id);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] {"Package has been edited"});
             }
@@ -75,7 +75,7 @@ namespace ProductsService_API.Repository
         public async Task<ResponseDto> GetPackages()
         {
             IEnumerable<Currency> packages = await cacheService.TryGetFromCache<Currency>(CacheType.Currencies);
-            if (packages.Count() == 0) packages = await cacheService.TryUpdateCache<Currency>(CacheType.Currencies);
+            if (packages.Count() == 0) packages = await cacheService.TryUpdateCurrency();
             return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<CurrencyDto>>(packages));
         }
     }

@@ -147,5 +147,17 @@ namespace VisionClient.Core.Services
             if (response is not null) return response;
             return null;
         }
+
+        public async Task<ResponseDto?> DeleteGame(Guid gameId)
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.DELETE,
+                ApiUrl = $"{ConnectionData.GatewayUrl}/games/deletegame?gameId={gameId}"
+            });
+
+            if (response is not null) return response;
+            return null;
+        }
     }
 }

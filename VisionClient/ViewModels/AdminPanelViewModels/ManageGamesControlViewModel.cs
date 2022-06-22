@@ -1,5 +1,6 @@
 ﻿using Prism.Commands;
 using Prism.Mvvm;
+using Prism.Services.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -71,16 +72,21 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
         }
 
         private readonly IGamesRepository gamesRepository;
+        private readonly IDialogService dialogService;
+
         public IStaticData StaticData { get; }
         public DelegateCommand ExecuteCommand { get; }
+        public DelegateCommand ExecuteDeleteCommand { get; }
         public DelegateCommand<string> OpenImageCommand { get; }
 
-        public ManageGamesControlViewModel(IStaticData staticData, IGamesRepository gamesRepository)
+        public ManageGamesControlViewModel(IStaticData staticData, IGamesRepository gamesRepository, IDialogService dialogService)
         {
             OpenImageCommand = new DelegateCommand<string>(OpenImage);
             ExecuteCommand = new DelegateCommand(Execute);
+            ExecuteDeleteCommand = new DelegateCommand(DeleteGame);
             StaticData = staticData;
             this.gamesRepository = gamesRepository;
+            this.dialogService = dialogService;
         }
 
         private void OpenImage(string imageContainer)
@@ -102,6 +108,44 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
                     default:
                         break;
                 }
+            }
+        }
+
+        private async void DeleteGame()
+        {
+            if (SelectedGame is null || SelectedGame.Id == Guid.Empty) return;
+
+            bool result = false;
+            dialogService.ShowDialog("ConfirmControl", new DialogParameters
+                {
+                    { "title", "Confirm Delete" },
+                    { "message", "Are you sure, you want to delete this game?" }
+                }, x =>
+                {
+                    result = x.Result switch
+                    {
+                        ButtonResult.OK => true,
+                        ButtonResult.Cancel => false,
+                        _ => false,
+                    };
+                });
+            if (!result) return;
+            IsButtonEnabled = false;
+
+            try
+            {
+                (bool success, ErrorText) = await gamesRepository.DeleteGame(SelectedGame.Id);
+                if (success)
+                {
+                    StaticData.GameModels.Remove(SelectedGame);
+                    SelectedGame = new();
+                }
+                IsButtonEnabled = true;
+            }
+            catch(Exception)
+            {
+                ErrorText = "Something went wrong";
+                IsButtonEnabled = true;
             }
         }
 

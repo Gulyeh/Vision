@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using ProductsService_API.DbContexts;
+using ProductsService_API.Entites;
 using ProductsService_API.Helpers;
 using ProductsService_API.Services.IServices;
 
@@ -56,11 +57,24 @@ namespace ProductsService_API.Services
             memoryCache.Set(type, value, cacheOptions);
         }
 
-        public async Task<List<T>> TryUpdateCache<T>(CacheType type) where T : BaseProducts
+        public async Task<List<Currency>> TryUpdateCurrency()
         {
-            List<T> value = await db.Set<T>().OrderBy(x => x.Price).ToListAsync();
-            SetCache<T>(type, value);
+            List<Currency> value = await db.Set<Currency>().OrderBy(x => x.Price).ToListAsync();
+            SetCache<Currency>(CacheType.Currencies, value);
             return value;
+        }
+
+        public Task TryReplaceCache<T>(CacheType type, T source, T replacement) where T: BaseProducts
+        {
+            List<T> value;
+            memoryCache.TryGetValue(type, out value);
+            if(value is null) return Task.CompletedTask;
+
+            value.Remove(source);
+            value.Add(replacement);
+            SetCache<T>(type, value);
+
+            return Task.CompletedTask;
         }
     }
 }

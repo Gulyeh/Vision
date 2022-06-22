@@ -20,12 +20,15 @@ namespace ProductsService_API.Repository
         private readonly ILogger<GamesRepository> logger;
         private readonly IGetCachedGames getCachedGames;
         private readonly IGameAccessService gameAccessService;
+        private readonly IUploadService uploadService;
 
         public GamesRepository(ApplicationDbContext db, IMapper mapper, ICacheService cacheService,
-            IGameDataService gameDataService, ILogger<GamesRepository> logger, IGetCachedGames getCachedGames, IGameAccessService gameAccessService)
+            IGameDataService gameDataService, ILogger<GamesRepository> logger, IGetCachedGames getCachedGames, IGameAccessService gameAccessService,
+            IUploadService uploadService)
         {
             this.getCachedGames = getCachedGames;
             this.gameAccessService = gameAccessService;
+            this.uploadService = uploadService;
             this.gameDataService = gameDataService;
             this.logger = logger;
             this.db = db;
@@ -65,24 +68,28 @@ namespace ProductsService_API.Repository
 
             await db.Games.AddAsync(mapped);
             if (await SaveChangesAsync()) {
+                await cacheService.TryAddToCache<Games>(CacheType.Games, mapped);
                 logger.LogInformation("Added Game with ID: {gameId} for purchase successfully", data.GameId);
                 return;
             }
             logger.LogError("Could not add Game with ID: {gameId} for purchase", data.GameId);
         }
 
-        public async Task DeleteGame(Guid gameId)
+        public async Task<bool> DeleteGame(Guid gameId)
         {
-            var game = await db.Games.FirstOrDefaultAsync(x => x.GameId == gameId);
-            if (game is null) return;
+            var game = await db.Games.Include(x => x.Products).FirstOrDefaultAsync(x => x.GameId == gameId);
+            if (game is null) return false;
 
             db.Games.Remove(game);
 
             if (await SaveChangesAsync()) {
+                foreach(var product in game.Products) await uploadService.DeletePhoto(product.PhotoId);
                 logger.LogInformation("Deleted Game with ID: {gameId}", gameId);
-                return;  
+                return true;  
             }                
+            
             logger.LogError("Could not delete Game with ID: {gameId}", gameId);
+            return false;
         }
 
         public async Task UpdateGameData(GameProductData data){
@@ -116,6 +123,12 @@ namespace ProductsService_API.Repository
         {
             if (await db.SaveChangesAsync() > 0) return true;
             return false;
+        }
+
+        public async Task<Games?> FindGame(Guid gameId)
+        {
+            var game = await getCachedGames.GetGames();
+            return game.FirstOrDefault(x => x.GameId == gameId);
         }
     }
 }

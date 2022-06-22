@@ -56,7 +56,7 @@
                       ScrollViewer.HorizontalScrollBarVisibility="Hidden" 
                       HorizontalAlignment="Left"
                       SelectionMode="Single"
-                      ItemsSource="{Binding GameList}"
+                      ItemsSource="{Binding StaticData.GameModels}"
                       SelectedItem="{Binding SelectedGame, Mode=TwoWay}"
                       ScrollViewer.CanContentScroll="False">
                 <ListView.ItemsPanel>

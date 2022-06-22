@@ -3,6 +3,7 @@ using Prism.Mvvm;
 using Prism.Regions;
 using System;
 using System.Linq;
+using VisionClient.Core;
 using VisionClient.SignalR;
 using VisionClient.Views;
 

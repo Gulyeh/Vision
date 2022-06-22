@@ -9,6 +9,7 @@ namespace ProductsService_API.Entites
         {
             PhotoId = string.Empty;
             PhotoUrl = string.Empty;
+            Products = new List<Products>();
         }
 
         [Required]
@@ -17,6 +18,6 @@ namespace ProductsService_API.Entites
         public string PhotoUrl { get; set; }
         [Required]
         public string PhotoId { get; set; }
-        public ICollection<Products>? Products { get; set; }
+        public ICollection<Products> Products { get; set; }
     }
 }

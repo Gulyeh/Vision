@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using ProdcutsService_API.Messages;
+using ProdcutsService_API.RabbitMQSender;
 using ProductsService_API.Helpers;
 using ProductsService_API.Messages;
 using ProductsService_API.Repository.IRepository;
@@ -14,12 +16,14 @@ namespace ProductsService_API.RabbitMQConsumer
     {
         private IConnection connection;
         private IModel channel;
+        private readonly IRabbitMQSender rabbitMQSender;
         private readonly IServiceScopeFactory serviceScopeFactory;
         private readonly ILogger<RabbitMQDeleteGameConsumer> logger;
 
-        public RabbitMQDeleteGameConsumer(IOptions<RabbitMQSettings> options,
+        public RabbitMQDeleteGameConsumer(IOptions<RabbitMQSettings> options, IRabbitMQSender rabbitMQSender,
             IServiceScopeFactory serviceScopeFactory, ILogger<RabbitMQDeleteGameConsumer> logger)
         {
+            this.rabbitMQSender = rabbitMQSender;
             this.serviceScopeFactory = serviceScopeFactory;
             this.logger = logger;
             var factory = new ConnectionFactory
@@ -60,7 +64,10 @@ namespace ProductsService_API.RabbitMQConsumer
                 {
                     using var scope = serviceScopeFactory.CreateScope();
                     var gamesRepository = scope.ServiceProvider.GetRequiredService<IGamesRepository>();
-                    await gamesRepository.DeleteGame(data);
+
+                    var game = await gamesRepository.FindGame(data);
+                    var isDeleted = await gamesRepository.DeleteGame(data);
+                    if(isDeleted && game is not null) rabbitMQSender.SendMessage(new DeleteGameDto(game.GameId, game.Products.Select(x => x.Id)), "DeleteGameAccessQueue");                  
                     scope.Dispose();
                     return;
                 }

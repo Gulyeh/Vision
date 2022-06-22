@@ -29,6 +29,7 @@ namespace GamesDataService_API.Dtos
         [Required]
         public string Details { get; set; }
         [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "Please enter valid price")]
         public decimal Price { get; set; }
         [Required]
         public int Discount { get; set; }

@@ -71,7 +71,7 @@ namespace VisionClient.Core.Repository
 
             response.isSuccess = true;
             var json = ResponseToJsonHelper.GetJson<BanModel>(response);
-            if (json is null) throw new Exception();
+            if (json is null || json.BanDate.Equals(default)) throw new Exception();
             return json;
         }
 
@@ -113,6 +113,13 @@ namespace VisionClient.Core.Repository
         public async Task<(bool, string)> EditNews(EditNewsDto data)
         {
             var response = await gamesService.EditNews(data);
+            if (response is null) throw new Exception();
+            return (response.isSuccess, ResponseToJsonHelper.GetJson(response));
+        }
+
+        public async Task<(bool, string)> DeleteGame(Guid gameId)
+        {
+            var response = await gamesService.DeleteGame(gameId);
             if (response is null) throw new Exception();
             return (response.isSuccess, ResponseToJsonHelper.GetJson(response));
         }

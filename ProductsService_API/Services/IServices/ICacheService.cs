@@ -1,3 +1,4 @@
+using ProductsService_API.Entites;
 using ProductsService_API.Helpers;
 
 namespace ProductsService_API.Services.IServices
@@ -7,6 +8,7 @@ namespace ProductsService_API.Services.IServices
         Task TryAddToCache<T>(CacheType type, T data) where T : BaseProducts;
         Task<List<T>> TryGetFromCache<T>(CacheType type) where T : new();
         Task DeleteFromCache<T>(CacheType type, T data) where T : BaseProducts;
-        Task<List<T>> TryUpdateCache<T>(CacheType type) where T : BaseProducts;
+        Task<List<Currency>> TryUpdateCurrency();
+        Task TryReplaceCache<T>(CacheType type, T source, T replacement) where T: BaseProducts;
     }
 }

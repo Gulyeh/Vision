@@ -1,4 +1,5 @@
 using GameAccessService_API.Dtos;
+using GameAccessService_API.Messages;
 
 namespace GameAccessService_API.Repository.IRepository
 {
@@ -10,5 +11,6 @@ namespace GameAccessService_API.Repository.IRepository
         Task<bool> CheckUserHasGame(Guid gameId, Guid userId);
         Task<bool> CheckUserHasProduct(Guid productId, Guid gameId, Guid userId);
         Task<bool> AddProductOrGame(Guid userId, Guid gameId, Guid productId);
+        Task RemoveGameAndProducts(DeleteGameDto data);
     }
 }

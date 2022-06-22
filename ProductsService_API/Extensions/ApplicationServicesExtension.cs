@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using ProdcutsService_API.RabbitMQSender;
 using ProductsService_API.DbContexts;
 using ProductsService_API.Helpers;
 using ProductsService_API.Middleware;
@@ -23,6 +24,7 @@ namespace ProductsService_API.Extensions
             services.AddHostedService<RabbitMQNewGameConsumer>();
             services.AddHostedService<RabbitMQDeleteGameConsumer>();
             services.AddHostedService<RabbitMQEditGameConsumer>();
+            services.AddSingleton<IRabbitMQSender, RabbitMQMessageSender>();
             services.Configure<RabbitMQSettings>(config.GetSection("RabbitMQSettings"));
             services.AddHttpClient<IGameDataService, GameDataService>();
             services.AddHttpClient<IGameAccessService, GameAccessService>();

@@ -54,7 +54,13 @@ namespace ProductsService_API.Repository
             if(!string.IsNullOrWhiteSpace(mapped.PhotoUrl)){
                 game.Products?.Add(mapped);
                 if (await SaveChangesAsync())
-                {
+                {                
+                    var cachedGame = await cacheService.TryGetFromCache<Games>(CacheType.Games);
+                    if(cachedGame is not null){
+                        var gameFound = cachedGame.FirstOrDefault(x => x.GameId == data.GameId);
+                        if(gameFound is not null) await cacheService.TryReplaceCache<Games>(CacheType.Games, gameFound, game);
+                    }
+                    
                     logger.LogInformation("Added Product to Game with ID: {gameId} for purchase successfully", data.GameId);
                     return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Product has been added successfuly" });
                 }

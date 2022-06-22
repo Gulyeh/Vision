@@ -20,19 +20,17 @@ namespace VisionClient.ViewModels
             }
         }
 
+        public IStaticData StaticData { get; }
+
         private readonly IEventAggregator eventAggregator;
-        public ObservableCollection<GameModel> GameList { get; }
 
         public GameListControlViewModel(IEventAggregator eventAggregator, IStaticData StaticData)
         {
-            GameList = StaticData.GameModels;
             this.eventAggregator = eventAggregator;
-            if(GameList.Count > 0) SelectedGame = GameList[0];
+            this.StaticData = StaticData;
+            if (StaticData.GameModels.Count > 0) SelectedGame = StaticData.GameModels[0];
         }
 
-        private void GameSelected(GameModel game)
-        {
-            eventAggregator.GetEvent<SendEvent<GameModel>>().Publish(game);
-        }
+        private void GameSelected(GameModel game) => eventAggregator.GetEvent<SendEvent<GameModel>>().Publish(game);      
     }
 }
