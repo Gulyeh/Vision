@@ -34,7 +34,7 @@ namespace VisionClient.Core.Dtos
             get => price;
             set
             {
-                if (value < 0 || value > 999) price = 0;
+                if (value <= 0 || value > 999) price = 1;
                 price = Math.Round(value, 2);
                 OnPropertyChanged();
             }
@@ -53,6 +53,6 @@ namespace VisionClient.Core.Dtos
         public RequirementsModel Requirements { get; set; }
         public ProductInfoModel Informations { get; set; }
 
-        public bool Validation() => !string.IsNullOrEmpty(Name) && Informations.Validation() && Requirements.Validation();      
+        public bool Validation() => !string.IsNullOrEmpty(Name) && Informations.Validation() && Requirements.Validation() && Price > 0;      
     }
 }

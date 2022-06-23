@@ -39,15 +39,15 @@ namespace GamesDataService_API.Repository
         {
             var mapped = mapper.Map<Games>(data);
 
-            var results = await uploadService.UploadPhoto(Convert.FromBase64String(data.CoverPhoto));
+            var results = await uploadService.UploadPhoto(data.CoverPhoto);
             mapped.CoverId = results.PublicId;
             mapped.CoverUrl = results.SecureUrl.AbsoluteUri;
 
-            results = await uploadService.UploadPhoto(Convert.FromBase64String(data.IconPhoto));
+            results = await uploadService.UploadPhoto(data.IconPhoto);
             mapped.IconUrl = results.SecureUrl.AbsoluteUri;
             mapped.IconId = results.PublicId;
 
-            results = await uploadService.UploadPhoto(Convert.FromBase64String(data.BannerPhoto));
+            results = await uploadService.UploadPhoto(data.BannerPhoto);
             mapped.BannerUrl = results.SecureUrl.AbsoluteUri;
             mapped.BannerId = results.PublicId;
 
@@ -134,7 +134,7 @@ namespace GamesDataService_API.Repository
 
             if (!string.IsNullOrWhiteSpace(data.CoverPhoto))
             {
-                var results = await uploadService.UploadPhoto(Convert.FromBase64String(data.CoverPhoto));
+                var results = await uploadService.UploadPhoto(data.CoverPhoto);
                 oldCoverId = gameDb.CoverId;
                 gameDb.CoverId = results.PublicId;
                 gameDb.CoverUrl = results.SecureUrl.AbsoluteUri;
@@ -142,7 +142,7 @@ namespace GamesDataService_API.Repository
 
             if (!string.IsNullOrWhiteSpace(data.IconPhoto))
             {
-                var results = await uploadService.UploadPhoto(Convert.FromBase64String(data.IconPhoto));
+                var results = await uploadService.UploadPhoto(data.IconPhoto);
                 oldIconId = gameDb.IconId;
                 gameDb.IconId = results.PublicId;
                 gameDb.IconUrl = results.SecureUrl.AbsoluteUri;
@@ -150,7 +150,7 @@ namespace GamesDataService_API.Repository
 
             if (!string.IsNullOrWhiteSpace(data.BannerPhoto))
             {
-                var results = await uploadService.UploadPhoto(Convert.FromBase64String(data.BannerPhoto));
+                var results = await uploadService.UploadPhoto(data.BannerPhoto);
                 oldBannerId = gameDb.BannerId;
                 gameDb.BannerId = results.PublicId;
                 gameDb.BannerUrl = results.SecureUrl.AbsoluteUri;

@@ -44,7 +44,7 @@ namespace ProductsService_API.Repository
 
             var mapped = mapper.Map<Products>(data);
 
-            var results = await uploadService.UploadPhoto(Convert.FromBase64String(data.Photo));
+            var results = await uploadService.UploadPhoto(data.Photo);
             if (results.Error is null)
             {
                 mapped.PhotoId = results.PublicId;
@@ -103,7 +103,7 @@ namespace ProductsService_API.Repository
 
             if (!string.IsNullOrWhiteSpace(data.Photo))
             {
-                var results = await uploadService.UploadPhoto(Convert.FromBase64String(data.Photo));
+                var results = await uploadService.UploadPhoto(data.Photo);
                 if (results.Error is null)
                 {
                     oldPhotoId = product.PhotoId;

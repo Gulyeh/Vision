@@ -33,16 +33,15 @@ namespace UsersService_API.Services
             return results;
         }
 
-        public async Task<ImageUploadResult> UploadPhoto(byte[] file)
+        public async Task<ImageUploadResult> UploadPhoto(string file)
         {
             var uploadResults = new ImageUploadResult();
             if (file is not null)
             {
                 var guid = Guid.NewGuid().ToString().Replace("-", "");
-                using var stream = new MemoryStream(file);
                 var uploadParams = new ImageUploadParams
                 {
-                    File = new FileDescription(guid, stream)
+                    File = new FileDescription(guid, $"data:image/png;base64,{file}")
                 };
 
                 uploadResults = await cloudinary.UploadAsync(uploadParams);

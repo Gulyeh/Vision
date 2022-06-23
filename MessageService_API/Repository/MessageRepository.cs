@@ -114,7 +114,7 @@ namespace MessageService_API.Repository
             {
                 foreach (var attachment in message.AttachmentsList)
                 {
-                    var results = await uploadService.UploadPhoto(Convert.FromBase64String(attachment));
+                    var results = await uploadService.UploadPhoto(attachment);
                     if (results.Error is null)
                     {
                         var msgAttachment = new MessageAttachment()

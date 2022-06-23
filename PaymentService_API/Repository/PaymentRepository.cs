@@ -47,7 +47,7 @@ namespace PaymentService_API.Repository
             var mapped = mapper.Map<PaymentMethods>(data);
             mapped.Provider = providerParsed;
 
-            var results = await uploadService.UploadPhoto(Convert.FromBase64String(data.Photo));
+            var results = await uploadService.UploadPhoto(data.Photo);
             mapped.PhotoId = results.PublicId;
             mapped.PhotoUrl = results.SecureUrl.AbsoluteUri;
 

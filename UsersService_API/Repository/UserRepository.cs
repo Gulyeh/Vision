@@ -44,7 +44,7 @@ namespace UsersService_API.Repository
             var user = await db.Users.FirstOrDefaultAsync(x => x.UserId == userId);
             if (user is null) return string.Empty;
 
-            var results = await uploadService.UploadPhoto(Convert.FromBase64String(base64));
+            var results = await uploadService.UploadPhoto(base64);
             if (results.Error is not null) return string.Empty;
 
             oldPhotoId = user.PhotoId;

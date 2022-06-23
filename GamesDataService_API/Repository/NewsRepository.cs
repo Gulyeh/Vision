@@ -35,7 +35,7 @@ namespace GamesDataService_API.Repository
             var game = await db.Games.Include(x => x.News).FirstOrDefaultAsync(x => x.Id == data.GameId);
             if (game is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game not found" });
 
-            var results = await uploadService.UploadPhoto(Convert.FromBase64String(data.Photo));
+            var results = await uploadService.UploadPhoto(data.Photo);
             if (results.Error is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not upload image" });
 
             var mapped = mapper.Map<News>(data);
@@ -93,7 +93,7 @@ namespace GamesDataService_API.Repository
 
             if (!string.IsNullOrWhiteSpace(data.Photo))
             {
-                var results = await uploadService.UploadPhoto(Convert.FromBase64String(data.Photo));
+                var results = await uploadService.UploadPhoto(data.Photo);
                 if (results.Error is null)
                 {
                     oldPhotoId = news.PhotoId;
