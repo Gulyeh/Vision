@@ -130,8 +130,8 @@
                     <editors:SfDataGrid.Columns>
                         <editors:GridTextColumn MappingName="Title" HeaderText="Title" TextAlignment="Center" TextWrapping="Wrap"/>
                         <editors:GridTextColumn MappingName="Amount" HeaderText="Amount" Width="90" TextWrapping="Wrap" TextAlignment="Center"/>
-                        <editors:GridTextColumn DisplayBinding="{Binding Price, StringFormat=C}" MappingName="Price" HeaderText="Price" Width="80" TextWrapping="Wrap" TextAlignment="Center"/>
-                        <editors:GridTextColumn DisplayBinding="{Binding Discount, StringFormat={}{0}%}" MappingName="Discount" HeaderText="Discount" Width="95" TextWrapping="Wrap" TextAlignment="Center"/>
+                        <editors:GridTextColumn ValueBinding="{Binding Price, StringFormat=C}" HeaderText="Price" Width="80" TextWrapping="Wrap" TextAlignment="Center"/>
+                        <editors:GridTextColumn ValueBinding="{Binding Discount, StringFormat={}{0}%}" HeaderText="Discount" Width="95" TextWrapping="Wrap" TextAlignment="Center"/>
                         <editors:GridTextColumn HeaderText="" Width="150">
                             <editors:GridTextColumn.CellTemplate>
                                 <DataTemplate>

@@ -69,7 +69,7 @@
                 Command="{Binding OpenImageCommand}"
                 CommandParameter="Banner"
                 Grid.Row="0">
-                <Image Source="{Binding CoverImage}"
+                <Image Source="{Binding CoverImage, IsAsync=True}"
                    HorizontalAlignment="Center">
                     <Image.OpacityMask>
                         <RadialGradientBrush RadiusY="3">

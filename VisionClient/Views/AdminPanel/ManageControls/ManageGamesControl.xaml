@@ -60,7 +60,7 @@
                     Command="{Binding OpenImageCommand}"
                     CommandParameter="Banner"
                     Grid.Row="0">
-                <Image Source="{Binding BannerImage}"
+                <Image Source="{Binding BannerImage, IsAsync=True}"
                        HorizontalAlignment="Center">
                     <Image.OpacityMask>
                         <RadialGradientBrush RadiusY="3">
@@ -73,14 +73,13 @@
             <StackPanel Grid.Row="1" Orientation="Vertical" VerticalAlignment="Center">
                 <Separator Grid.Row="1" Height="1" VerticalAlignment="Top"/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <editors:ComboBoxAdv 
+                    <ComboBox 
                               Width="200" 
                               Height="25"
-                              Background="#164971"
-                              Foreground="Black"     
-                              DefaultText="Select Game"
+                              Foreground="Black" 
+                              BorderThickness="0"
                               Margin="0,20,0,0"
-                              ItemsSource="{Binding StaticData.GameModels, UpdateSourceTrigger=PropertyChanged}"
+                              ItemsSource="{Binding StaticData.GameModels}"
                               SelectedItem="{Binding SelectedGame}"
                               DisplayMemberPath="Name"/>
                     <Button Width="80"
@@ -101,14 +100,14 @@
                             Margin="0,20,0,20"
                             Command="{Binding OpenImageCommand}"
                             CommandParameter="Home">
-                        <Image Source="{Binding HomeImage}"/>
+                        <Image Source="{Binding HomeImage, IsAsync=True}"/>
                     </Button>
                     <Button Width="80" Height="80" 
                             Background="Transparent" BorderThickness="1"
                             Margin="40,0,0,0"
                             Command="{Binding OpenImageCommand}"
                             CommandParameter="Icon">
-                        <Image Source="{Binding IconImage}"/>
+                        <Image Source="{Binding IconImage, IsAsync=True}"/>
                     </Button>
                 </StackPanel>
                 <editors:SfTextBoxExt 

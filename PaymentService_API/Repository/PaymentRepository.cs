@@ -92,18 +92,8 @@ namespace PaymentService_API.Repository
             return allProviders.Except(usedProvidersName);
         }
 
-        public async Task<ResponseDto> GetPaymentMethods()
-        {
-            var methods = await cacheService.GetMethodsFromCache();
-            if (methods.Count() == 0)
-            {
-                var dbMethods = await db.PaymentMethods.ToListAsync();
-                foreach (var method in dbMethods) await cacheService.AddMethodsToCache(method);
-                methods = dbMethods;
-            }
-            return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<PaymentMethodsDto>>(methods));
-        }
-
+        public async Task<ResponseDto> GetPaymentMethods() => new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<PaymentMethodsDto>>(await cacheService.GetMethodsFromCache()));
+        
         public async Task<ResponseDto> PaymentCompleted(string sessionId, PaymentStatus status, string Access_Token)
         {
             var payment = await db.Payments.FirstOrDefaultAsync(x => x.StripeId == sessionId);

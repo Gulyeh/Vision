@@ -47,17 +47,27 @@
                             Background="Transparent" BorderThickness="1"
                             Command="{Binding OpenImageCommand}"
                             CommandParameter="Icon">
-                    <Image Source="{Binding IconImage}"/>
+                    <Image Source="{Binding IconImage, IsAsync=True}"/>
                 </Button>
-                <editors:ComboBoxAdv 
-                              Width="200" 
-                              Height="25"
-                              Background="#164971"
-                              Foreground="Black" 
-                              ItemsSource="{Binding ProvidersList}"
-                              SelectedValue="{Binding PaymentMethod.Provider}"
-                              DefaultText="Provider"
-                              Margin="0,20,0,0"/>
+                <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+                    <ComboBox
+                        Width="200" 
+                        Height="25"
+                        Foreground="Black"
+                        VerticalAlignment="Center"
+                        ItemsSource="{Binding ProvidersList}"
+                        SelectedValue="{Binding PaymentMethod.Provider}"
+                        BorderThickness="0"/>
+                    <Button Width="100"
+                        Height="30" 
+                        Content="Update List"
+                        Background="#0AA1DD"
+                        Foreground="White"
+                        Command="{Binding ExecuteUpdateCommand}"
+                        BorderThickness="0"
+                        Margin="10,0,0,0"
+                        HorizontalAlignment="Left"/>
+                </StackPanel>
                 <editors:ComboBoxAdv 
                               Width="100" 
                               Height="25"

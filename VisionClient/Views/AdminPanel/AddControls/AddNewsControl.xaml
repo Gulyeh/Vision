@@ -58,7 +58,7 @@
                 Command="{Binding OpenImageCommand}"
                 CommandParameter="Banner"
                 Grid.Row="0">
-                <Image Source="{Binding CoverImage}"
+                <Image Source="{Binding CoverImage, IsAsync=True}"
                    HorizontalAlignment="Center">
                     <Image.OpacityMask>
                         <RadialGradientBrush RadiusY="3">
@@ -79,16 +79,15 @@
                     Margin="0,20,0,20"
                     Text="{Binding NewsData.Title}"
                     Watermark="Title"/>
-                <editors:ComboBoxAdv 
+                <ComboBox
                     Width="200" 
                     Height="25"
                     ItemsSource="{Binding StaticData.GameModels}"
                     DisplayMemberPath="Name"
                     SelectedItem="{Binding SelectedGame}"
                     HorizontalAlignment="Center"
-                    Background="#164971"
-                    Foreground="Black" 
-                    DefaultText="Game List"/>
+                    BorderThickness="0"
+                    Foreground="Black" />
                 <editors:SfTextBoxExt 
                         Margin="0,20,0,0"
                         HorizontalAlignment="Center"  

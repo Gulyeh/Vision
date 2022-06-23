@@ -1,4 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using PaymentService_API.DbContexts;
 using PaymentService_API.Entities;
 using PaymentService_API.Services.IServices;
 
@@ -7,10 +9,12 @@ namespace PaymentService_API.Services
     public class CacheService : ICacheService
     {
         private readonly IMemoryCache memoryCache;
+        private readonly ApplicationDbContext db;
         private const string cacheName = "paymentMethods";
-        public CacheService(IMemoryCache memoryCache)
+        public CacheService(IMemoryCache memoryCache, ApplicationDbContext db)
         {
             this.memoryCache = memoryCache;
+            this.db = db;
         }
 
         public Task AddMethodsToCache(PaymentMethods data)
@@ -25,12 +29,14 @@ namespace PaymentService_API.Services
             return Task.CompletedTask;
         }
 
-        public Task<IEnumerable<PaymentMethods>> GetMethodsFromCache()
+        public async Task<IEnumerable<PaymentMethods>> GetMethodsFromCache()
         {
             IEnumerable<PaymentMethods> value;
             memoryCache.TryGetValue(cacheName, out value);
-            if (value is null) value = new List<PaymentMethods>();
-            return Task.FromResult(value);
+            if (value is null) {
+                value = await db.PaymentMethods.ToListAsync();
+            }
+            return value;
         }
 
         public Task RemoveMethodsFromCache(PaymentMethods data)

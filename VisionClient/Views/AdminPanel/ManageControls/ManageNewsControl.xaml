@@ -98,16 +98,15 @@
             </Border>
             <StackPanel Orientation="Vertical" VerticalAlignment="Top" 
                     HorizontalAlignment="Center" Margin="10,20,10,20">
-                <editors:ComboBoxAdv 
-                Width="200" 
-                Height="25"
-                Background="#164971"
-                Foreground="Black"     
-                DefaultText="Select Game"
-                ItemsSource="{Binding StaticData.GameModels}"
-                SelectedValuePath="Id"
-                SelectedValue="{Binding SelectedGameId}"
-                DisplayMemberPath="Name"/>
+                <ComboBox 
+                    Width="200" 
+                    Height="25"
+                    BorderThickness="0"
+                    Foreground="Black"     
+                    ItemsSource="{Binding StaticData.GameModels}"
+                    SelectedValuePath="Id"
+                    SelectedValue="{Binding SelectedGameId}"
+                    DisplayMemberPath="Name"/>
                 <TextBlock Text="{Binding ErrorText}"
                        FontSize="10" Foreground="Red"
                        Margin="0,40,0,0"
@@ -128,7 +127,7 @@
                 AllowEditing="False"
                 Foreground="White">
                     <editors:SfDataGrid.Columns>
-                        <editors:GridImageColumn MappingName="PhotoUrl" HeaderText="Photo" Width="160" TextAlignment="Center"/>
+                        <editors:GridImageColumn ValueBinding="{Binding PhotoUrl, IsAsync=True}" HeaderText="Photo" Width="160" TextAlignment="Center"/>
                         <editors:GridTextColumn MappingName="Title" HeaderText="Title" TextWrapping="Wrap" TextAlignment="Center"/>
                         <editors:GridTextColumn MappingName="CreatedDate" HeaderText="Created Date" TextWrapping="Wrap" TextAlignment="Center"/>
                         <editors:GridTextColumn HeaderText="" Width="150">

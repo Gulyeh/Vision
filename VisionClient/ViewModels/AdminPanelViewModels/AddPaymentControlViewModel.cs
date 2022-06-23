@@ -62,11 +62,13 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
 
         public DelegateCommand OpenImageCommand { get; }
         public DelegateCommand ExecuteCommand { get; }
+        public DelegateCommand ExecuteUpdateCommand { get; }
         public ObservableCollection<string> ProvidersList { get; set; }
 
         public AddPaymentControlViewModel(IPaymentRepository paymentRepository)
         {
             ProvidersList = new();
+            ExecuteUpdateCommand = new DelegateCommand(GetProviders);
             ExecuteCommand = new DelegateCommand(Execute);
             OpenImageCommand = new DelegateCommand(OpenImage);
             ClearData();
@@ -75,9 +77,21 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
 
         private async void GetProviders()
         {
-            ProvidersList.Clear();
-            var list = await paymentRepository.GetNewMethods();
-            foreach(var provider in list) ProvidersList.Add(provider);
+            ErrorText = string.Empty;
+            IsButtonEnabled = false;
+
+            try
+            {
+                ProvidersList.Clear();
+                var list = await paymentRepository.GetNewMethods();
+                foreach (var provider in list) ProvidersList.Add(provider);
+                IsButtonEnabled = true;
+            }
+            catch (Exception)
+            {
+                ErrorText = "Something went wrong";
+                IsButtonEnabled = true;
+            }
         }
 
         private void OpenImage()
