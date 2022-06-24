@@ -86,6 +86,7 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
                 PackageData = editPackage;
                 CoverImage = x.Item1.PhotoUrl;
             });
+
             this.eventAggregator = eventAggregator;
             this.regionManager = regionManager;
             this.gamesRepository = gamesRepository;

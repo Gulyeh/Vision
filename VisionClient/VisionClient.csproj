@@ -81,6 +81,12 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Update="Views\AdminPanel\ManageControls\EditCouponControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\AdminPanel\ManageControls\ManageCouponsControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\AdminPanel\ManageControls\ManagePaymentControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -115,6 +121,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Page Update="Views\AdminPanel\ManageControls\EditCouponControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\AdminPanel\ManageControls\ManageCouponsControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Views\AdminPanel\ManageControls\ManagePaymentControl.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>

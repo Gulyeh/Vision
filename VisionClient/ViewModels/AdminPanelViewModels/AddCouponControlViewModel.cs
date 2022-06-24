@@ -54,6 +54,7 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
 
                 if (CouponModel.CodeType.Equals("Package")) CouponModel.GameId = value.Id;
                 else if (CouponModel.CodeType.Equals("Game")) CouponModel.CodeValue = value.Id.ToString();
+
                 SetProperty(ref selectedGame, value); 
             }
         }

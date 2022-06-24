@@ -37,6 +37,43 @@ namespace VisionClient.Core.Services
             return new ResponseDto();
         }
 
+        public async Task<ResponseDto?> DeleteCoupon(string coupon)
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.DELETE,
+                ApiUrl = $"{ConnectionData.GatewayUrl}/codes?code={coupon}"
+            });
+
+            if (response is not null) return response;
+            return null;
+        }
+
+        public async Task<ResponseDto?> GetCoupons()
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.GET,
+                ApiUrl = $"{ConnectionData.GatewayUrl}/codes"
+            });
+
+            if (response is not null) return response;
+            return null;
+        }
+
+        public async Task<ResponseDto?> UpdateCoupon(EditCouponDto data)
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.PUT,
+                ApiUrl = $"{ConnectionData.GatewayUrl}/codes/editcode",
+                Data = data
+            });
+
+            if (response is not null) return response;
+            return null;
+        }
+
         public async Task<ResponseDto> VerifyCoupon(string coupon, CodeTypes type)
         {
             var codeType = Enum.GetName(typeof(CodeTypes), type);

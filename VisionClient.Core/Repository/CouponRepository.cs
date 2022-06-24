@@ -32,6 +32,27 @@ namespace VisionClient.Core.Repository
             return ResponseToJsonHelper.GetJson(response);
         }
 
+        public async Task<(bool, string)> DeleteCoupon(string coupon)
+        {
+            var response = await couponService.DeleteCoupon(coupon);
+            if (response is null) throw new Exception();
+            return (response.isSuccess, ResponseToJsonHelper.GetJson(response));
+        }
+
+        public async Task<List<DetailedCouponModel>> GetCoupons()
+        {
+            var response = await couponService.GetCoupons();
+            if (response is null) throw new Exception();
+            return ResponseToJsonHelper.GetJson<List<DetailedCouponModel>>(response);
+        }
+
+        public async Task<(bool, string)> UpdateCoupon(EditCouponDto data)
+        {
+            var response = await couponService.UpdateCoupon(data);
+            if (response is null) throw new Exception();
+            return (response.isSuccess, ResponseToJsonHelper.GetJson(response));
+        }
+
         public async Task<(CouponModel, string?)> VerifyCoupon(string coupon, CodeTypes type)
         {
             if (string.IsNullOrEmpty(coupon)) return (new(), "Field cannot be empty");

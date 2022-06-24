@@ -8,5 +8,8 @@ namespace VisionClient.Core.Services.IServices
         Task<ResponseDto> ApplyCoupon(string coupon, CodeTypes type);
         Task<ResponseDto> VerifyCoupon(string coupon, CodeTypes type);
         Task<ResponseDto?> AddCoupon(AddCouponDto data);
+        Task<ResponseDto?> GetCoupons();
+        Task<ResponseDto?> DeleteCoupon(string coupon);
+        Task<ResponseDto?> UpdateCoupon(EditCouponDto data);
     }
 }

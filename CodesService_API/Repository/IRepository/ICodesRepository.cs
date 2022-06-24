@@ -8,8 +8,8 @@ namespace CodesService_API.Repository.IRepository
         Task<ResponseDto> CheckCode(string code, CodeTypes codeType, Guid userId);
         Task<ResponseDto> AddCode(AddCodesDto code);
         Task<ResponseDto> GetAllCodes();
-        Task<ResponseDto> RemoveCode(int codeId);
-        Task<ResponseDto> EditCode(CodesDataDto codeData);
+        Task<ResponseDto> RemoveCode(string code);
+        Task<ResponseDto> EditCode(EditCodeDto codeData);
         Task<ResponseDto> ApplyCode(string code, Guid userId, CodeTypes codeType, string Access_Token);
         Task RemoveUsedCode(string code, Guid userId);
     }

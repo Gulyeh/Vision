@@ -9,10 +9,21 @@ namespace CodesService_API
     {
         public MapperConfig()
         {
-            CreateMap<CodesDataDto, Codes>().ReverseMap();
+            CreateMap<EditCodeDto, Codes>().ReverseMap();
             CreateMap<AddCodesDto, Codes>()
                 .ForMember(x => x.CodeType, src => src.Ignore())
                 .ForMember(x => x.Signature, src => src.Ignore());
+            CreateMap<Codes, GetCodesDto>()
+                .ForMember(x => x.CodeType, src => src.MapFrom(z => GetEnumString(z.CodeType)))
+                .ForMember(x => x.Signature, src => src.MapFrom(z => GetEnumString(z.Signature)));
+        }
+
+        private string GetEnumString<T>(T data)
+        {
+            if(data is null || !typeof(T).IsEnum) return string.Empty;
+            var parsed = Enum.GetName(typeof(T), data);
+            if(parsed is null) return string.Empty;
+            return parsed;
         }
     }
 }

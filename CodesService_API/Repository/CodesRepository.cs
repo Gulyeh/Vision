@@ -115,15 +115,19 @@ namespace CodesService_API.Repository
             return new ResponseDto(true, StatusCodes.Status200OK, codeResponse);
         }
 
-        public async Task<ResponseDto> EditCode(CodesDataDto codeData)
+        public async Task<ResponseDto> EditCode(EditCodeDto codeData)
         {
             var checkCode = await db.Codes.FirstOrDefaultAsync(c => c.Id == codeData.Id);
             if (checkCode is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Code does not exist" });
+            if(await db.Codes.AnyAsync(x => x.Code.Equals(codeData.Code)) && !checkCode.Code.Equals(codeData.Code)) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "This code already exists" });
 
             mapper.Map(codeData, checkCode);
             if (await db.SaveChangesAsync() > 0)
             {
-                logger.LogInformation("Code: {code} has been modified", codeData.Code);
+                var cachedCode = await FindCouponInCache(codeData.Id);
+                if(cachedCode is not null) await cacheService.TryReplaceCache<Codes>(CacheType.Codes, cachedCode, checkCode);
+
+                logger.LogInformation("Code: {code} has been modified", codeData.Code);             
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Code has been modified successfuly" });
             }
 
@@ -133,20 +137,22 @@ namespace CodesService_API.Repository
 
         public async Task<ResponseDto> GetAllCodes()
         {
-            var codes = await db.Codes.ToListAsync();
-            var mapped = mapper.Map<List<CodesDataDto>>(codes);
+            var codes = await cacheService.TryGetFromCache<Codes>(CacheType.Codes);
+            var mapped = mapper.Map<List<GetCodesDto>>(codes);
             return new ResponseDto(true, StatusCodes.Status200OK, mapped);
         }
 
-        public async Task<ResponseDto> RemoveCode(int codeId)
+        public async Task<ResponseDto> RemoveCode(string code)
         {
-            var checkCode = await db.Codes.FirstOrDefaultAsync(c => c.Id == codeId);
+            var checkCode = await db.Codes.FirstOrDefaultAsync(c => c.Code == code);
             if (checkCode is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Code does not exist" });
 
             db.Codes.Remove(checkCode);
             if (await db.SaveChangesAsync() > 0)
             {
-                await cacheService.TryRemoveFromCache<Codes>(CacheType.Codes, checkCode);
+                var cachedCode = await FindCouponInCache(code);
+                if(cachedCode is not null) await cacheService.TryRemoveFromCache<Codes>(CacheType.Codes, cachedCode);
+
                 logger.LogInformation("Code: {code} has been removed", checkCode.Code);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Code has been deleted successfuly" });
             }
@@ -183,6 +189,18 @@ namespace CodesService_API.Repository
                     }
                 }
             }
+        }
+
+        private async Task<Codes?> FindCouponInCache(string code){
+            var cached = await cacheService.TryGetFromCache<Codes>(CacheType.Codes);
+            if(cached is null) return null;     
+            return cached.FirstOrDefault(x => x.Code.Equals(code));
+        }
+
+        private async Task<Codes?> FindCouponInCache(Guid codeId){
+            var cached = await cacheService.TryGetFromCache<Codes>(CacheType.Codes);
+            if(cached is null) return null;     
+            return cached.FirstOrDefault(x => x.Id == codeId);
         }
     }
 }

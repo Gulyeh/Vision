@@ -50,6 +50,18 @@ namespace CodesService_API.Services
             return Task.CompletedTask;
         }
 
+        public Task TryReplaceCache<T>(CacheType type, T source, T replacement) where T : class
+        {
+            List<T> value;
+            memoryCache.TryGetValue(type, out value);
+            if(value is not null){
+                value.Remove(source);
+                value.Add(replacement);
+                SetCache<T>(type, value);
+            }
+            return Task.CompletedTask;
+        }
+
         private void SetCache<T>(CacheType type, IEnumerable<T> value)
         {
             var cacheOptions = new MemoryCacheEntryOptions()

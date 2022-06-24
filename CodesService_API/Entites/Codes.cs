@@ -11,7 +11,7 @@ namespace CodesService_API.Entites
         }
 
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public ICollection<CodesUsed> CodesUsed { get; set; }
     }
 }

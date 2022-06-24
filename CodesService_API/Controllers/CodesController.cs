@@ -46,15 +46,15 @@ namespace CodesService_API.Controllers
 
         [Authorize(Roles = StaticData.AdminRole)]
         [HttpDelete]
-        public async Task<ActionResult<ResponseDto>> RemoveCode([FromQuery] int codeId)
+        public async Task<ActionResult<ResponseDto>> RemoveCode([FromQuery] string code)
         {
-            if (codeId <= 0) return BadRequest();
-            return CheckActionResult(await codesRepository.RemoveCode(codeId));
+            if (string.IsNullOrWhiteSpace(code)) return BadRequest();
+            return CheckActionResult(await codesRepository.RemoveCode(code));
         }
 
         [Authorize(Roles = StaticData.AdminRole)]
         [HttpPut("EditCode")]
-        public async Task<ActionResult<ResponseDto>> EditCode([FromBody] CodesDataDto data)
+        public async Task<ActionResult<ResponseDto>> EditCode([FromBody] EditCodeDto data)
         {
             if (!ModelState.IsValid) return BadRequest();
             return CheckActionResult(await codesRepository.EditCode(data));
