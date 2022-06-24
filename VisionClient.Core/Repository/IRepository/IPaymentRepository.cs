@@ -8,5 +8,7 @@ namespace VisionClient.Core.Repository.IRepository
         Task<IEnumerable<PaymentMethod>> GetPaymentMethods();
         Task<IEnumerable<string>> GetNewMethods();
         Task<(bool, string)> AddPaymentMethod(AddPaymentMethodDto data);
+        Task<(bool, string)> DeleteMethod(Guid paymentId);
+        Task<string> UpdatePaymentMethod(EditPaymentDto data);
     }
 }

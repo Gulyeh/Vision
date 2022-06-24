@@ -64,15 +64,18 @@ namespace ProductsService_API.Services
             return value;
         }
 
-        public Task TryReplaceCache<T>(CacheType type, T source, T replacement) where T: BaseProducts
+        public Task TryReplaceCache<T>(CacheType type, T replacement) where T: BaseProducts
         {
             List<T> value;
             memoryCache.TryGetValue(type, out value);
             if(value is null) return Task.CompletedTask;
 
-            value.Remove(source);
-            value.Add(replacement);
-            SetCache<T>(type, value);
+            var data = value.FirstOrDefault(x => x.Id == replacement.Id);
+            if(data is not null){
+                value.Remove(data);
+                value.Add(replacement);
+                SetCache<T>(type, value);
+            }
 
             return Task.CompletedTask;
         }

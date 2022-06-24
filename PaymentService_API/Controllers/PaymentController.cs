@@ -53,5 +53,21 @@ namespace PaymentService_API.Controllers
             if(!ModelState.IsValid) return BadRequest();
             return CheckActionResult(await paymentRepository.AddPaymentMethod(data));
         }
+
+        [HttpDelete("DeletePaymentMethod")]
+        [Authorize(Roles = StaticData.AdminRole)]
+        public async Task<ActionResult<ResponseDto>> DeletePaymentMethod([FromQuery] Guid paymentId)
+        {
+            if(paymentId == Guid.Empty) return BadRequest();
+            return CheckActionResult(await paymentRepository.DeletePaymentMethod(paymentId));
+        }
+
+        [HttpPut("UpdatePaymentMethod")]
+        [Authorize(Roles = StaticData.AdminRole)]
+        public async Task<ActionResult<ResponseDto>> UpdatePaymentMethod([FromBody] EditPaymentMethodDto data)
+        {
+            if(!ModelState.IsValid) return BadRequest();
+            return CheckActionResult(await paymentRepository.UpdatePaymentMethod(data));
+        }
     }
 }

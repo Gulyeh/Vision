@@ -9,6 +9,6 @@ namespace ProductsService_API.Services.IServices
         Task<List<T>> TryGetFromCache<T>(CacheType type) where T : new();
         Task DeleteFromCache<T>(CacheType type, T data) where T : BaseProducts;
         Task<List<Currency>> TryUpdateCurrency();
-        Task TryReplaceCache<T>(CacheType type, T source, T replacement) where T: BaseProducts;
+        Task TryReplaceCache<T>(CacheType type, T replacement) where T: BaseProducts;
     }
 }

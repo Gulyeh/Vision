@@ -103,10 +103,8 @@ namespace ProductsService_API.Repository
             game.PhotoId = data.PhotoId;
             game.Title = data.Name;
             
-            if(await SaveChangesAsync()) {
-                var cachedGame = await FindGame(data.GameId);
-                if(cachedGame is not null) await cacheService.TryReplaceCache<Games>(CacheType.Games, cachedGame, game);
-            }
+            if(await SaveChangesAsync()) await cacheService.TryReplaceCache<Games>(CacheType.Games, game);
+            
         }
 
         public async Task<ResponseDto> EditGame(EditPackageDto data)
@@ -119,8 +117,7 @@ namespace ProductsService_API.Repository
             if (await SaveChangesAsync())
             {
                 logger.LogInformation("Edited Game with ID: {gameId} successfully", data.Id);
-                var cachedGame = await FindGame(data.Id);
-                if(cachedGame is not null) await cacheService.TryReplaceCache<Games>(CacheType.Games, cachedGame, game);
+                await cacheService.TryReplaceCache<Games>(CacheType.Games, game);
                 
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Game has been edited successfuly" });
             }

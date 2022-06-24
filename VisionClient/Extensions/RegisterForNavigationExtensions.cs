@@ -42,6 +42,7 @@ namespace VisionClient.Extensions
             containerRegistry.RegisterForNavigation<EditCurrencyControl>("EditCurrencyControl");
             containerRegistry.RegisterForNavigation<ManageProductsControl>("ManageProductsControl");
             containerRegistry.RegisterForNavigation<EditPackageControl>("EditPackageControl");
+            containerRegistry.RegisterForNavigation<ManagePaymentControl>("ManagePaymentControl");
         }
     }
 }

@@ -47,6 +47,7 @@ namespace VisionClient
             ViewModelLocationProvider.Register(typeof(EditCurrencyControl).ToString(), typeof(EditCurrencyControlViewModel));
             ViewModelLocationProvider.Register(typeof(ManageProductsControl).ToString(), typeof(ManageProductsControlViewModel));
             ViewModelLocationProvider.Register(typeof(EditPackageControl).ToString(), typeof(EditPackageControlViewModel));
+            ViewModelLocationProvider.Register(typeof(ManagePaymentControl).ToString(), typeof(ManagePaymentControlViewModel));
         }
     }
 }

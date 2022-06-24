@@ -7,5 +7,6 @@ namespace PaymentService_API.Services.IServices
         Task AddMethodsToCache(PaymentMethods data);
         Task<IEnumerable<PaymentMethods>> GetMethodsFromCache();
         Task RemoveMethodsFromCache(PaymentMethods data);
+        Task ReplacePaymentMethod(PaymentMethods replacement);
     }
 }

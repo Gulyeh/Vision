@@ -24,6 +24,18 @@ namespace VisionClient.Core.Services
             return null;
         }
 
+        public async Task<ResponseDto?> DeletePaymentMethod(Guid paymentMethodId)
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.DELETE,
+                ApiUrl = $"{ConnectionData.GatewayUrl}/Payment/DeletePaymentMethod?paymentId={paymentMethodId}"
+            });
+
+            if (response is not null) return response;
+            return null;
+        }
+
         public async Task<ResponseDto> GetNewProviders()
         {
             var response = await SendAsync<ResponseDto>(new ApiRequest()
@@ -42,6 +54,19 @@ namespace VisionClient.Core.Services
             {
                 ApiType = APIType.GET,
                 ApiUrl = $"{ConnectionData.GatewayUrl}/Payment/GetPaymentMethods",
+            });
+
+            if (response is not null) return response;
+            return new ResponseDto();
+        }
+
+        public async Task<ResponseDto?> UpdatePaymentMethod(EditPaymentDto data)
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.PUT,
+                ApiUrl = $"{ConnectionData.GatewayUrl}/Payment/UpdatePaymentMethod",
+                Data = data
             });
 
             if (response is not null) return response;

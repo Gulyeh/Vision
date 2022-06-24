@@ -22,6 +22,13 @@ namespace VisionClient.Core.Repository
             return (response.isSuccess, ResponseToJsonHelper.GetJson(response));
         }
 
+        public async Task<(bool, string)> DeleteMethod(Guid paymentId)
+        {
+            var response = await paymentService.DeletePaymentMethod(paymentId);
+            if (response is null) throw new Exception();
+            return (response.isSuccess, ResponseToJsonHelper.GetJson(response));
+        }
+
         public async Task<IEnumerable<string>> GetNewMethods()
         {
             var newMethods = await paymentService.GetNewProviders();
@@ -32,6 +39,13 @@ namespace VisionClient.Core.Repository
         {
             var methods = await paymentService.GetPaymentMethods();
             return ResponseToJsonHelper.GetJson<List<PaymentMethod>>(methods);
+        }
+
+        public async Task<string> UpdatePaymentMethod(EditPaymentDto data)
+        {
+            var response = await paymentService.UpdatePaymentMethod(data);
+            if (response is null) throw new Exception();
+            return ResponseToJsonHelper.GetJson(response);
         }
     }
 }

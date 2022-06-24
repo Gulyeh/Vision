@@ -112,7 +112,7 @@
                          CommandParameter="ManageProductsControl"/>
                 <RadioButton Content="Manage Pay. Methods" 
                          Command="{Binding AdminPanelContentCommand}"
-                         CommandParameter="ManageNewsControl"/>
+                         CommandParameter="ManagePaymentControl"/>
                 <RadioButton Content="Manage Coupon Codes" 
                          Command="{Binding AdminPanelContentCommand}"
                          CommandParameter="ManageNewsControl"/>

@@ -58,5 +58,21 @@ namespace PaymentService_API.Services
 
             memoryCache.Set(cacheName, value, cacheOptions);
         }
+
+        public Task ReplacePaymentMethod(PaymentMethods replacement){
+            List<PaymentMethods> value;
+            memoryCache.TryGetValue(cacheName, out value);
+            if (value is null) return Task.CompletedTask;
+
+            var data = value.FirstOrDefault(x => x.Id == replacement.Id);
+            if(data is not null)
+            {
+                value.Remove(data);
+                value.Add(replacement);
+                SetCache(value);
+            }
+            
+            return Task.CompletedTask;
+        }
     }
 }

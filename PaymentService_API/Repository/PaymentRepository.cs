@@ -78,6 +78,29 @@ namespace PaymentService_API.Repository
             logger.LogInformation("Created Payment for Order with ID: {orderId}", data.OrderId);
         }
 
+        public async Task<ResponseDto> DeletePaymentMethod(Guid paymentId)
+        {
+            var paymentMethod = await db.PaymentMethods.FirstOrDefaultAsync(x => x.Id == paymentId);
+            if(paymentMethod is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Payment method does not exist" });
+
+            db.PaymentMethods.Remove(paymentMethod);
+            if(await db.SaveChangesAsync() > 0){
+                var cached = await cacheService.GetMethodsFromCache();
+                if(cached is not null && cached.Any()){
+                    var method = cached.FirstOrDefault(x => x.Id == paymentId);
+                    if(method is not null) await cacheService.RemoveMethodsFromCache(method);
+                }
+
+                await uploadService.DeletePhoto(paymentMethod.PhotoId);
+
+                logger.LogInformation("Payment method with ID: {x} - has been deleted", paymentId);
+                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Payment method has been deleted" });
+            }
+
+            logger.LogInformation("Payment method with ID: {x} - could not be deleted", paymentId);
+            return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Payment method could not be deleted" });
+        }
+
         public async Task<IEnumerable<string>> GetNewProviders()
         {
             var usedProviders = await cacheService.GetMethodsFromCache();
@@ -133,6 +156,34 @@ namespace PaymentService_API.Repository
             {
                 return paymentUrlData;
             }
+        }
+
+        public async Task<ResponseDto> UpdatePaymentMethod(EditPaymentMethodDto data)
+        {
+            string oldPhotoId = string.Empty;
+
+            var payment = await db.PaymentMethods.FirstOrDefaultAsync(x => x.Id == data.Id);
+            if(payment is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Payment method does not exist" });
+            
+            mapper.Map(data, payment);
+
+            if(!string.IsNullOrWhiteSpace(data.Photo)){
+                var results = await uploadService.UploadPhoto(data.Photo);
+                oldPhotoId = payment.PhotoId;
+                payment.PhotoId = results.PublicId;
+                payment.PhotoUrl = results.SecureUrl.AbsoluteUri;          
+            }
+
+            if(await db.SaveChangesAsync() > 0){
+                if(!string.IsNullOrWhiteSpace(oldPhotoId)) await uploadService.DeletePhoto(oldPhotoId);
+                await cacheService.ReplacePaymentMethod(payment);
+
+                logger.LogInformation("Payment method with ID: {x} - has been edited successfully", data.Id);
+                return new ResponseDto(true, StatusCodes.Status200OK, new[] {"Payment method has been edited successfully"});
+            }
+
+            logger.LogInformation("Method: {x} - could not be edited", data.Id);
+            return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] {"Method could not be edited"});
         }
     }
 }

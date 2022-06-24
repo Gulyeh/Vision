@@ -11,7 +11,8 @@ namespace PaymentService_API
         public MapperConfig()
         {
             CreateMap<PaymentMessage, Payment>();
-            CreateMap<PaymentMethods, PaymentMethodsDto>();
+            CreateMap<EditPaymentMethodDto, PaymentMethods>();
+            CreateMap<PaymentMethods, PaymentMethodsDto>().ForMember(x => x.Title, src => src.MapFrom(z => z.Provider.ToString()));
             CreateMap<AddPaymentMethodDto, PaymentMethods>()
                 .ForMember(x => x.Provider, src => src.Ignore())
                 .ForMember(x => x.PhotoId, src => src.Ignore())

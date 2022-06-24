@@ -12,5 +12,7 @@ namespace PaymentService_API.Repository.IRepository
         Task<ResponseDto> PaymentCompleted(string sessionId, PaymentStatus status, string Access_Token);
         Task<IEnumerable<string>> GetNewProviders();
         Task<ResponseDto> AddPaymentMethod(AddPaymentMethodDto data);
+        Task<ResponseDto> DeletePaymentMethod(Guid paymentId);
+        Task<ResponseDto> UpdatePaymentMethod(EditPaymentMethodDto data);
     }
 }
