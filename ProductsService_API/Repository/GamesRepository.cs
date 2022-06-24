@@ -84,6 +84,9 @@ namespace ProductsService_API.Repository
 
             if (await SaveChangesAsync()) {
                 foreach(var product in game.Products) await uploadService.DeletePhoto(product.PhotoId);
+                var cachedGame = await FindGame(gameId);
+                if(cachedGame is not null) await cacheService.DeleteFromCache<Games>(CacheType.Games, cachedGame);
+
                 logger.LogInformation("Deleted Game with ID: {gameId}", gameId);
                 return true;  
             }                
@@ -93,29 +96,36 @@ namespace ProductsService_API.Repository
         }
 
         public async Task UpdateGameData(GameProductData data){
-            var game = await db.Games.FirstOrDefaultAsync(x => x.GameId == data.GameId);
+            var game = await db.Games.Include(x => x.Products).FirstOrDefaultAsync(x => x.GameId == data.GameId);
             if (game is null) return;
 
             game.PhotoUrl = data.PhotoUrl;
             game.PhotoId = data.PhotoId;
             game.Title = data.Name;
-            await SaveChangesAsync();
+            
+            if(await SaveChangesAsync()) {
+                var cachedGame = await FindGame(data.GameId);
+                if(cachedGame is not null) await cacheService.TryReplaceCache<Games>(CacheType.Games, cachedGame, game);
+            }
         }
 
-        public async Task<ResponseDto> EditGame(GamesDto data)
+        public async Task<ResponseDto> EditGame(EditPackageDto data)
         {
-            var game = await db.Games.FirstOrDefaultAsync(x => x.GameId == data.GameId);
+            var game = await db.Games.Include(x => x.Products).FirstOrDefaultAsync(x => x.GameId == data.Id);
             if (game is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game does not exist" });
 
             mapper.Map(data, game);
 
             if (await SaveChangesAsync())
             {
-                logger.LogInformation("Edited Game with ID: {gameId} successfully", data.GameId);
+                logger.LogInformation("Edited Game with ID: {gameId} successfully", data.Id);
+                var cachedGame = await FindGame(data.Id);
+                if(cachedGame is not null) await cacheService.TryReplaceCache<Games>(CacheType.Games, cachedGame, game);
+                
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Game has been edited successfuly" });
             }
 
-            logger.LogError("Could not edit Game with ID: {gameId}", data.GameId);
+            logger.LogError("Could not edit Game with ID: {gameId}", data.Id);
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not edit game" });
         }
 

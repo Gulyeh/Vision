@@ -7,16 +7,22 @@ using VisionClient.Core.Helpers;
 
 namespace VisionClient.Core.Dtos
 {
-    public class AddCurrencyDto : NotifyPropertyChanged
+    public class EditPackageDto : NotifyPropertyChanged
     {
-        public AddCurrencyDto()
+        public EditPackageDto()
         {
             Title = string.Empty;
             Details = string.Empty;
+            Photo = string.Empty;
         }
 
+        public Guid Id { get; set; }
+        public Guid GameId { get; set; }
         public string Title { get; set; }
+        public string Details { get; set; }
+        public string Photo { get; set; }
         public bool IsAvailable { get; set; }
+
         private decimal price;
         public decimal Price
         {
@@ -39,9 +45,7 @@ namespace VisionClient.Core.Dtos
                 OnPropertyChanged();
             }
         }
-        public string Details { get; set; }
-        public int Amount { get; set; }
 
-        public bool Validator() => !string.IsNullOrWhiteSpace(Title) && Price > 0 && Amount > 0 && Discount <= 100 && Discount >= 0;
+        public bool Validator() => Id != Guid.Empty && !string.IsNullOrEmpty(Title) && !string.IsNullOrEmpty(Details) && Price > 0 && Discount <= 100 && Discount >= 0;
     }
 }

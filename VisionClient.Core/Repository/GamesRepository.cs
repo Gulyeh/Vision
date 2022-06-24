@@ -123,5 +123,19 @@ namespace VisionClient.Core.Repository
             if (response is null) throw new Exception();
             return (response.isSuccess, ResponseToJsonHelper.GetJson(response));
         }
+
+        public async Task<(bool, string)> DeleteProduct(Guid productId, Guid gameId)
+        {
+            var response = await gamesService.DeletePackage(productId, gameId);
+            if (response is null) throw new Exception();
+            return (response.isSuccess, ResponseToJsonHelper.GetJson(response));
+        }
+
+        public async Task<(bool, string)> EditPackage(EditPackageDto data)
+        {
+            var response = await gamesService.EditPackage(data);
+            if (response is null) throw new Exception();
+            return (response.isSuccess, ResponseToJsonHelper.GetJson(response));
+        }
     }
 }

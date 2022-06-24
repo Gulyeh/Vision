@@ -17,6 +17,9 @@ namespace ProductsService_API
             CreateMap<NewProductDto, Products>();
             CreateMap<AddCurrencyDto, Currency>();
             CreateMap<EditCurrencyDto, Currency>();
+            CreateMap<EditPackageDto, Games>().ForMember(x => x.Id, src => src.Ignore())
+                .ForMember(x => x.GameId, src => src.Ignore());
+            CreateMap<EditPackageDto, Products>();
         }
     }
 }

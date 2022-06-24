@@ -1,6 +1,7 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using ProdcutsService_API.RabbitMQSender;
 using ProductsService_API.DbContexts;
 using ProductsService_API.Dtos;
 using ProductsService_API.Entites;
@@ -15,13 +16,14 @@ namespace ProductsService_API.Repository
         private readonly ApplicationDbContext db;
         private readonly IMapper mapper;
         private readonly IUploadService uploadService;
+        private readonly IRabbitMQSender rabbitMQSender;
         private readonly ICacheService cacheService;
         private readonly IGameDataService gameDataService;
         private readonly ILogger<ProductsRepository> logger;
         private readonly IGetCachedGames getCachedGames;
         private readonly IGameAccessService gameAccessService;
 
-        public ProductsRepository(ApplicationDbContext db, IMapper mapper, IUploadService uploadService,
+        public ProductsRepository(ApplicationDbContext db, IMapper mapper, IUploadService uploadService, IRabbitMQSender rabbitMQSender,
             ICacheService cacheService, IGameDataService gameDataService, ILogger<ProductsRepository> logger, IGetCachedGames getCachedGames, IGameAccessService gameAccessService)
         {
             this.getCachedGames = getCachedGames;
@@ -29,6 +31,7 @@ namespace ProductsService_API.Repository
             this.db = db;
             this.mapper = mapper;
             this.uploadService = uploadService;
+            this.rabbitMQSender = rabbitMQSender;
             this.cacheService = cacheService;
             this.gameDataService = gameDataService;
             this.logger = logger;
@@ -55,12 +58,7 @@ namespace ProductsService_API.Repository
                 game.Products?.Add(mapped);
                 if (await SaveChangesAsync())
                 {                
-                    var cachedGame = await cacheService.TryGetFromCache<Games>(CacheType.Games);
-                    if(cachedGame is not null){
-                        var gameFound = cachedGame.FirstOrDefault(x => x.GameId == data.GameId);
-                        if(gameFound is not null) await cacheService.TryReplaceCache<Games>(CacheType.Games, gameFound, game);
-                    }
-                    
+                    await ReplaceGameProduct(data.GameId, game);                  
                     logger.LogInformation("Added Product to Game with ID: {gameId} for purchase successfully", data.GameId);
                     return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Product has been added successfuly" });
                 }
@@ -75,13 +73,17 @@ namespace ProductsService_API.Repository
         {
             var game = await db.Games.Include(x => x.Products).FirstOrDefaultAsync(x => x.GameId == gameId);
             if (game is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game does not exist" });
-            var product = game.Products?.FirstOrDefault(x => x.Id == productId);
+            var product = game.Products.FirstOrDefault(x => x.Id == productId);
             if (product is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Product does not exist" });
 
-            game.Products?.Remove(product);
+            game.Products.Remove(product);
 
             if (await SaveChangesAsync())
             {
+                await uploadService.DeletePhoto(product.PhotoId);
+                await ReplaceGameProduct(gameId, game);
+                rabbitMQSender.SendMessage(productId, "DeleteProductAccessQueue");
+
                 logger.LogInformation("Deleted Product with ID: {productId} from Game with ID: {gameId} successfully", productId, gameId);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Product has been removed successfuly" });
             }
@@ -90,13 +92,13 @@ namespace ProductsService_API.Repository
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not remove product" });
         }
 
-        public async Task<ResponseDto> EditProduct(ProductsDto data)
+        public async Task<ResponseDto> EditProduct(EditPackageDto data)
         {
             var oldPhotoId = string.Empty;
 
             var game = await db.Games.Include(x => x.Products).FirstOrDefaultAsync(x => x.GameId == data.GameId);
             if (game is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game does not exist" });
-            var product = game.Products?.FirstOrDefault(x => x.Id == data.Id);
+            var product = game.Products.FirstOrDefault(x => x.Id == data.Id);
             if (product is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Product does not exist" });
 
             mapper.Map(data, product);
@@ -115,6 +117,10 @@ namespace ProductsService_API.Repository
             if (await SaveChangesAsync())
             {
                 if (!string.IsNullOrEmpty(oldPhotoId)) await uploadService.DeletePhoto(oldPhotoId);
+
+                var newGame = await db.Games.Include(x => x.Products).FirstOrDefaultAsync(x => x.GameId == data.GameId);
+                if(newGame is not null) await ReplaceGameProduct(data.GameId, newGame);
+
                 logger.LogInformation("Edited Product with ID: {productId} in Game with ID: {gameId} successfully", data.Id, data.GameId);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Product has been edited successfuly" });
             }
@@ -130,7 +136,7 @@ namespace ProductsService_API.Repository
             var game = getGamesCache.FirstOrDefault(x => x.GameId == gameId);
             if (game is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game does not exist" });
 
-            if (game.Products is not null)
+            if (game.Products.Any())
             {
                 var product = game.Products.FirstOrDefault(x => x.Id == productId);
 
@@ -167,6 +173,14 @@ namespace ProductsService_API.Repository
         {
             if (await db.SaveChangesAsync() > 0) return true;
             return false;
+        }
+
+        private async Task ReplaceGameProduct(Guid gameId, Games Replacement){
+            var cachedGame = await getCachedGames.GetGames();
+            if(cachedGame is not null){
+                var gameFound = cachedGame.FirstOrDefault(x => x.GameId == gameId);
+                if(gameFound is not null) await cacheService.TryReplaceCache<Games>(CacheType.Games, gameFound, Replacement);
+            }
         }
     }
 }

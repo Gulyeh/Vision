@@ -8,7 +8,7 @@ namespace ProductsService_API.Repository.IRepository
     {
         Task AddGame(NewProductDto data);
         Task<bool> DeleteGame(Guid gameId);
-        Task<ResponseDto> EditGame(GamesDto data);
+        Task<ResponseDto> EditGame(EditPackageDto data);
         Task<ResponseDto> GetGame(Guid gameId, string Access_Token);
         Task UpdateGameData(GameProductData data);
         Task<Games?> FindGame(Guid gameId);

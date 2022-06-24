@@ -194,5 +194,14 @@ namespace GameAccessService_API.Repository
                 await cacheService.TryUpdateCache<UserAccess>(CacheType.GameAccess);
             }        
         }
+
+        public async Task RemoveProductAccess(Guid productId)
+        {
+            var products = await db.UsersProducts.Where(x => x.ProductId == productId).ToListAsync();
+            if(products is null || !products.Any()) return;
+            
+            db.UsersProducts.RemoveRange(products);
+            if(await db.SaveChangesAsync() > 0) await cacheService.TryUpdateCache<UserProducts>(CacheType.OwnProduct);
+        }
     }
 }

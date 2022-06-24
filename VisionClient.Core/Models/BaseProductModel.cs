@@ -38,8 +38,8 @@ namespace VisionClient.Core.Models
             }
         }
         public bool IsAvailable { get; set; }
-        private int? discount;
-        public int? Discount
+        private int discount;
+        public int Discount
         {
             get => discount;
             set
@@ -56,7 +56,7 @@ namespace VisionClient.Core.Models
             if (Discount > 0)
             {
                 OldPrice = Price;
-                Price = Math.Round(Price - (Price * (decimal)Discount / 100), 2);
+                Price = Math.Round(Price - (Price * Discount / 100), 2);
             }
         }
     }

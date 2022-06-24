@@ -81,7 +81,13 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Update="Views\AdminPanel\ManageControls\EditPackageControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\AdminPanel\ManageControls\ManageGamesControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\AdminPanel\ManageControls\ManageProductsControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\Dialogs\PurchaseProgressControl.xaml.cs">
@@ -106,7 +112,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Page Update="Views\AdminPanel\ManageControls\EditPackageControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Views\AdminPanel\ManageControls\ManageGamesControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\AdminPanel\ManageControls\ManageProductsControl.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>

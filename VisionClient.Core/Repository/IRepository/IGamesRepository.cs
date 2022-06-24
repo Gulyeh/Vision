@@ -18,5 +18,7 @@ namespace VisionClient.Core.Repository.IRepository
         Task<(bool, string)> DeleteNews(Guid gameId, Guid newsId);
         Task<(bool, string)> EditNews(EditNewsDto data);
         Task<(bool, string)> DeleteGame(Guid gameId);
+        Task<(bool, string)> DeleteProduct(Guid productId, Guid gameId);
+        Task<(bool, string)> EditPackage(EditPackageDto data);
     }
 }

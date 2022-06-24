@@ -53,6 +53,7 @@ namespace VisionClient.Core.Dtos
         public RequirementsModel Requirements { get; set; }
         public ProductInfoModel Informations { get; set; }
 
-        public bool Validation() => !string.IsNullOrEmpty(Name) && Informations.Validation() && Requirements.Validation() && Price > 0;      
+        public bool Validation() => !string.IsNullOrEmpty(Name) && Informations.Validation() && Requirements.Validation() 
+            && Price > 0 && !string.IsNullOrEmpty(Details) && Discount >= 0 && Discount <= 100;      
     }
 }

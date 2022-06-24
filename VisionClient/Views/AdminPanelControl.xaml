@@ -109,7 +109,7 @@
                          CommandParameter="ManageCurrencyControl"/>
                 <RadioButton Content="Manage Packages" 
                          Command="{Binding AdminPanelContentCommand}"
-                         CommandParameter="ManagePackagesControl"/>
+                         CommandParameter="ManageProductsControl"/>
                 <RadioButton Content="Manage Pay. Methods" 
                          Command="{Binding AdminPanelContentCommand}"
                          CommandParameter="ManageNewsControl"/>

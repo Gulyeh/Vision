@@ -159,5 +159,34 @@ namespace VisionClient.Core.Services
             if (response is not null) return response;
             return null;
         }
+
+        public async Task<ResponseDto?> DeletePackage(Guid packageId, Guid gameId)
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.DELETE,
+                ApiUrl = $"{ConnectionData.GatewayUrl}/products/DeleteProduct?gameId={gameId}&productId={packageId}"
+            });
+
+            if (response is not null) return response;
+            return null;
+        }
+
+        public async Task<ResponseDto?> EditPackage(EditPackageDto data)
+        {
+            string url = data.GameId == Guid.Empty ?
+                $"{ConnectionData.GatewayUrl}/games/EditProductGame" :
+                $"{ConnectionData.GatewayUrl}/products/EditProduct";
+
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.PUT,
+                ApiUrl = url,
+                Data = data
+            });
+
+            if (response is not null) return response;
+            return null;
+        }
     }
 }

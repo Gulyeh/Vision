@@ -281,7 +281,10 @@ namespace VisionClient.ViewModels
         private async Task GetProducts()
         {
             EnabledProducts = true;
+            MainButtonEnabled = true;
+
             GameProducts = await gamesRepository.GetProducts(GameModel.Id);
+            if (!GameProducts.IsAvailable && !GameProducts.IsPurchased) MainButtonEnabled = false;
             if (!GameProducts.IsPurchased) EnabledProducts = false;
             if (GameProducts.GameId == Guid.Empty) throw new Exception();
         }

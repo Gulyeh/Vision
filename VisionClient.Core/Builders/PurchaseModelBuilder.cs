@@ -53,7 +53,7 @@ namespace VisionClient.Core.Builders
             data.OldPrice = oldPrice;
         }
 
-        public void SetDiscount(int? discount)
+        public void SetDiscount(int discount)
         {
             data.Discount = discount;
         }

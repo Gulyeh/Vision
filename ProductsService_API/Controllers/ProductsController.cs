@@ -33,7 +33,7 @@ namespace ProductsService_API.Controllers
 
         [HttpPut("EditProduct")]
         [Authorize(Roles = StaticData.AdminRole)]
-        public async Task<ActionResult<ResponseDto>> EditProduct([FromBody] ProductsDto data)
+        public async Task<ActionResult<ResponseDto>> EditProduct([FromBody] EditPackageDto data)
         {
             if (!ModelState.IsValid) return BadRequest();
             return CheckActionResult(await productsRepository.EditProduct(data));

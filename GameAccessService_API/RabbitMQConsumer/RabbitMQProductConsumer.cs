@@ -11,15 +11,15 @@ using System.Text;
 
 namespace GameAccessService_API.RabbitMQConsumer
 {
-    public class RabbitMQProductsConsumer  : BackgroundService
+    public class RabbitMQProductConsumer  : BackgroundService
     {
-        private readonly ILogger<RabbitMQProductsConsumer> logger;
+        private readonly ILogger<RabbitMQProductConsumer> logger;
         private readonly IServiceScopeFactory scopeFactory;
         private readonly IRabbitMQSender rabbitMQSender;
         private IConnection connection;
         private IModel channel;
 
-        public RabbitMQProductsConsumer (IOptions<RabbitMQSettings> options, ILogger<RabbitMQProductsConsumer> logger, IServiceScopeFactory scopeFactory, IRabbitMQSender rabbitMQSender)
+        public RabbitMQProductConsumer (IOptions<RabbitMQSettings> options, ILogger<RabbitMQProductConsumer> logger, IServiceScopeFactory scopeFactory, IRabbitMQSender rabbitMQSender)
         {
             this.logger = logger;
             this.scopeFactory = scopeFactory;
@@ -35,7 +35,7 @@ namespace GameAccessService_API.RabbitMQConsumer
 
             connection = factory.CreateConnection();
             channel = connection.CreateModel();
-            channel.QueueDeclare(queue: "DeleteGameAccessQueue", false, false, false, arguments: null);
+            channel.QueueDeclare(queue: "DeleteProductAccessQueue", false, false, false, arguments: null);
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -44,27 +44,27 @@ namespace GameAccessService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
-                logger.LogInformation("RabbitMQ Consumed request from queue: DeleteGameAccessQueue");
+                logger.LogInformation("RabbitMQ Consumed request from queue: DeleteProductAccessQueue");
                 var content = Encoding.UTF8.GetString(args.Body.ToArray());
-                DeleteGameDto? gameData = JsonConvert.DeserializeObject<DeleteGameDto>(content);
-                HandleMessage(gameData).GetAwaiter().GetResult();
+                Guid? productId = JsonConvert.DeserializeObject<Guid>(content);
+                HandleMessage(productId).GetAwaiter().GetResult();
 
                 channel.BasicAck(args.DeliveryTag, false);
             };
-            channel.BasicConsume("DeleteGameAccessQueue", false, consumer);
+            channel.BasicConsume("DeleteProductAccessQueue", false, consumer);
 
             return Task.CompletedTask;
         }
 
-        private async Task HandleMessage(DeleteGameDto? data)
+        private async Task HandleMessage(Guid? productId)
         {
-            if (data is not null)
+            if (productId is not null && productId != Guid.Empty)
             {
                 try
                 {
                     using var scope = scopeFactory.CreateScope();
                     var accessRepository = scope.ServiceProvider.GetRequiredService<IAccessRepository>();
-                    await accessRepository.RemoveGameAndProducts(data);
+                    await accessRepository.RemoveProductAccess((Guid)productId);
                     scope.Dispose();
                 }
                 catch (Exception)
