@@ -96,11 +96,11 @@ namespace VisionClient.Core.Repository
             return ResponseToJsonHelper.GetJson(response);
         }
 
-        public async Task<GetPagedNewsDto> GetPagedNews(Guid gameId, int pageNumber)
+        public async Task<List<NewsModel>> GetPagedNews(Guid gameId)
         {
-            var response = await gamesService.GetNews(gameId, pageNumber);
+            var response = await gamesService.GetNews(gameId);
             if(response is null) throw new Exception();
-            return ResponseToJsonHelper.GetJson<GetPagedNewsDto>(response);
+            return ResponseToJsonHelper.GetJson<List<NewsModel>>(response);
         }
 
         public async Task<(bool, string)> DeleteNews(Guid gameId, Guid newsId)

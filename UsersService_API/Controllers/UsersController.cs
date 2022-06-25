@@ -7,6 +7,7 @@ using UsersService_API.Helpers;
 using UsersService_API.Repository.IRepository;
 using UsersService_API.Services.IServices;
 using UsersService_API.SignalR;
+using UsersService_API.Statics;
 
 namespace UsersService_API.Controllers
 {
@@ -43,8 +44,17 @@ namespace UsersService_API.Controllers
         [HttpGet("FindUser")]
         public async Task<ActionResult<ResponseDto>> FindUsers([FromQuery] string containsString)
         {
+            if(string.IsNullOrWhiteSpace(containsString)) return BadRequest();
             var userId = HttpContext.User.GetId();
             return Ok(new ResponseDto(true, StatusCodes.Status200OK, await userRepository.FindUsers(containsString, userId)));
+        }
+
+        [Authorize(Roles = StaticData.AdminRole)]
+        [HttpGet("FindDetailedUser")]
+        public async Task<ActionResult<ResponseDto>> FindDetailedUser([FromQuery] string containsString)
+        {
+            if(string.IsNullOrWhiteSpace(containsString)) return BadRequest();
+            return Ok(new ResponseDto(true, StatusCodes.Status200OK, await userRepository.FindDetailedUsers(containsString)));
         }
 
         [Authorize]

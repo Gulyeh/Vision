@@ -20,15 +20,14 @@ namespace VisionClient.Views.AdminPanel.ManageControls
     /// <summary>
     /// Logika interakcji dla klasy ManageCoinsControl.xaml
     /// </summary>
-    public partial class ManageCurrencyControl : UserControl
+    public partial class ManageUsersControl : UserControl
     {
         double autoHeight;
         GridRowSizingOptions gridRowResizingOptions = new();
-        public ManageCurrencyControl()
+        public ManageUsersControl()
         {
             InitializeComponent();
         }
-
         private void HandlePreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
             HandleScrollingToParent.HandlePreviewMouseWheel(sender, e);

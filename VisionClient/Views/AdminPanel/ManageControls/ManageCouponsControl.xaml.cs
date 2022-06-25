@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using VisionClient.Scrolling;
 
 namespace VisionClient.Views.AdminPanel.ManageControls
 {
@@ -41,6 +42,11 @@ namespace VisionClient.Views.AdminPanel.ManageControls
                     e.Handled = true;
                 }
             }
+        }
+
+        private void HandlePreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            HandleScrollingToParent.HandlePreviewMouseWheel(sender, e);
         }
     }
 }

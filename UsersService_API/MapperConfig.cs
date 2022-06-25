@@ -9,6 +9,7 @@ namespace UsersService_API
         public MapperConfig()
         {
             CreateMap<FriendRequestDto, FriendRequests>();
+            CreateMap<Users, GetDetailedUsersDto>();
             CreateMap<EditableUserDataDto, Users>();
             CreateMap<Users, UserDataDto>();
             CreateMap<Users, GetFriendRequestsDto>();

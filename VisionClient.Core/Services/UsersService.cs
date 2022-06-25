@@ -33,5 +33,16 @@ namespace VisionClient.Core.Services
 
             return response;
         }
+
+        public async Task<ResponseDto?> GetDetailedUsers(string containsString)
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.GET,
+                ApiUrl = $"{ConnectionData.GatewayUrl}/Users/FindDetailedUser?containsString={containsString}",
+            });
+
+            return response;
+        }
     }
 }

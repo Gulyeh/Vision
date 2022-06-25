@@ -14,6 +14,7 @@ namespace UsersService_API.Repository.IRepository
         Task<List<string>> GetUserFriendsOnline(Guid userId);
         Task<List<string>> CheckUserIsOnline(Guid userId, HubTypes hubType);
         Task<IEnumerable<GetUserDto>> FindUsers(string containsString, Guid userId);
+        Task<IEnumerable<GetDetailedUsersDto>> FindDetailedUsers(string containsString);
         Task CreateUser(Guid userId);
         Task<ResponseDto> UserExists(Guid userId);
         Task<ResponseDto> IsUserBlocked(Guid userId, Guid user2Id);

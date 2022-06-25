@@ -131,6 +131,7 @@
                     SelectionMode="None"
                     HeaderRowHeight="30"
                     RowHeight="40"
+                    PreviewMouseWheel="HandlePreviewMouseWheel"
                     QueryRowHeight="dataGrid_QueryRowHeight"
                     ScrollViewer.VerticalScrollBarVisibility="Disabled"
                     ShowRowHeader="False"

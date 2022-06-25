@@ -23,5 +23,7 @@ namespace UsersService_API.Entites
         public int CurrencyValue { get; set; }
         [Required]
         public bool IsDeletedAccount { get; set; }
+        [Required]
+        public bool IsBanned { get; set; }
     }
 }

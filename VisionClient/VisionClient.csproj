@@ -84,7 +84,13 @@
     <Compile Update="Views\AdminPanel\ManageControls\EditCouponControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\AdminPanel\ManageControls\EditUsersControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\AdminPanel\ManageControls\ManageCouponsControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\AdminPanel\ManageControls\ManageUsersControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\AdminPanel\ManageControls\ManageOrdersControl.xaml.cs">
@@ -128,7 +134,15 @@
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="Views\AdminPanel\ManageControls\EditUsersControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Views\AdminPanel\ManageControls\ManageCouponsControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\AdminPanel\ManageControls\ManageUsersControl.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>

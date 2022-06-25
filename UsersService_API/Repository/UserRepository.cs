@@ -169,11 +169,11 @@ namespace UsersService_API.Repository
 
         public async Task<IEnumerable<GetUserDto>> FindUsers(string containsString, Guid userId)
         {
-            IEnumerable<GetUserDto> Users = new List<GetUserDto>();
             var foundUsers = await db.Users.Where(x => x.Username.ToLower().Contains(containsString.ToLower())).Take(25).ToListAsync();
             if (foundUsers.Any(x => x.UserId == userId)) foundUsers.Remove(foundUsers.First(x => x.UserId == userId));
             return mapper.Map<IEnumerable<GetUserDto>>(foundUsers);
         }
+        
 
         public async Task<ResponseDto> UserExists(Guid userId)
         {
@@ -201,6 +201,17 @@ namespace UsersService_API.Repository
 
             if (methodName != null && !string.IsNullOrEmpty(methodName)) logger.LogInformation("Could not save data from {methodName}", methodName);
             return false;
+        }
+
+        public async Task<IEnumerable<GetDetailedUsersDto>> FindDetailedUsers(string containsString)
+        {
+            List<Users> users = new();
+            var tryGuidParse = Guid.TryParse(containsString, out Guid userId);
+            
+            if(tryGuidParse) users = await db.Users.Where(x => x.UserId == userId).OrderBy(x => x.Username).Take(500).ToListAsync();
+            else users = await db.Users.Where(x => x.Username.ToLower().Contains(containsString.ToLower())).OrderBy(x => x.Username).Take(500).ToListAsync();
+
+            return mapper.Map<IEnumerable<GetDetailedUsersDto>>(users);
         }
     }
 }

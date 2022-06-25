@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using VisionClient.Core.Helpers;
 using VisionClient.Core.Models;
 using VisionClient.Core.Repository.IRepository;
 using VisionClient.Core.Services.IServices;
@@ -31,14 +32,14 @@ namespace VisionClient.Core.Repository
         {
             var response = await usersService.FindUser(contains);
             if (response == null) return new List<BaseUserModel>();
+            return ResponseToJsonHelper.GetJson<List<BaseUserModel>>(response);
+        }
 
-            var responseData = response.Response.ToString();
-            if (string.IsNullOrEmpty(responseData)) return new List<BaseUserModel>();
-
-            var json = JsonConvert.DeserializeObject<IEnumerable<BaseUserModel>>(responseData);
-            if (json is null) return new List<BaseUserModel>();
-
-            return json;
+        public async Task<List<DetailedUserModel>> GetDetailedUsers(string containsString)
+        {
+            var response = await usersService.GetDetailedUsers(containsString);
+            if(response is null) throw new Exception();
+            return ResponseToJsonHelper.GetJson<List<DetailedUserModel>>(response);
         }
     }
 }

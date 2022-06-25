@@ -7,7 +7,7 @@ namespace VisionClient.Core.Repository.IRepository
     {
         Task GetGames();
         Task<IEnumerable<NewsModel>> GetNews(Guid gameId);
-        Task<GetPagedNewsDto> GetPagedNews(Guid gameId, int pageNumber);
+        Task<List<NewsModel>> GetPagedNews(Guid gameId);
         Task<GameProductModel> GetProducts(Guid gameId);
         Task<bool> OwnsProduct(Guid productId, Guid gameId);
         Task<BanModel?> CheckGameAccess(Guid gameId);

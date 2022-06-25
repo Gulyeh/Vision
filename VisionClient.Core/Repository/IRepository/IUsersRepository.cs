@@ -6,5 +6,6 @@ namespace VisionClient.Core.Repository.IRepository
     {
         Task<IEnumerable<BaseUserModel>> FindUsers(string contains);
         Task ChangePhoto(string image);
+        Task<List<DetailedUserModel>> GetDetailedUsers(string containsString);
     }
 }

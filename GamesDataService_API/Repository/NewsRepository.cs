@@ -119,7 +119,7 @@ namespace GamesDataService_API.Repository
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not edit news" });
         }
 
-        public async Task<ResponseDto> GetGameNews(Guid gameId, int? pageNumber = null)
+        public async Task<ResponseDto> GetGameNews(Guid gameId)
         {
             IEnumerable<News> news = await cacheService.TryGetFromCache<News>(CacheType.News);
             if (news.Count() == 0)
@@ -128,11 +128,9 @@ namespace GamesDataService_API.Repository
                 foreach (var item in dbNews) await cacheService.TryAddToCache<News>(CacheType.News, item);
                 news = dbNews;
             }
-            IEnumerable<News> gameNews = pageNumber is null ? news.Where(x => x.GameId == gameId).OrderByDescending(x => x.CreatedDate).Take(10) 
-                : news.Where(x => x.GameId == gameId).OrderByDescending(x => x.CreatedDate).Skip(10 * (int)pageNumber).Take(10);
-
-            if(pageNumber is null) return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<NewsDto>>(gameNews));
-            return new ResponseDto(true, StatusCodes.Status200OK, new GetPagedNewsDto(mapper.Map<IEnumerable<NewsDto>>(gameNews)));
+            
+            IEnumerable<News> gameNews = news.Where(x => x.GameId == gameId).OrderByDescending(x => x.CreatedDate).Take(500);
+            return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<NewsDto>>(gameNews));
         }
 
         private async Task<News?> GetNewsFromCache(Guid newsId){

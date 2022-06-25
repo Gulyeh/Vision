@@ -46,12 +46,12 @@ namespace VisionClient.Core.Services
             return response;
         }
 
-        public async Task<ResponseDto?> GetNews(Guid gameId, int? pageNumber = null)
+        public async Task<ResponseDto?> GetNews(Guid gameId)
         {
             var response = await SendAsync<ResponseDto>(new ApiRequest()
             {
                 ApiType = APIType.GET,
-                ApiUrl = $"{ConnectionData.GatewayUrl}/News/GetNews?gameId={gameId}&pageNumber={pageNumber}",
+                ApiUrl = $"{ConnectionData.GatewayUrl}/News/GetNews?gameId={gameId}",
             });
 
             return response;

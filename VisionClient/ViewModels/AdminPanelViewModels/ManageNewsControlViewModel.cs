@@ -31,20 +31,6 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
             }
         }
 
-        private int pageNumber;
-        public int PageNumber
-        {
-            get { return pageNumber; }
-            set { SetProperty(ref pageNumber, value); }
-        }
-
-        private int maxPages;
-        public int MaxPages
-        {
-            get { return maxPages; }
-            set { SetProperty(ref maxPages, value); }
-        }
-
         private Visibility loadingVisibility = Visibility.Collapsed;
         public Visibility LoadingVisibility
         {
@@ -136,13 +122,10 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
             LoadingVisibility = Visibility.Visible;
             try
             {
-                var pagedNews = await gamesRepository.GetPagedNews(SelectedGameId, PageNumber);
-                if(pagedNews.NewsList.Any())
-                {
-                    NewsList.Clear();
-                    foreach(var item in pagedNews.NewsList) NewsList.Add(item);
-                    MaxPages = pagedNews.MaxPages;
-                }
+                NewsList.Clear();
+                var newsList = await gamesRepository.GetPagedNews(SelectedGameId);
+                NewsList.AddRange(newsList);
+
                 LoadingVisibility = Visibility.Collapsed;
             }
             catch (Exception)

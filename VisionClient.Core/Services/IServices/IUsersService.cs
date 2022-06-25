@@ -6,5 +6,6 @@ namespace VisionClient.Core.Services.IServices
     {
         Task<ResponseDto?> FindUser(string contains);
         Task<ResponseDto?> ChangePhoto(string image);
+        Task<ResponseDto?> GetDetailedUsers(string containsString);
     }
 }

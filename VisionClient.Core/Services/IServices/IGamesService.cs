@@ -5,7 +5,7 @@ namespace VisionClient.Core.Services.IServices
     public interface IGamesService
     {
         Task<ResponseDto?> GetGames();
-        Task<ResponseDto?> GetNews(Guid gameId, int? pageNumber = null);
+        Task<ResponseDto?> GetNews(Guid gameId);
         Task<ResponseDto?> GetProducts(Guid gameId);
         Task<ResponseDto?> BoughtPackage(Guid productId, Guid gameId);
         Task<ResponseDto?> CheckGameAccess(Guid gameId);

@@ -15,10 +15,10 @@ namespace GamesDataService_API.Controllers
         }
 
         [HttpGet("GetNews")]
-        public async Task<ActionResult<ResponseDto>> GetGameNews([FromQuery] Guid gameId, [FromQuery] int? pageNumber = null)
+        public async Task<ActionResult<ResponseDto>> GetGameNews([FromQuery] Guid gameId)
         {
             if (gameId == Guid.Empty) return BadRequest();
-            return CheckActionResult(await newsRepository.GetGameNews(gameId, pageNumber));
+            return CheckActionResult(await newsRepository.GetGameNews(gameId));
         }
 
         [HttpPost("AddNews")]

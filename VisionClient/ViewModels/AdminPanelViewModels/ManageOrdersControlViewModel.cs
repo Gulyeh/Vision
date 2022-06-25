@@ -14,13 +14,6 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
 {
     internal class ManageOrdersControlViewModel : BindableBase
     {
-        private Visibility loadingVisibility = Visibility.Collapsed;
-        public Visibility LoadingVisibility
-        {
-            get { return loadingVisibility; }
-            set { SetProperty(ref loadingVisibility, value); }
-        }
-
         private string errorText = string.Empty;
         public string ErrorText
         {
@@ -33,6 +26,13 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
         {
             get { return isButtonEnabled; }
             set { SetProperty(ref isButtonEnabled, value); }
+        }
+
+        private Visibility loadingVisibility = Visibility.Collapsed;
+        public Visibility LoadingVisibility
+        {
+            get { return loadingVisibility; }
+            set { SetProperty(ref loadingVisibility, value); }
         }
 
         private readonly IOrderRepository orderRepository;
@@ -53,7 +53,6 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
             ErrorText = string.Empty;
             if (orderId is null || orderId == Guid.Empty) return;
             IsButtonEnabled = false;
-
             try
             {
                 (bool success, ErrorText) = await orderRepository.ChangeOrderToPaid((Guid)orderId);
@@ -71,6 +70,7 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
         {
             ErrorText = string.Empty;
             if (string.IsNullOrWhiteSpace(orderId)) return;
+            LoadingVisibility = Visibility.Visible;
 
             try
             {
@@ -78,8 +78,11 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
                 var list = await orderRepository.GetOrders(orderId);
                 foreach (var item in list) OrderList.Add(item);
                 ErrorText = $"Found {list.Count} record(s)";
-            }catch (Exception)
+                LoadingVisibility = Visibility.Collapsed;
+            }
+            catch (Exception)
             {
+                LoadingVisibility = Visibility.Collapsed;
                 ErrorText = "Something went wrong";
             }
         }
