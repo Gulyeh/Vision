@@ -124,9 +124,6 @@
                 <RadioButton Content="Manage Orders" 
                          Command="{Binding AdminPanelContentCommand}"
                          CommandParameter="ManageOrdersControl"/>
-                <RadioButton Content="Manage Payments" 
-                         Command="{Binding AdminPanelContentCommand}"
-                         CommandParameter="ManagePaymentsControl"/>
             </StackPanel>
         </ScrollViewer>
         <ContentControl Grid.Column="1" 

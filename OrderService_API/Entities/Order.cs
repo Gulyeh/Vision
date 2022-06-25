@@ -8,6 +8,7 @@ namespace OrderService_API.Entities
         public Order()
         {
             Title = string.Empty;
+            CouponCode = string.Empty;
         }
 
         [Key]
@@ -27,7 +28,7 @@ namespace OrderService_API.Entities
         [Required]
         public DateTime OrderDate { get; private init; } = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
         public DateTime? PaymentDate { get; set; }
-        public string? CuponCode { get; set; }
+        public string CouponCode { get; set; }
 
     }
 }

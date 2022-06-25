@@ -8,7 +8,7 @@ namespace OrderService_API.Processors
 {
     public interface IOrderTypeProcessor
     {
-        IOrder? CreateOrder(OrderType orderType);
+        IOrder? GetOrderOfType(OrderType orderType);
     }
 
     public class OrderTypeProcessor : IOrderTypeProcessor
@@ -24,7 +24,7 @@ namespace OrderService_API.Processors
             this.orderRepository = orderRepository;
         }
 
-        public IOrder? CreateOrder(OrderType orderType)
+        public IOrder? GetOrderOfType(OrderType orderType)
         {
             return orderType switch
             {

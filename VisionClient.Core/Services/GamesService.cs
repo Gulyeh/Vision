@@ -32,7 +32,6 @@ namespace VisionClient.Core.Services
                 ApiUrl = $"{ConnectionData.GatewayUrl}/Access/OwnsProduct?productId={productId}&gameId={gameId}",
             });
 
-            if (response is null) return null;
             return response;
         }
 
@@ -44,7 +43,6 @@ namespace VisionClient.Core.Services
                 ApiUrl = $"{ConnectionData.GatewayUrl}/Games/GetGames",
             });
 
-            if (response is null) return null;
             return response;
         }
 
@@ -56,8 +54,7 @@ namespace VisionClient.Core.Services
                 ApiUrl = $"{ConnectionData.GatewayUrl}/News/GetNews?gameId={gameId}&pageNumber={pageNumber}",
             });
 
-            if (response is not null) return response;
-            return null;
+            return response;
         }
 
         public async Task<ResponseDto?> GetProducts(Guid gameId)
@@ -68,8 +65,7 @@ namespace VisionClient.Core.Services
                 ApiUrl = $"{ConnectionData.GatewayUrl}/games/getproductgame?gameId={gameId}",
             });
 
-            if (response is not null) return response;
-            return null;
+            return response;
         }
 
         public async Task<ResponseDto?> CheckGameAccess(Guid gameId)
@@ -80,8 +76,7 @@ namespace VisionClient.Core.Services
                 ApiUrl = $"{ConnectionData.GatewayUrl}/access/CheckGameAccess?gameId={gameId}",
             });
 
-            if (response is not null) return response;
-            return null;
+            return response;
         }
 
         public async Task<ResponseDto?> AddNews(AddNewsDto data)
@@ -93,8 +88,7 @@ namespace VisionClient.Core.Services
                 Data = data
             });
 
-            if (response is not null) return response;
-            return null;
+            return response;
         }
 
         public async Task<ResponseDto?> AddGamePackage(AddPackageDto data)
@@ -106,8 +100,7 @@ namespace VisionClient.Core.Services
                 Data = data
             });
 
-            if (response is not null) return response;
-            return null;
+            return response;
         }
 
         public async Task<ResponseDto?> EditGame(EditGameDto data)
@@ -119,8 +112,7 @@ namespace VisionClient.Core.Services
                 Data = data
             });
 
-            if (response is not null) return response;
-            return null;
+            return response;
         }
 
         public async Task<ResponseDto?> DeleteNews(Guid gameId, Guid newsId)
@@ -131,8 +123,7 @@ namespace VisionClient.Core.Services
                 ApiUrl = $"{ConnectionData.GatewayUrl}/news/deletenews?newsId={newsId}&gameId={gameId}"
             });
 
-            if (response is not null) return response;
-            return null;
+            return response;
         }
 
         public async Task<ResponseDto?> EditNews(EditNewsDto data)
@@ -144,8 +135,7 @@ namespace VisionClient.Core.Services
                 Data = data
             });
 
-            if (response is not null) return response;
-            return null;
+            return response;
         }
 
         public async Task<ResponseDto?> DeleteGame(Guid gameId)
@@ -156,8 +146,7 @@ namespace VisionClient.Core.Services
                 ApiUrl = $"{ConnectionData.GatewayUrl}/games/deletegame?gameId={gameId}"
             });
 
-            if (response is not null) return response;
-            return null;
+            return response;
         }
 
         public async Task<ResponseDto?> DeletePackage(Guid packageId, Guid gameId)
@@ -168,8 +157,7 @@ namespace VisionClient.Core.Services
                 ApiUrl = $"{ConnectionData.GatewayUrl}/products/DeleteProduct?gameId={gameId}&productId={packageId}"
             });
 
-            if (response is not null) return response;
-            return null;
+            return response;
         }
 
         public async Task<ResponseDto?> EditPackage(EditPackageDto data)
@@ -185,8 +173,7 @@ namespace VisionClient.Core.Services
                 Data = data
             });
 
-            if (response is not null) return response;
-            return null;
+            return response;
         }
     }
 }

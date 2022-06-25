@@ -52,7 +52,7 @@ namespace OrderService_API.SignalR
             if (string.IsNullOrEmpty(token) || string.IsNullOrWhiteSpace(productId) || string.IsNullOrEmpty(paymentMethodId) || !isParsedOrder) throw new HubException("Please provide valid data");
             if (order == OrderType.Product && string.IsNullOrWhiteSpace(gameId)) throw new HubException("Please provide a gameId");
 
-            var orderCreated = orderTypeProcessor.CreateOrder(order);
+            var orderCreated = orderTypeProcessor.GetOrderOfType(order);
             if (orderCreated is null) throw new HubException("Wrong orderType");
 
             var orderData = new CreateOrderData(productId, userId, coupon, userEmail, token, order, gameId, paymentMethodId);

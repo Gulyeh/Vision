@@ -40,7 +40,7 @@ namespace OrderService_API.Repository
 
             var newOrder = mapper.Map<Order>(data);
             newOrder.Title = product.Title;
-            newOrder.CuponCode = couponDiscount.CodeValue > 0 ? data.Coupon : string.Empty;
+            newOrder.CouponCode = data.Coupon;
 
             var messageBuilder = new PaymentMessageBuilder(product.Price, product.Discount, couponDiscount);
             messageBuilder.SetEmail(data.Email);
@@ -60,21 +60,6 @@ namespace OrderService_API.Repository
             return null;
         }
 
-        public async Task<ResponseDto> DeleteOrder(Guid orderId)
-        {
-            var order = await db.Orders.FirstOrDefaultAsync(x => x.Id == orderId);
-            if (order is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Order not found" });
-
-            db.Orders.Remove(order);
-            if (await SaveChangesAsync())
-            {
-                logger.LogInformation("Deleted Order with Id: {orderId} successfully", orderId);
-                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Deleted order successfuly" });
-            }
-            logger.LogInformation("Could not delete an Order with ID: {orderId}", orderId);
-            return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not delete order" });
-        }
-
         public async Task<OrderDto> GetOrder(Guid orderId)
         {
             var order = await db.Orders.FirstOrDefaultAsync(x => x.Id == orderId);
@@ -82,34 +67,34 @@ namespace OrderService_API.Repository
             return mapper.Map<OrderDto>(order);
         }
 
-        public async Task<ResponseDto> GetOrders(Guid productId, Guid? userId = null)
+        public async Task<ResponseDto> GetUserOrders(Guid userId)
         {
-            IEnumerable<Order> order;
-            if (userId is null) order = await db.Orders.Where(x => x.ProductId == productId).ToListAsync();
-            else order = await db.Orders.Where(x => x.ProductId == productId && x.UserId == userId).ToListAsync();
-
-            if (order is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Could not find orders" });
-
-            var mapped = mapper.Map<IEnumerable<OrderDto>>(order);
-            return new ResponseDto(true, StatusCodes.Status200OK, mapped);
+            var orders = await db.Orders.Where(x => x.UserId == userId).ToListAsync();
+            return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<OrderDto>>(orders));
         }
 
-        public async Task ChangeOrderStatus(PaymentCompleted data)
-        {
-            var order = await db.Orders.FirstOrDefaultAsync(x => x.Id == data.OrderId);
+        public async Task<bool> ChangeOrderStatus(Guid orderId, bool isPaid, Guid? paymentId = null){
+            var order = await db.Orders.FirstOrDefaultAsync(x => x.Id == orderId);
             if (order is not null)
             {
-                order.Paid = data.IsSuccess;
-                order.PaymentId = data.PaymentId;
+                order.Paid = isPaid;
+                if(paymentId is not null && paymentId != Guid.Empty) order.PaymentId = paymentId;
                 order.PaymentDate = DateTime.Now;
-                await SaveChangesAsync();
+                if(await SaveChangesAsync()) return true;
             }
+            return false;
         }
 
         private async Task<bool> SaveChangesAsync()
         {
             if (await db.SaveChangesAsync() > 0) return true;
             return false;
+        }
+
+        public async Task<ResponseDto> GetOrders(string orderId)
+        {
+             var order = await db.Orders.Where(x => x.Id.ToString().Contains(orderId)).ToListAsync();
+             return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<GetOrdersDto>>(order));
         }
     }
 }

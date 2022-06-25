@@ -8,6 +8,7 @@ namespace OrderService_API.Dtos
         public OrderDto()
         {
             Title = string.Empty;
+            CouponCode = string.Empty;
         }
 
         [Required]
@@ -26,7 +27,7 @@ namespace OrderService_API.Dtos
         [Required]
         public string Title { get; set; }
         public DateTime? PaymentDate { get; set; }
-        public string? CuponCode { get; set; }
+        public string CouponCode { get; set; }
         public Guid? GameId { get; set; }
 
     }

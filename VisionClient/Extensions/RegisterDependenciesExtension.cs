@@ -48,6 +48,8 @@ namespace VisionClient.Extensions
                 s.AddSingleton<IMessageService_Hubs, MessageService_Hubs>();
                 s.AddScoped<ICouponService, CouponService>();
                 s.AddScoped<ICouponRepository, CouponRepository>();
+                s.AddScoped<IOrderService, OrderService>();
+                s.AddScoped<IOrderRepository, OrderRepository>();
             });
         }
     }

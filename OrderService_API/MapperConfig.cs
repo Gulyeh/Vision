@@ -10,6 +10,7 @@ namespace OrderService_API
     {
         public MapperConfig()
         {
+            CreateMap<Order, GetOrdersDto>();
             CreateMap<Order, OrderDto>().ReverseMap();
             CreateMap<CreateOrderData, Order>();
             CreateMap<PaymentMessage, PaymentCompleted>().ForMember(x => x.IsSuccess, y => y.MapFrom(src => true));

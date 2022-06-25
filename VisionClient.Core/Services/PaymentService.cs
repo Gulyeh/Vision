@@ -20,8 +20,7 @@ namespace VisionClient.Core.Services
                 Data = data
             });
 
-            if (response is not null) return response;
-            return null;
+            return response;
         }
 
         public async Task<ResponseDto?> DeletePaymentMethod(Guid paymentMethodId)
@@ -32,8 +31,7 @@ namespace VisionClient.Core.Services
                 ApiUrl = $"{ConnectionData.GatewayUrl}/Payment/DeletePaymentMethod?paymentId={paymentMethodId}"
             });
 
-            if (response is not null) return response;
-            return null;
+            return response;
         }
 
         public async Task<ResponseDto> GetNewProviders()
@@ -69,8 +67,7 @@ namespace VisionClient.Core.Services
                 Data = data
             });
 
-            if (response is not null) return response;
-            return new ResponseDto();
+            return response;
         }
     }
 }

@@ -6,7 +6,7 @@ namespace OrderService_API.Helpers
         {
             ProductId = Guid.Parse(productId);
             UserId = userId;
-            Coupon = coupon;
+            Coupon = coupon is null ? string.Empty : coupon;
             Email = email;
             Access_Token = access_Token;
             OrderType = orderType;
@@ -20,7 +20,7 @@ namespace OrderService_API.Helpers
         public Guid ProductId { get; private set; }
         public Guid UserId { get; private set; }
         public Guid PaymentMethodId { get; private set; }
-        public string? Coupon { get; private set; }
+        public string Coupon { get; private set; }
         public string Email { get; private set; }
         public string Access_Token { get; private set; }
         public OrderType OrderType { get; private set; }

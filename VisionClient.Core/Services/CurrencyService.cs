@@ -32,8 +32,7 @@ namespace VisionClient.Core.Services
                 Data = data
             });
 
-            if (response is not null) return response;
-            return null;
+            return response;
         }
 
         public async Task<ResponseDto?> DeletePackage(Guid packageId)
@@ -44,8 +43,7 @@ namespace VisionClient.Core.Services
                 ApiUrl = $"{ConnectionData.GatewayUrl}/currency/deletepackage?packageId={packageId}"
             });
 
-            if (response is not null) return response;
-            return null;
+            return response;
         }
 
         public async Task<ResponseDto?> EditPackage(EditCurrencyDto data)
@@ -57,8 +55,7 @@ namespace VisionClient.Core.Services
                 Data = data
             });
 
-            if (response is not null) return response;
-            return null;
+            return response;
         }
     }
 }

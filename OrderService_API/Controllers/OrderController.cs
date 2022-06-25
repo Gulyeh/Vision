@@ -16,38 +16,27 @@ namespace OrderService_API.Controllers
             this.orderRepository = orderRepository;
         }
 
-        [HttpGet("GetOrder")]
-        [Authorize(Roles = StaticData.AdminRole)]
-        public async Task<ActionResult<ResponseDto>> GetOrder([FromQuery] Guid orderId)
-        {
-            if (orderId == Guid.Empty) return BadRequest();
-            var order = await orderRepository.GetOrder(orderId);
-            if (order is null) return NotFound(new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Order does not exist" }));
-            return Ok(new ResponseDto(true, StatusCodes.Status200OK, order));
-        }
-
         [HttpGet("GetOrders")]
         [Authorize(Roles = StaticData.AdminRole)]
-        public async Task<ActionResult<ResponseDto>> GetOrders([FromQuery] Guid productId)
+        public async Task<ActionResult<ResponseDto>> GetOrders([FromQuery] string orderId)
         {
-            if (productId == Guid.Empty) return BadRequest();
-            return CheckActionResult(await orderRepository.GetOrders(productId));
+            if (string.IsNullOrWhiteSpace(orderId)) return BadRequest();
+            return Ok(await orderRepository.GetOrders(orderId));
         }
 
         [HttpGet("GetUserOrders")]
-        public async Task<ActionResult<ResponseDto>> GetUserOrders([FromQuery] Guid productId)
+        public async Task<ActionResult<ResponseDto>> GetUserOrders()
         {
-            if (productId == Guid.Empty) return BadRequest();
             var userId = User.GetId();
-            return CheckActionResult(await orderRepository.GetOrders(productId, userId));
+            return CheckActionResult(await orderRepository.GetUserOrders(userId));
         }
 
-        [HttpDelete("DeleteOrder")]
+        [HttpPost("ChangeToPaid")]
         [Authorize(Roles = StaticData.AdminRole)]
-        public async Task<ActionResult<ResponseDto>> DeleteOrder([FromQuery] Guid orderId)
-        {
-            if (orderId == Guid.Empty) return BadRequest();
-            return CheckActionResult(await orderRepository.DeleteOrder(orderId));
+        public async Task<ActionResult<ResponseDto>> ChangeToPaid([FromQuery] Guid orderId){
+            if(orderId == Guid.Empty) return BadRequest();
+            if(!await orderRepository.ChangeOrderStatus(orderId, true)) return CheckActionResult(new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not change status" }));
+            return CheckActionResult(new ResponseDto(true, StatusCodes.Status200OK, new[] { "Status has been changed" }));
         }
     }
 }

@@ -7,9 +7,9 @@ namespace OrderService_API.Repository.IRepository
     public interface IOrderRepository
     {
         Task<PaymentMessage?> CreateOrder<T>(CreateOrderData data, T product) where T : BaseProductData;
-        Task<ResponseDto> GetOrders(Guid productId, Guid? userId = null);
+        Task<ResponseDto> GetUserOrders(Guid userId);
+        Task<ResponseDto> GetOrders(string orderId);
         Task<OrderDto> GetOrder(Guid orderId);
-        Task<ResponseDto> DeleteOrder(Guid orderId);
-        Task ChangeOrderStatus(PaymentCompleted data);
+        Task<bool> ChangeOrderStatus(Guid orderId, bool isPaid, Guid? paymentId = null);
     }
 }

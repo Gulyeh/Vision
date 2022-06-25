@@ -50,6 +50,7 @@ namespace VisionClient
             ViewModelLocationProvider.Register(typeof(ManagePaymentControl).ToString(), typeof(ManagePaymentControlViewModel));
             ViewModelLocationProvider.Register(typeof(ManageCouponsControl).ToString(), typeof(ManageCouponsControlViewModel));
             ViewModelLocationProvider.Register(typeof(EditCouponControl).ToString(), typeof(EditCouponControlViewModel));
+            ViewModelLocationProvider.Register(typeof(ManageOrdersControl).ToString(), typeof(ManageOrdersControlViewModel));
         }
     }
 }

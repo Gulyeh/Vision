@@ -20,8 +20,7 @@ namespace VisionClient.Core.Services
                 Data = data
             });
 
-            if (response is not null) return response;
-            return null;
+            return response;
         }
 
         public async Task<ResponseDto> ApplyCoupon(string coupon, CodeTypes type)
@@ -45,8 +44,7 @@ namespace VisionClient.Core.Services
                 ApiUrl = $"{ConnectionData.GatewayUrl}/codes?code={coupon}"
             });
 
-            if (response is not null) return response;
-            return null;
+            return response;
         }
 
         public async Task<ResponseDto?> GetCoupons()
@@ -57,8 +55,7 @@ namespace VisionClient.Core.Services
                 ApiUrl = $"{ConnectionData.GatewayUrl}/codes"
             });
 
-            if (response is not null) return response;
-            return null;
+            return response;
         }
 
         public async Task<ResponseDto?> UpdateCoupon(EditCouponDto data)
@@ -70,8 +67,7 @@ namespace VisionClient.Core.Services
                 Data = data
             });
 
-            if (response is not null) return response;
-            return null;
+            return response;
         }
 
         public async Task<ResponseDto> VerifyCoupon(string coupon, CodeTypes type)

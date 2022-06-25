@@ -76,8 +76,8 @@ namespace OrderService_API.RabbitMQConsumer
                         var orderTypeProcessor = scope.ServiceProvider.GetRequiredService<IOrderTypeProcessor>();
 
                         var order = await orderRepository.GetOrder(data.OrderId);
-                        await orderRepository.ChangeOrderStatus(data);
-                        var orderProccessor = orderTypeProcessor.CreateOrder(order.OrderType);
+                        await orderRepository.ChangeOrderStatus(data.OrderId, data.IsSuccess, data.PaymentId);
+                        var orderProccessor = orderTypeProcessor.GetOrderOfType(order.OrderType);
 
                         if (orderProccessor is null)
                         {

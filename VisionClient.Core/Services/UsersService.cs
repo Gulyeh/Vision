@@ -19,8 +19,7 @@ namespace VisionClient.Core.Services
                 ApiUrl = $"{ConnectionData.GatewayUrl}/Users/FindUser?containsString={contains}",
             });
 
-            if (response is not null) return response;
-            return null;
+            return response;
         }
 
         public async Task<ResponseDto?> ChangePhoto(string image)
@@ -32,8 +31,7 @@ namespace VisionClient.Core.Services
                 Data = image
             });
 
-            if (response is not null) return response;
-            return null;
+            return response;
         }
     }
 }

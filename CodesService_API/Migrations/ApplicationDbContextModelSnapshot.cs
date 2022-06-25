@@ -59,7 +59,7 @@ namespace CodesService_API.Migrations
                     b.HasIndex("Code")
                         .IsUnique();
 
-                    b.ToTable("Codes");
+                    b.ToTable("Codes", (string)null);
                 });
 
             modelBuilder.Entity("CodesService_API.Entites.CodesUsed", b =>
@@ -80,7 +80,7 @@ namespace CodesService_API.Migrations
 
                     b.HasIndex("CodeId");
 
-                    b.ToTable("CodesUsed");
+                    b.ToTable("CodesUsed", (string)null);
                 });
 
             modelBuilder.Entity("CodesService_API.Entites.CodesUsed", b =>
