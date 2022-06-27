@@ -24,7 +24,7 @@ namespace ProductsService_API.Controllers
         }
 
         [HttpPut("EditProductGame")]
-        [Authorize(Roles = StaticData.AdminRole)]
+        [Authorize(Policy = "HasAdminRole")]
         public async Task<ActionResult<ResponseDto>> EditGame([FromBody] EditPackageDto data)
         {
             if (!ModelState.IsValid) return BadRequest();

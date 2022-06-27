@@ -49,7 +49,7 @@ namespace UsersService_API.Controllers
             return Ok(new ResponseDto(true, StatusCodes.Status200OK, await userRepository.FindUsers(containsString, userId)));
         }
 
-        [Authorize(Roles = StaticData.AdminRole)]
+        [Authorize(Policy = "HasAdminRole")]
         [HttpGet("FindDetailedUser")]
         public async Task<ActionResult<ResponseDto>> FindDetailedUser([FromQuery] string containsString)
         {

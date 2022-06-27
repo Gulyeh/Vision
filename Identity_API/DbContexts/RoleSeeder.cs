@@ -33,7 +33,8 @@ namespace Identity_API.DbContexts
                     var roles = new List<ApplicationRole>{
                         new ApplicationRole{ Name= StaticData.AdminRole },
                         new ApplicationRole{ Name= StaticData.ModeratorRole },
-                        new ApplicationRole{ Name= StaticData.UserRole }
+                        new ApplicationRole{ Name= StaticData.UserRole },
+                        new ApplicationRole{ Name= StaticData.OwnerRole }
                     };
 
                     foreach (var role in roles)

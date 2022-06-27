@@ -9,14 +9,23 @@ namespace VisionClient.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is null) return Visibility.Hidden;
-            return (string)value == "User" ? Visibility.Hidden : Visibility.Visible;
+            if (value is null || parameter is null) return Visibility.Collapsed;
+            if (string.IsNullOrWhiteSpace(value.ToString())) return Visibility.Collapsed;
+
+            switch ((string)parameter)
+            {
+                case "AdminPanelButton":
+                    return (string)value == "User" ? Visibility.Collapsed : Visibility.Visible;
+                case "AdminPanelSettings":
+                    return (string)value == "Moderator" || (string)value == "User" ? Visibility.Collapsed : Visibility.Visible;
+                default:
+                    return Visibility.Collapsed;
+            }
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is null) return Visibility.Hidden;
-            return (string)value == "User" ? Visibility.Hidden : Visibility.Visible;
+            throw new NotImplementedException();
         }
     }
 }

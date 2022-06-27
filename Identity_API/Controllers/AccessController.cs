@@ -42,12 +42,14 @@ namespace Identity_API.Controllers
         }
 
         [HttpGet("GetRoles")]
+        [Authorize(Policy = "HasAdminRole")]
         public async Task<ActionResult<ResponseDto>> GetRoles()
         {
             return CheckActionResult(new ResponseDto(true, StatusCodes.Status200OK, await accessRepository.GetRoles()));
         }
 
         [HttpPost("ChangeUserRole")]
+        [Authorize(Policy = "HasAdminRole")]
         public async Task<ActionResult<ResponseDto>> ChangeUserRole([FromQuery] Guid userId, [FromQuery] string role)
         {
             if(userId == Guid.Empty || string.IsNullOrWhiteSpace(role)) return BadRequest();

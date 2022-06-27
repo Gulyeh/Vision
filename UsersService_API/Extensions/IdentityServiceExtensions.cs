@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using UsersService_API.Statics;
 
 namespace UsersService_API.Extensions
 {
@@ -21,6 +22,13 @@ namespace UsersService_API.Extensions
                         ValidateAudience = false
                     };
                 });
+
+            services.AddAuthorization(opts =>
+            {
+                opts.AddPolicy("HasOwnerRole", builder => builder.RequireRole(StaticData.OwnerRole));
+                opts.AddPolicy("HasAdminRole", builder => builder.RequireRole(StaticData.AdminRole, StaticData.OwnerRole));
+                opts.AddPolicy("HasModeratorRole", builder => builder.RequireRole(StaticData.OwnerRole, StaticData.AdminRole, StaticData.ModeratorRole));
+            });
             return services;
         }
     }

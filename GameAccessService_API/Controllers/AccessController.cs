@@ -25,7 +25,7 @@ namespace GameAccessService_API.Controllers
             return Ok(new ResponseDto(hasAccess, StatusCodes.Status200OK, bannedData));
         }
 
-        [Authorize(Roles = StaticData.AdminRole)]
+        [Authorize(Policy = "HasAdminRole")]
         [HttpPost("BanUser")]
         public async Task<ActionResult<ResponseDto>> BanUser([FromBody] UserAccessDto data)
         {
@@ -34,7 +34,7 @@ namespace GameAccessService_API.Controllers
             return CheckActionResult(await accessRepository.BanUserAccess(data));
         }
 
-        [Authorize(Roles = StaticData.AdminRole)]
+        [Authorize(Policy = "HasAdminRole")]
         [HttpDelete("UnbanUser")]
         public async Task<ActionResult<ResponseDto>> UnbanUser([FromBody] AccessDataDto data)
         {

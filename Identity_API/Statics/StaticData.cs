@@ -7,12 +7,14 @@ namespace Identity_API.Statics
         public const string UserRole = "User";
         public const string AdminRole = "Administrator";
         public const string ModeratorRole = "Moderator";
+        public const string OwnerRole = "Owner";
 
         public enum RoleValue
         {
             User = 0,
             Moderator = 1,
-            Administrator = 2
+            Administrator = 2,
+            Owner = 3
         }      
     }
 }

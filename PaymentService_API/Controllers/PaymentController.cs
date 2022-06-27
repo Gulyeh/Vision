@@ -42,13 +42,13 @@ namespace PaymentService_API.Controllers
         }
 
         [HttpGet("GetNewProviders")]
-        [Authorize(Roles = StaticData.AdminRole)]
+        [Authorize(Policy = "HasAdminRole")]
         public async Task<ActionResult<ResponseDto>> GetNewProviders(){
             return new ResponseDto(true, StatusCodes.Status200OK, await paymentRepository.GetNewProviders());
         }
 
         [HttpPost("AddPaymentMethod")]
-        [Authorize(Roles = StaticData.AdminRole)]
+        [Authorize(Policy = "HasAdminRole")]
         public async Task<ActionResult<ResponseDto>> AddPaymentMethod([FromBody] AddPaymentMethodDto data)
         {
             if(!ModelState.IsValid) return BadRequest();
@@ -56,7 +56,7 @@ namespace PaymentService_API.Controllers
         }
 
         [HttpDelete("DeletePaymentMethod")]
-        [Authorize(Roles = StaticData.AdminRole)]
+        [Authorize(Policy = "HasAdminRole")]
         public async Task<ActionResult<ResponseDto>> DeletePaymentMethod([FromQuery] Guid paymentId)
         {
             if(paymentId == Guid.Empty) return BadRequest();
@@ -64,7 +64,7 @@ namespace PaymentService_API.Controllers
         }
 
         [HttpPut("UpdatePaymentMethod")]
-        [Authorize(Roles = StaticData.AdminRole)]
+        [Authorize(Policy = "HasAdminRole")]
         public async Task<ActionResult<ResponseDto>> UpdatePaymentMethod([FromBody] EditPaymentMethodDto data)
         {
             if(!ModelState.IsValid) return BadRequest();

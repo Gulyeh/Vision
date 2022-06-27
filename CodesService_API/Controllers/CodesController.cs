@@ -37,14 +37,14 @@ namespace CodesService_API.Controllers
         }
 
 
-        [Authorize(Roles = StaticData.AdminRole)]
+        [Authorize(Policy = "HasAdminRole")]
         [HttpGet]
         public async Task<ActionResult<ResponseDto>> GetCodes()
         {
             return Ok(await codesRepository.GetAllCodes());
         }
 
-        [Authorize(Roles = StaticData.AdminRole)]
+        [Authorize(Policy = "HasAdminRole")]
         [HttpDelete]
         public async Task<ActionResult<ResponseDto>> RemoveCode([FromQuery] string code)
         {
@@ -52,7 +52,7 @@ namespace CodesService_API.Controllers
             return CheckActionResult(await codesRepository.RemoveCode(code));
         }
 
-        [Authorize(Roles = StaticData.AdminRole)]
+        [Authorize(Policy = "HasAdminRole")]
         [HttpPut("EditCode")]
         public async Task<ActionResult<ResponseDto>> EditCode([FromBody] EditCodeDto data)
         {
@@ -60,7 +60,7 @@ namespace CodesService_API.Controllers
             return CheckActionResult(await codesRepository.EditCode(data));
         }
 
-        [Authorize(Roles = StaticData.AdminRole)]
+        [Authorize(Policy = "HasAdminRole")]
         [HttpPost("AddCode")]
         public async Task<ActionResult<ResponseDto>> AddCode([FromBody] AddCodesDto data)
         {
@@ -68,7 +68,7 @@ namespace CodesService_API.Controllers
             return CheckActionResult(await codesRepository.AddCode(data));
         }
 
-        [Authorize(Roles = StaticData.AdminRole)]
+        [Authorize(Policy = "HasAdminRole")]
         [HttpGet("GetUserUsedCodes")]
         public async Task<ActionResult<ResponseDto>> GetUserUsedCodes([FromQuery] Guid userId)
         {
@@ -76,7 +76,7 @@ namespace CodesService_API.Controllers
             return CheckActionResult(await codesRepository.GetUserUsedCodes(userId));
         }
 
-        [Authorize(Roles = StaticData.AdminRole)]
+        [Authorize(Policy = "HasAdminRole")]
         [HttpDelete("DeleteUsedCode")]
         public async Task<ActionResult<ResponseDto>> DeleteUsedCode([FromQuery] Guid codeId)
         {

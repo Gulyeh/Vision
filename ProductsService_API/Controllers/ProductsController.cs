@@ -24,7 +24,7 @@ namespace ProductsService_API.Controllers
         }
 
         [HttpDelete("DeleteProduct")]
-        [Authorize(Roles = StaticData.AdminRole)]
+        [Authorize(Policy = "HasAdminRole")]
         public async Task<ActionResult<ResponseDto>> DeleteProduct([FromQuery] Guid GameId, [FromQuery] Guid ProductId)
         {
             if (GameId == Guid.Empty || ProductId == Guid.Empty) return BadRequest();
@@ -32,7 +32,7 @@ namespace ProductsService_API.Controllers
         }
 
         [HttpPut("EditProduct")]
-        [Authorize(Roles = StaticData.AdminRole)]
+        [Authorize(Policy = "HasAdminRole")]
         public async Task<ActionResult<ResponseDto>> EditProduct([FromBody] EditPackageDto data)
         {
             if (!ModelState.IsValid) return BadRequest();
@@ -40,7 +40,7 @@ namespace ProductsService_API.Controllers
         }
 
         [HttpPost("AddProduct")]
-        [Authorize(Roles = StaticData.AdminRole)]
+        [Authorize(Policy = "HasAdminRole")]
         public async Task<ActionResult<ResponseDto>> AddProduct([FromBody] AddProductsDto data)
         {
             if (!ModelState.IsValid) return BadRequest();

@@ -17,7 +17,7 @@ namespace OrderService_API.Controllers
         }
 
         [HttpGet("GetOrders")]
-        [Authorize(Roles = StaticData.AdminRole)]
+        [Authorize(Policy = "HasAdminRole")]
         public async Task<ActionResult<ResponseDto>> GetOrders([FromQuery] string orderId)
         {
             if (string.IsNullOrWhiteSpace(orderId)) return BadRequest();
@@ -25,6 +25,7 @@ namespace OrderService_API.Controllers
         }
 
         [HttpGet("GetUserOrders")]
+        [Authorize]
         public async Task<ActionResult<ResponseDto>> GetUserOrders()
         {
             var userId = User.GetId();
@@ -32,7 +33,7 @@ namespace OrderService_API.Controllers
         }
 
         [HttpPost("ChangeToPaid")]
-        [Authorize(Roles = StaticData.AdminRole)]
+        [Authorize(Policy = "HasAdminRole")]
         public async Task<ActionResult<ResponseDto>> ChangeToPaid([FromQuery] Guid orderId){
             if(orderId == Guid.Empty) return BadRequest();
             if(!await orderRepository.ChangeOrderStatus(orderId, true)) return CheckActionResult(new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not change status" }));

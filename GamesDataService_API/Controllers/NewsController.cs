@@ -22,7 +22,7 @@ namespace GamesDataService_API.Controllers
         }
 
         [HttpPost("AddNews")]
-        [Authorize(Policy = "HasAdminOrModRole")]
+        [Authorize(Policy = "HasModeratorRole")]
         public async Task<ActionResult<ResponseDto>> AddGameNews([FromBody] AddNewsDto data)
         {
             if (!ModelState.IsValid) return BadRequest();
@@ -30,7 +30,7 @@ namespace GamesDataService_API.Controllers
         }
 
         [HttpDelete("DeleteNews")]
-        [Authorize(Policy = "HasAdminOrModRole")]
+        [Authorize(Policy = "HasModeratorRole")]
         public async Task<ActionResult<ResponseDto>> DeleteGameNews([FromQuery] Guid newsId, [FromQuery] Guid gameId)
         {
             if (newsId == Guid.Empty) return BadRequest();
@@ -38,7 +38,7 @@ namespace GamesDataService_API.Controllers
         }
 
         [HttpPut("EditNews")]
-        [Authorize(Policy = "HasAdminOrModRole")]
+        [Authorize(Policy = "HasModeratorRole")]
         public async Task<ActionResult<ResponseDto>> EditGameNews([FromBody] EditNewsDto data)
         {
             if (!ModelState.IsValid) return BadRequest();

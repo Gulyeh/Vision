@@ -5,6 +5,7 @@ using Identity_API.Entities;
 using Identity_API.Helpers;
 using Identity_API.RabbitMQSender;
 using Identity_API.Repository.IRepository;
+using Identity_API.Statics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -87,7 +88,7 @@ namespace Identity_API.Repository
 
         public async Task<IEnumerable<string>> GetRoles() {
             var roles = await roleManager.Roles.ToListAsync();
-            return roles.Select(x => x.Name);
+            return roles.Where(x => !x.Name.Equals(StaticData.OwnerRole)).Select(x => x.Name);
         }
 
         public async Task<ResponseDto> ChangeUserRole(Guid userId, string role, Guid requesterId)

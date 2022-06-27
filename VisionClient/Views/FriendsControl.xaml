@@ -210,7 +210,7 @@
                     Foreground="White"
                     FontSize="12" 
                     Margin="0,0,10,0"
-                    Visibility="{Binding StaticData.UserData.Role, Converter={StaticResource RoleToVis}}"
+                    Visibility="{Binding StaticData.UserData.Role, Converter={StaticResource RoleToVis}, ConverterParameter='AdminPanelButton'}"
                     Command="{Binding OpenControlCommand}"
                     CommandParameter="AdminPanelControl"/>
 

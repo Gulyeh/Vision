@@ -45,8 +45,9 @@ namespace Identity_API.Extensions
 
             services.AddAuthorization(opts =>
             {
-                opts.AddPolicy("HasAdminRole", builder => builder.RequireRole(StaticData.AdminRole));
-                opts.AddPolicy("HasAdminOrModRole", builder => builder.RequireRole(StaticData.AdminRole, StaticData.ModeratorRole));
+                opts.AddPolicy("HasOwnerRole", builder => builder.RequireRole(StaticData.OwnerRole));
+                opts.AddPolicy("HasAdminRole", builder => builder.RequireRole(StaticData.AdminRole, StaticData.OwnerRole));
+                opts.AddPolicy("HasModeratorRole", builder => builder.RequireRole(StaticData.OwnerRole, StaticData.AdminRole, StaticData.ModeratorRole));
             });
             return services;
         }
