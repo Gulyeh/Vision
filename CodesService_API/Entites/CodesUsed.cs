@@ -11,10 +11,9 @@ namespace CodesService_API.Entites
         }
 
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         [Required]
-        public Guid userId { get; set; }
-
+        public Guid UserId { get; set; }
         public Guid CodeId { get; set; }
         [ForeignKey("CodeId")]
         public Codes Code { get; set; }

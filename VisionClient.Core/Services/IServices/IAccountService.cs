@@ -13,5 +13,7 @@ namespace VisionClient.Core.Services.IServices
         Task<ResponseDto> ResendEmailConfirmation(string Email);
         Task<ResponseDto> ChangePassword(ChangePasswordDto changePasswordData);
         Task<ResponseDto> GetServerData(Guid sessionId);
+        Task<ResponseDto?> ChangeUserRole(Guid userId, string roleName);
+        Task<ResponseDto?> GetRoles();
     }
 }

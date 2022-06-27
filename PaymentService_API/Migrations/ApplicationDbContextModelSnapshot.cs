@@ -35,17 +35,17 @@ namespace PaymentService_API.Migrations
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("PaymentId")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("PaymentStatus")
                         .HasColumnType("int");
 
+                    b.Property<string>("PaymentUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Provider")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("StripeId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("StripeUrl")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("TotalPrice")

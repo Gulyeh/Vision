@@ -23,8 +23,8 @@ namespace PaymentService_API.Entities
         [Column(TypeName = "decimal(15,2)")]
         [Required]
         public decimal TotalPrice { get; set; }
-        public string? StripeUrl { get; set; }
-        public string? StripeId { get; set; }
+        public string? PaymentUrl { get; set; }
+        public string? PaymentId { get; set; }
         [Required]
         public PaymentStatus PaymentStatus { get; set; }
         [Required]

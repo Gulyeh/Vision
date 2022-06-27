@@ -39,11 +39,25 @@ namespace VisionClient.Core.Repository
             return (response.isSuccess, ResponseToJsonHelper.GetJson(response));
         }
 
+        public async Task<(bool, string)> DeleteUsedCoupon(Guid couponId)
+        {
+            var response = await couponService.DeleteUsedCoupon(couponId);
+            if (response is null) throw new Exception();
+            return (response.isSuccess, ResponseToJsonHelper.GetJson(response));
+        }
+
         public async Task<List<DetailedCouponModel>> GetCoupons()
         {
             var response = await couponService.GetCoupons();
             if (response is null) throw new Exception();
             return ResponseToJsonHelper.GetJson<List<DetailedCouponModel>>(response);
+        }
+
+        public async Task<List<UsedCodeModel>> GetUserUsedCoupons(Guid userId)
+        {
+            var response = await couponService.GetUserUsedCoupons(userId);
+            if (response is null) throw new Exception();
+            return ResponseToJsonHelper.GetJson<List<UsedCodeModel>>(response);
         }
 
         public async Task<(bool, string)> UpdateCoupon(EditCouponDto data)

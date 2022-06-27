@@ -8,7 +8,6 @@
              xmlns:prism="http://prismlibrary.com/"
              d:DesignHeight="170" d:DesignWidth="350"
              BorderThickness="1"
-             Name="LogoutDialog"
              BorderBrush="#0AA1DD"
              Background="#0f3452">
     
@@ -121,7 +120,6 @@
             <Button Content="Log out"
                     Style="{StaticResource ButtonTemplate}"
                     Command="{Binding ExecuteCommand}"
-                    CommandParameter="{Binding ElementName=LogoutDialog}"
                     Margin="0,0,60,0"/>
             <Button Content="Cancel"
                     Style="{StaticResource ButtonTemplate}"

@@ -11,5 +11,6 @@ namespace VisionClient.Core.Repository.IRepository
     {
         Task<List<OrderModel>> GetOrders(string? orderId = null);
         Task<(bool, string)> ChangeOrderToPaid(Guid orderId);
+        Task<List<OrderModel>> GetUserOrders();
     }
 }

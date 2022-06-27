@@ -5,6 +5,7 @@ using VisionClient.Core.Repository;
 using VisionClient.Core.Repository.IRepository;
 using VisionClient.Core.Services;
 using VisionClient.Core.Services.IServices;
+using VisionClient.Helpers;
 using VisionClient.SignalR;
 using VisionClient.Utility;
 
@@ -16,7 +17,6 @@ namespace VisionClient.Extensions
         {
             containerRegistry.RegisterServices(s =>
             {
-                s.AddSingleton<IUsersService_Hubs, UsersService_Hubs>();
                 s.AddSingleton<IStaticData, StaticData>();
                 s.AddHttpClient<IAccountService, AccountService>();
                 s.AddScoped<IAccountService, AccountService>();
@@ -28,9 +28,11 @@ namespace VisionClient.Extensions
         {
             containerRegistry.RegisterServices(s =>
             {
+                s.AddSingleton<IUsersService_Hubs, UsersService_Hubs>();
                 s.AddSingleton<IToastNotification, ToastNotification>();
                 s.AddScoped<IGamesRepository, GamesRepository>();
                 s.AddScoped<IGamesService, GamesService>();
+                s.AddScoped<ILogoutClient, LogoutClient>();
             });
         }
 
@@ -50,6 +52,7 @@ namespace VisionClient.Extensions
                 s.AddScoped<ICouponRepository, CouponRepository>();
                 s.AddScoped<IOrderService, OrderService>();
                 s.AddScoped<IOrderRepository, OrderRepository>();
+                s.AddScoped<ITextEventHelper, TextEventHelper>();
             });
         }
     }

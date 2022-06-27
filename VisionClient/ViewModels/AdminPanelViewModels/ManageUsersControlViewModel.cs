@@ -12,6 +12,7 @@ using System.Windows;
 using VisionClient.Core.Events;
 using VisionClient.Core.Models;
 using VisionClient.Core.Repository.IRepository;
+using VisionClient.Helpers;
 
 namespace VisionClient.ViewModels.AdminPanelViewModels
 {
@@ -42,14 +43,20 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
         private readonly IRegionManager regionManager;
         private readonly IUsersRepository usersRepository;
 
+        private DetailedUserModel TempUser { get; set; } = new();
         public ObservableCollection<DetailedUserModel> UsersList { get; set; } = new();
         public DelegateCommand<DetailedUserModel> ShowDetailsCommand { get; }
         public DelegateCommand GetUsersCommand { get; }
 
-        public ManageUsersControlViewModel(IEventAggregator eventAggregator, IRegionManager regionManager, IUsersRepository usersRepository)
+        public ManageUsersControlViewModel(IEventAggregator eventAggregator, IRegionManager regionManager, IUsersRepository usersRepository, ITextEventHelper panelOpened)
         {
             ShowDetailsCommand = new DelegateCommand<DetailedUserModel>(ShowDetails);
             GetUsersCommand = new DelegateCommand(GetUsers);
+
+            panelOpened.NotifyOpened += (s, e) =>
+            {
+                eventAggregator.GetEvent<SendEvent<(DetailedUserModel, string)>>().Publish((TempUser, e.Text));
+            };
 
             this.eventAggregator = eventAggregator;
             this.regionManager = regionManager;
@@ -59,6 +66,7 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
         private void ShowDetails(DetailedUserModel data)
         {
             regionManager.RequestNavigate("AdminPanelRegion", "EditUsersControl");
+            TempUser = data;
             eventAggregator.GetEvent<SendEvent<DetailedUserModel>>().Publish(data);
         }
 

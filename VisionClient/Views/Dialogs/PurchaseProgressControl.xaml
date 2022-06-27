@@ -93,6 +93,12 @@
                 </Style.Triggers>
             </Style>
         </Grid.Style>
+        <Button Content="x" Foreground="Gray" Height="20" Width="20" 
+                Background="Transparent" HorizontalAlignment="Right" VerticalAlignment="Top"
+                BorderThickness="0" Command="{Binding CloseDialogCommand}"
+                CommandParameter="false"/>
+        <TextBlock TextAlignment="Center" Text="Do not close this window, unless something failed"
+                       Foreground="Gray" FontSize="10" Width="250" Margin="0,20,0,0" TextWrapping="Wrap"/>
         <DockPanel HorizontalAlignment="Center" VerticalAlignment="Center">
             <Image Source="pack://application:,,,/Images/VisionLogo.png" 
                            Height="60" 

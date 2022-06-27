@@ -64,10 +64,11 @@
             </Setter>
         </Style>
     </UserControl.Resources>
-    <Grid>
-        <ScrollViewer HorizontalScrollBarVisibility="Disabled" 
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled" 
                       VerticalScrollBarVisibility="Hidden"
                       CanContentScroll="False" Margin="0,0,0,20">
+        <Grid>
+
             <StackPanel Orientation="Vertical" 
                         HorizontalAlignment="Stretch" 
                         Margin="50,20,20,0">
@@ -132,6 +133,6 @@
                            Foreground="Red" 
                            Margin="0,10,0,0" HorizontalAlignment="Left"/>
             </StackPanel>
-        </ScrollViewer>
-    </Grid>
+        </Grid>
+    </ScrollViewer>
 </UserControl>

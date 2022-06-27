@@ -11,6 +11,7 @@ namespace OrderService_API.Dtos
         {
             Title = string.Empty;
             CouponCode = string.Empty;
+            OrderType = string.Empty;
         }
 
         public Guid Id { get; set; }
@@ -18,5 +19,6 @@ namespace OrderService_API.Dtos
         public DateTime OrderDate { get; set; }
         public string Title { get; set; }
         public string CouponCode { get; set; }
+        public string OrderType { get; set; }
     }
 }

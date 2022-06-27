@@ -40,8 +40,6 @@ namespace VisionClient.ViewModels
             }
         }
 
-        protected virtual void RaiseIsActiveChanged() => IsActiveChanged?.Invoke(this, EventArgs.Empty);
-
         private string messageContent = string.Empty;
         public string MessageContent
         {
@@ -89,6 +87,7 @@ namespace VisionClient.ViewModels
         private readonly IRegionManager regionManager;
         private readonly IDialogService dialogService;
         private readonly IMessageService_Hubs messageService_Hubs;
+        protected virtual void RaiseIsActiveChanged() => IsActiveChanged?.Invoke(this, EventArgs.Empty);
 
         private int CurrentPage { get; set; }
         public IStaticData StaticData { get; }

@@ -13,12 +13,11 @@ namespace VisionClient.Scrolling
             ListView? list = control.FindName(elementName) as ListView;
             Decorator? decorator = VisualTreeHelper.GetChild(list, 0) as Decorator;
             ScrollViewer? scrollViewer = decorator?.Child as ScrollViewer;
-            return scrollViewer == null ? null : scrollViewer;
+            return scrollViewer ?? null;
         }
 
         public async static Task SmoothScroll<T>(ScrollType type, string elementName, T control, int scrollAmount, int scrollBy) where T : FrameworkElement
         {
-
             var scrollViewer = FindScrollViewer<T>(control, elementName);
             if (scrollViewer == null) return;
 

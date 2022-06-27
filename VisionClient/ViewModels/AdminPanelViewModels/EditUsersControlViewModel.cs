@@ -25,18 +25,15 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
         private readonly IRegionManager regionManager;
 
         public DelegateCommand BackwardCommand { get; }
-
-        public EditUsersControlViewModel(IRegionManager regionManager, IEventAggregator eventAggregator)
+        public DelegateCommand<string> UserPanelContentCommand { get; }
+        public EditUsersControlViewModel(IRegionManager regionManager)
         {
             BackwardCommand = new DelegateCommand(NavigateToUsers);
+            UserPanelContentCommand = new DelegateCommand<string>(SwitchContent);
             this.regionManager = regionManager;
-
-            eventAggregator.GetEvent<SendEvent<DetailedUserModel>>().Subscribe(x =>
-            {
-                UserModel = x;
-            });
         }
 
+        private void SwitchContent(string name) => regionManager.RequestNavigate("UserPanelRegion", name);
         private void NavigateToUsers() => regionManager.RequestNavigate("AdminPanelRegion", "ManageUsersControl");
     }
 }

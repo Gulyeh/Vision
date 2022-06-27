@@ -9,5 +9,6 @@ namespace VisionClient.Core.Services.IServices
         Task<ResponseDto?> CreatePaymentMethod(AddPaymentMethodDto data); 
         Task<ResponseDto?> DeletePaymentMethod(Guid paymentMethodId);
         Task<ResponseDto?> UpdatePaymentMethod(EditPaymentDto data);
+        Task<ResponseDto?> GetUserPayments();
     }
 }

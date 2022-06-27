@@ -155,5 +155,19 @@ namespace VisionClient.Core.Repository
             var response = await accountService.ResendEmailConfirmation(email);
             return ValidateStringResponse(response);
         }
+
+        public async Task<List<string>> GetRoles()
+        {
+            var response = await accountService.GetRoles();
+            if (response is null) throw new Exception();
+            return ResponseToJsonHelper.GetJson<List<string>>(response);
+        }
+
+        public async Task<string> ChangeUserRole(Guid userId, string roleName)
+        {
+            var response = await accountService.ChangeUserRole(userId, roleName);
+            if (response is null) throw new Exception();
+            return ResponseToJsonHelper.GetJson(response);
+        }
     }
 }

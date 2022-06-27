@@ -2,6 +2,7 @@
 using VisionClient.Views;
 using VisionClient.Views.AdminPanel.AddControls;
 using VisionClient.Views.AdminPanel.ManageControls;
+using VisionClient.Views.AdminPanel.UserControls;
 using VisionClient.Views.SettingsControls;
 
 namespace VisionClient.Extensions
@@ -48,6 +49,13 @@ namespace VisionClient.Extensions
             containerRegistry.RegisterForNavigation<ManageOrdersControl>("ManageOrdersControl");
             containerRegistry.RegisterForNavigation<ManageUsersControl>("ManageUsersControl");
             containerRegistry.RegisterForNavigation<EditUsersControl>("EditUsersControl");
+            containerRegistry.RegisterForNavigation<ToggleBanAccessControl>("ToggleBanAccessControl");
+            containerRegistry.RegisterForNavigation<ToggleBanGameControl>("ToggleBanGameControl");
+            containerRegistry.RegisterForNavigation<UserUsedCodesControl>("UserUsedCodesControl");
+            containerRegistry.RegisterForNavigation<GiveUserProductControl>("GiveUserProductControl");
+            containerRegistry.RegisterForNavigation<ChangeUserRoleControl>("ChangeUserRoleControl");
+            containerRegistry.RegisterForNavigation<KickControl>("KickControl");
+            containerRegistry.RegisterForNavigation<TransactionsHistoryControl>("TransactionsHistoryControl");
         }
     }
 }

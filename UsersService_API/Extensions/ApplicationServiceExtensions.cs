@@ -25,6 +25,7 @@ namespace UsersService_API.Extensions
             services.AddHostedService<RabbitMQIdentityConsumer>();
             services.AddHostedService<RabbitMQCurrencyConsumer>();
             services.AddHostedService<RabbitMQCouponAccessConsumer>();
+            services.AddHostedService<RabbitMQKickUserConsumer>();
             services.AddSingleton<IRabbitMQSender, RabbitMQMessageSender>();
             services.AddScoped<ICacheService, CacheService>();
             services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));

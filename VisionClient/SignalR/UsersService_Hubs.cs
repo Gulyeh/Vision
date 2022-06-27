@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
+using Prism.Services.Dialogs;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -47,14 +48,18 @@ namespace VisionClient.SignalR
 
         private readonly IToastNotification toastNotification;
         private readonly IStaticData StaticData;
+        private readonly ILogoutClient logoutClient;
+        private readonly IDialogService dialogService;
 
         public event CouponTextHandler? CouponTextEvent;
         public event CouponProductHandler? CouponProductEvent;
 
-        public UsersService_Hubs(IToastNotification toastNotification, IStaticData staticData)
+        public UsersService_Hubs(IToastNotification toastNotification, IStaticData staticData, ILogoutClient logoutClient, IDialogService dialogService)
         {
             this.toastNotification = toastNotification;
             StaticData = staticData;
+            this.logoutClient = logoutClient;
+            this.dialogService = dialogService;
         }
 
         public async Task Disconnect()
@@ -75,7 +80,6 @@ namespace VisionClient.SignalR
                 {
                     opts.AccessTokenProvider = () => Task.FromResult(StaticData.UserData?.Access_Token);
                 })
-                .WithAutomaticReconnect()
                 .Build();
 
             ListenUsersConnections();
@@ -271,6 +275,30 @@ namespace VisionClient.SignalR
         private void ListenSelfUserConnections()
         {
             if (userHubConnection is null) throw new Exception("userHubConnection is null");
+
+            userHubConnection.Closed += (exception) =>
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    logoutClient.Logout();
+                });
+                return Task.CompletedTask;
+            };
+
+            userHubConnection.On<string>("UserKicked", async (reason) =>
+            {
+                if (!string.IsNullOrEmpty(reason))
+                {
+                    dialogService.ShowDialog("InformationControl", new DialogParameters()
+                    {
+                        { "title", "You have been kicked" },
+                        { "message", $"Reason:\n{reason}" }
+                    }, null);
+                }
+
+                await Disconnect();
+            });
+
             userHubConnection.On<ChangedUserDataDto>("ChangedData", (userData) =>
             {
                 if (userData is null) return;

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PaymentService_API.Dtos;
+using PaymentService_API.Extensions;
 using PaymentService_API.Helpers;
 using PaymentService_API.Repository.IRepository;
 using PaymentService_API.Statics;
@@ -69,5 +70,14 @@ namespace PaymentService_API.Controllers
             if(!ModelState.IsValid) return BadRequest();
             return CheckActionResult(await paymentRepository.UpdatePaymentMethod(data));
         }
+
+        [HttpGet("GetUserPayments")]
+        [Authorize]
+        public async Task<ActionResult<ResponseDto>> GetUserPayments()
+        {
+            var userId = User.GetId();
+            return CheckActionResult(await paymentRepository.GetUserPayments(userId));
+        }
+
     }
 }

@@ -14,5 +14,6 @@ namespace PaymentService_API.Repository.IRepository
         Task<ResponseDto> AddPaymentMethod(AddPaymentMethodDto data);
         Task<ResponseDto> DeletePaymentMethod(Guid paymentId);
         Task<ResponseDto> UpdatePaymentMethod(EditPaymentMethodDto data);
+        Task<ResponseDto> GetUserPayments(Guid userId);
     }
 }

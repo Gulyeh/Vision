@@ -58,6 +58,17 @@ namespace VisionClient.Core.Services
             return new ResponseDto();
         }
 
+        public async Task<ResponseDto?> GetUserPayments()
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.GET,
+                ApiUrl = $"{ConnectionData.GatewayUrl}/Payment/GetUserPayments"
+            });
+
+            return response;
+        }
+
         public async Task<ResponseDto?> UpdatePaymentMethod(EditPaymentDto data)
         {
             var response = await SendAsync<ResponseDto>(new ApiRequest()

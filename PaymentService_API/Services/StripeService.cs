@@ -77,9 +77,9 @@ namespace PaymentService_API.Services
             var payment = await db.Payments.FirstOrDefaultAsync(x => x.OrderId == data.OrderId);
             if (payment is not null)
             {
-                payment.StripeUrl = session.Url;
+                payment.PaymentUrl= session.Url;
                 payment.PaymentStatus = PaymentStatus.Inprogress;
-                payment.StripeId = session.Id;
+                payment.PaymentId = session.Id;
                 await db.SaveChangesAsync();
             }
 

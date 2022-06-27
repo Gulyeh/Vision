@@ -18,5 +18,6 @@ namespace UsersService_API.Repository.IRepository
         Task CreateUser(Guid userId);
         Task<ResponseDto> UserExists(Guid userId);
         Task<ResponseDto> IsUserBlocked(Guid userId, Guid user2Id);
+        Task KickUser(Guid userId, string? reason = null);
     }
 }

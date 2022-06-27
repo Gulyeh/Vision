@@ -3,11 +3,13 @@ using Identity_API.DbContexts;
 using Identity_API.Dtos;
 using Identity_API.Entities;
 using Identity_API.Helpers;
+using Identity_API.RabbitMQSender;
 using Identity_API.Repository.IRepository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using static Identity_API.Statics.StaticData;
 
 namespace Identity_API.Repository
 {
@@ -19,12 +21,16 @@ namespace Identity_API.Repository
         private readonly ILogger<AccessRepository> logger;
         private readonly IMemoryCache memoryCache;
         private readonly IOptions<ServersData> options;
+        private readonly RoleManager<ApplicationRole> roleManager;
+        private readonly IRabbitMQSender rabbitMQSender;
 
         public AccessRepository(IMapper mapper, UserManager<ApplicationUser> userManager, ApplicationDbContext db,
-                    ILogger<AccessRepository> logger, IMemoryCache memoryCache, IOptions<ServersData> options)
+                    ILogger<AccessRepository> logger, IMemoryCache memoryCache, IOptions<ServersData> options, RoleManager<ApplicationRole> roleManager, IRabbitMQSender rabbitMQSender)
         {
             this.memoryCache = memoryCache;
             this.options = options;
+            this.roleManager = roleManager;
+            this.rabbitMQSender = rabbitMQSender;
             this.mapper = mapper;
             this.userManager = userManager;
             this.db = db;
@@ -77,6 +83,45 @@ namespace Identity_API.Repository
             memoryCache.Remove(userId);
 
             return Task.FromResult(new ResponseDto(true, StatusCodes.Status200OK, options.Value.GetServerData()));
+        }
+
+        public async Task<IEnumerable<string>> GetRoles() {
+            var roles = await roleManager.Roles.ToListAsync();
+            return roles.Select(x => x.Name);
+        }
+
+        public async Task<ResponseDto> ChangeUserRole(Guid userId, string role, Guid requesterId)
+        {
+            if(userId.Equals(requesterId)) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "You cannot change your role" });
+
+            var roleData = await roleManager.FindByNameAsync(role);
+            if(roleData is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Role does not exist" });
+
+            var user = await userManager.FindByIdAsync(userId.ToString());
+            var requester = await userManager.FindByIdAsync(requesterId.ToString());
+            if(user is null || requester is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "User does not exist" });
+            if(await userManager.IsInRoleAsync(user, roleData.Name)) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "User already has this role" });
+
+            var requesterRole = await userManager.GetRolesAsync(requester);
+            var actualUserRole = await userManager.GetRolesAsync(user);
+        
+            if(actualUserRole.Any() && requesterRole.Any()){
+                var requesterRoleValue = (int)Enum.Parse(typeof(RoleValue), requesterRole.First());
+                var userRoleValue = (int)Enum.Parse(typeof(RoleValue), actualUserRole.First());
+                var requestedRoleValue = (int)Enum.Parse(typeof(RoleValue), roleData.Name);
+
+                if(requesterRoleValue > userRoleValue && requestedRoleValue <= requesterRoleValue){
+                    await userManager.RemoveFromRoleAsync(user, actualUserRole.First());
+                    await userManager.AddToRoleAsync(user, roleData.Name);
+
+                    rabbitMQSender.SendMessage(userId, "KickUserQueue");
+                    logger.LogInformation($"{userId} role has been changed from {actualUserRole.First()} to {roleData.Name}");
+                    return new ResponseDto(true, StatusCodes.Status200OK, new[] { $"User's role has been changed from {actualUserRole.First()} to {roleData.Name}" });              
+                }
+            }
+
+            logger.LogError($"{userId} role could not be changed");
+            return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "User's role could not be changed" });
         }
     }
 }

@@ -213,5 +213,11 @@ namespace UsersService_API.Repository
 
             return mapper.Map<IEnumerable<GetDetailedUsersDto>>(users);
         }
+
+        public async Task KickUser(Guid userId, string? reason = null)
+        {
+            var cachedIds = await cacheService.TryGetFromCache(HubTypes.Users);
+            if (cachedIds.Any(x => x.Key == userId)) await usersHub.Clients.Clients(cachedIds[(Guid)userId]).SendAsync("UserKicked", reason); 
+        }
     }
 }

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using VisionClient.Core.Events;
 using VisionClient.Helpers;
+using VisionClient.SignalR;
 
 namespace VisionClient.ViewModels.DialogsViewModels
 {
@@ -23,7 +24,9 @@ namespace VisionClient.ViewModels.DialogsViewModels
             set => SetProperty(ref buttonVisibility, value);
         }
 
-        public PurchaseProgressControlViewModel(IEventAggregator eventAggregator) : base(eventAggregator)
+        private readonly IOrderService_Hubs orderService_Hubs;
+
+        public PurchaseProgressControlViewModel(IEventAggregator eventAggregator, IOrderService_Hubs orderService_Hubs) : base(eventAggregator)
         {
             eventAggregator.GetEvent<SendEvent<string>>().Subscribe(x =>
             {
@@ -48,6 +51,13 @@ namespace VisionClient.ViewModels.DialogsViewModels
                 ProgressText = "Connection to order server has been closed.\nYour session is still in progress but will require to log in again after purchase.";
                 ButtonVisibility = Visibility.Visible;
             }, ThreadOption.PublisherThread, false, x => x.Equals("ConnectionClosed"));
+            this.orderService_Hubs = orderService_Hubs;
+        }
+
+        public override async void OnDialogClosed()
+        {
+            base.OnDialogClosed();
+            await orderService_Hubs.Disconnect();
         }
 
         protected override void Execute(object? data)

@@ -9,6 +9,7 @@ using VisionClient.ViewModels.AdminPanelViewModels;
 using VisionClient.Views;
 using VisionClient.Views.AdminPanel.AddControls;
 using VisionClient.Views.AdminPanel.ManageControls;
+using VisionClient.Views.AdminPanel.UserControls;
 using VisionClient.Views.SettingsControls;
 
 namespace VisionClient
@@ -53,6 +54,13 @@ namespace VisionClient
             ViewModelLocationProvider.Register(typeof(ManageOrdersControl).ToString(), typeof(ManageOrdersControlViewModel));
             ViewModelLocationProvider.Register(typeof(ManageUsersControl).ToString(), typeof(ManageUsersControlViewModel));
             ViewModelLocationProvider.Register(typeof(EditUsersControl).ToString(), typeof(EditUsersControlViewModel));
+            ViewModelLocationProvider.Register(typeof(ToggleBanAccessControl).ToString(), typeof(ToggleBanAccessControlViewModel));
+            ViewModelLocationProvider.Register(typeof(ToggleBanGameControl).ToString(), typeof(ToggleBanGameControlViewModel));
+            ViewModelLocationProvider.Register(typeof(KickControl).ToString(), typeof(KickControlViewModel));
+            ViewModelLocationProvider.Register(typeof(UserUsedCodesControl).ToString(), typeof(UserUsedCodesControlViewModel));
+            ViewModelLocationProvider.Register(typeof(GiveUserProductControl).ToString(), typeof(GiveUserProductControlViewModel));
+            ViewModelLocationProvider.Register(typeof(ChangeUserRoleControl).ToString(), typeof(ChangeUserRoleControlViewModel));
+            ViewModelLocationProvider.Register(typeof(TransactionsHistoryControl).ToString(), typeof(TransactionsHistoryControlViewModel));
         }
     }
 }

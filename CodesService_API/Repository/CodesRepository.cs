@@ -48,7 +48,7 @@ namespace CodesService_API.Repository
 
             dbcode.CodesUsed.Add(new CodesUsed()
             {
-                userId = userId
+                UserId = userId
             });
 
             if (await db.SaveChangesAsync() > 0)
@@ -168,7 +168,7 @@ namespace CodesService_API.Repository
 
             if (checkCode is null || checkCode.CodeType != codeType) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Code does not exist" });
             if (checkCode.ExpireDate <= DateTime.Now || (checkCode.IsLimited == true && checkCode.Uses == 0)) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Code expired" });
-            if (CodesUsed.FirstOrDefault(x => x.userId == userId && x.CodeId == checkCode.Id) is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Code has been already used" });
+            if (CodesUsed.FirstOrDefault(x => x.UserId == userId && x.CodeId == checkCode.Id) is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Code has been already used" });
             return new ResponseDto(true, StatusCodes.Status200OK, new { });
         }
 
@@ -177,7 +177,7 @@ namespace CodesService_API.Repository
             var codeFound = await db.Codes.Include(x => x.CodesUsed).FirstOrDefaultAsync(x => x.Code.Equals(code));
             if (codeFound is not null)
             {
-                var usedCode = codeFound.CodesUsed.FirstOrDefault(x => x.userId == userId);
+                var usedCode = codeFound.CodesUsed.FirstOrDefault(x => x.UserId == userId);
                 if (usedCode is not null)
                 {
                     codeFound.CodesUsed.Remove(usedCode);
@@ -189,6 +189,29 @@ namespace CodesService_API.Repository
                     }
                 }
             }
+        }
+  
+        public async Task<ResponseDto> RemoveUsedCode(Guid codeId)
+        {
+            var usedCode = await db.CodesUsed.FirstOrDefaultAsync(x => x.Id == codeId);
+            if(usedCode is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Used code does not exist" });
+            db.CodesUsed.Remove(usedCode);
+            if(await db.SaveChangesAsync() > 0) {
+                var cachedUsedCode = await cacheService.TryGetFromCache<CodesUsed>(CacheType.CodesUsed);
+                if(cachedUsedCode is not null) {
+                    var userUsedCode = cachedUsedCode.FirstOrDefault(x => x.UserId == usedCode.UserId);
+                    if(userUsedCode is not null) await cacheService.TryRemoveFromCache<CodesUsed>(CacheType.CodesUsed, userUsedCode);
+                }
+
+                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Used code has been removed" });
+            }
+            return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Used code could not be deleted" });
+        }
+
+        public async Task<ResponseDto> GetUserUsedCodes(Guid userId)
+        {
+            var codes = await db.CodesUsed.Include(x => x.Code).Where(x => x.UserId == userId).ToListAsync();
+            return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<GetUserUsedCodesDto>>(codes));           
         }
 
         private async Task<Codes?> FindCouponInCache(string code){

@@ -47,12 +47,34 @@ namespace VisionClient.Core.Services
             return response;
         }
 
+        public async Task<ResponseDto?> DeleteUsedCoupon(Guid couponId)
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.DELETE,
+                ApiUrl = $"{ConnectionData.GatewayUrl}/codes/DeleteUsedCode?codeId={couponId}"
+            });
+
+            return response;
+        }
+
         public async Task<ResponseDto?> GetCoupons()
         {
             var response = await SendAsync<ResponseDto>(new ApiRequest()
             {
                 ApiType = APIType.GET,
                 ApiUrl = $"{ConnectionData.GatewayUrl}/codes"
+            });
+
+            return response;
+        }
+
+        public async Task<ResponseDto?> GetUserUsedCoupons(Guid userId)
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.GET,
+                ApiUrl = $"{ConnectionData.GatewayUrl}/codes/GetUserUsedCodes?userId={userId}"
             });
 
             return response;

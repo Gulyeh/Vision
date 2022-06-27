@@ -12,5 +12,7 @@ namespace VisionClient.Core.Repository.IRepository
         Task<(bool, string)> Toggle2FA(string code);
         Task<(bool, object?)> Generate2FA();
         Task<bool> GetServerData();
+        Task<List<string>> GetRoles();
+        Task<string> ChangeUserRole(Guid userId, string roleName);
     }
 }

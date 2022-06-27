@@ -16,6 +16,9 @@ namespace CodesService_API
             CreateMap<Codes, GetCodesDto>()
                 .ForMember(x => x.CodeType, src => src.MapFrom(z => GetEnumString(z.CodeType)))
                 .ForMember(x => x.Signature, src => src.MapFrom(z => GetEnumString(z.Signature)));
+            CreateMap<CodesUsed, GetUserUsedCodesDto>()
+                .ForMember(x => x.CodeType, src => src.MapFrom(y => GetEnumString(y.Code.CodeType)))
+                .ForMember(x => x.Code, src => src.MapFrom(z => z.Code.Code));
         }
 
         private string GetEnumString<T>(T data)

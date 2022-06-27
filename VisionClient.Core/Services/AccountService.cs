@@ -110,5 +110,27 @@ namespace VisionClient.Core.Services
             if (response is not null) return response;
             return new ResponseDto();
         }
+
+        public async Task<ResponseDto?> ChangeUserRole(Guid userId, string roleName)
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.POST,
+                ApiUrl = $"{ConnectionData.GatewayUrl}/access/ChangeUserRole?userId={userId}&role={roleName}"
+            });
+
+            return response;
+        }
+
+        public async Task<ResponseDto?> GetRoles()
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.GET,
+                ApiUrl = $"{ConnectionData.GatewayUrl}/access/GetRoles"
+            });
+
+            return response;
+        }
     }
 }

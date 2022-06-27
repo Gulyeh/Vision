@@ -174,10 +174,8 @@ namespace MessageService_API.SignalR
         {
             var connIds = await cacheService.GetFromGroupCache(chatId);
             var userConnIds = connIds.GetValueOrDefault(userId);
-            if (userConnIds is null) return;
-
-            if (userConnIds.Count > 1) await Clients.Clients(userConnIds).SendAsync(connName, data);
-            else await Clients.Caller.SendAsync(connName, data);
+            if (userConnIds is null || !userConnIds.Any()) return;
+            await Clients.Clients(userConnIds).SendAsync(connName, data);
         }
 
     }

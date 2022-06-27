@@ -13,6 +13,8 @@ namespace VisionClient.Core.Models
         {
             Title = string.Empty;
             CouponCode = string.Empty;
+            OrderType = string.Empty;
+            PaymentUrl = string.Empty;
         }
 
         public Guid Id { get; set; }
@@ -35,6 +37,10 @@ namespace VisionClient.Core.Models
                 OnPropertyChanged();
             }
         }
+        public string OrderType { get; set; }
         public string CouponCode { get; set; }
+        public decimal Price { get; set; }
+        public string PaymentUrl { get; set; }
+
     }
 }

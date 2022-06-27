@@ -11,6 +11,37 @@
              d:DesignHeight="850" d:DesignWidth="600" 
              Background="#0c3c60">
     <UserControl.Resources>
+        <Style TargetType="RadioButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="LightGray"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="Margin" Value="0,10,0,0"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Width" Value="180"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="Border" CornerRadius="4,0,0,4">
+                            <ContentPresenter VerticalAlignment="Center" 
+                                              HorizontalAlignment="Stretch"
+                                              Margin="10,0,0,0"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" TargetName="Border" Value="#0c3c60"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter Property="Background" TargetName="Border" Value="#0c3c60"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="IsHitTestVisible" Value="False"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <Style TargetType="Button">
             <Setter Property="Template">
                 <Setter.Value>
@@ -36,19 +67,15 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <Style TargetType="editors:SfTextBoxExt">
-            <Setter Property="FontSize" Value="15"/>
-            <Setter Property="Padding" Value="5,4,0,0"/>
-            <Setter Property="Height" Value="30"/>
-            <Setter Property="Width" Value="250"/>
-            <Setter Property="Background" Value="#164971"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Foreground" Value="White"/>
-        </Style>
     </UserControl.Resources>
-    <ScrollViewer CanContentScroll="False" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled">
-        <Grid>
-            <Button Foreground="White"
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <ScrollViewer Grid.Column="0" CanContentScroll="False" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Background="#0f3452" Margin="3,0,0,0">
+                <Button Foreground="White"
                     BorderThickness="0"
                     HorizontalAlignment="Left"
                     Panel.ZIndex="1"
@@ -58,8 +85,36 @@
                     Height="20"
                     Background="Transparent"
                     Command="{Binding BackwardCommand}">
-                <Image Source="pack://application:,,,/Images/LeftArrow.png" Height="20"/>
-            </Button>
-        </Grid>
-    </ScrollViewer>
+                    <Image Source="pack://application:,,,/Images/LeftArrow.png" Height="20"/>
+                </Button>
+                <RadioButton Content="Toggle ban access" 
+                         Margin="0,20,0,0"
+                         Command="{Binding UserPanelContentCommand}"
+                         CommandParameter="ToggleBanAccessControl"/>
+                <RadioButton Content="Toggle ban game" 
+                         Margin="0,20,0,0"
+                         Command="{Binding UserPanelContentCommand}"
+                         CommandParameter="ToggleBanGameControl"/>
+                <RadioButton Content="Give user product" 
+                         Margin="0,20,0,0"
+                         Command="{Binding UserPanelContentCommand}"
+                         CommandParameter="GiveUserProductControl"/>
+                <RadioButton Content="Kick" 
+                         Margin="0,20,0,0"
+                         Command="{Binding UserPanelContentCommand}"
+                         CommandParameter="KickControl"/>
+                <RadioButton Content="Used codes" 
+                         Margin="0,20,0,0"
+                         Command="{Binding UserPanelContentCommand}"
+                         CommandParameter="UserUsedCodesControl"/>
+                <RadioButton Content="Change role" 
+                         Margin="0,20,0,0"
+                         Command="{Binding UserPanelContentCommand}"
+                         CommandParameter="ChangeUserRoleControl"/>
+            </StackPanel>
+        </ScrollViewer>
+        <ContentControl Grid.Column="1" 
+                        Panel.ZIndex="1"
+                        prism:RegionManager.RegionName="UserPanelRegion"/>
+    </Grid>
 </UserControl>

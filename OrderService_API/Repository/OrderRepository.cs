@@ -70,7 +70,7 @@ namespace OrderService_API.Repository
         public async Task<ResponseDto> GetUserOrders(Guid userId)
         {
             var orders = await db.Orders.Where(x => x.UserId == userId).ToListAsync();
-            return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<OrderDto>>(orders));
+            return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<GetOrdersDto>>(orders));
         }
 
         public async Task<bool> ChangeOrderStatus(Guid orderId, bool isPaid, Guid? paymentId = null){

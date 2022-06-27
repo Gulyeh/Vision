@@ -130,16 +130,12 @@ namespace VisionClient.ViewModels.DialogsViewModels
             try
             {
                 await orderService_Hubs.CreateHubConnection(SelectedCoin.Id, SelectedPayment.Id, OrderType.Currency, Guid.Empty, CouponCodeVerified);
-                dialogService.ShowDialog("PurchaseProgressControl", null, async r =>
+                dialogService.ShowDialog("PurchaseProgressControl", null, r =>
                 {
                     switch (r.Result)
                     {
                         case ButtonResult.OK:
-                            await orderService_Hubs.Disconnect();
                             RaiseRequestClose(new DialogResult(ButtonResult.OK));
-                            break;
-                        case ButtonResult.Cancel:
-                            await orderService_Hubs.Disconnect();
                             break;
                         default:
                             break;

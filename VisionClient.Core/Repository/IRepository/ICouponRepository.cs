@@ -12,5 +12,7 @@ namespace VisionClient.Core.Repository.IRepository
         Task<List<DetailedCouponModel>> GetCoupons();
         Task<(bool, string)> DeleteCoupon(string coupon);
         Task<(bool, string)> UpdateCoupon(EditCouponDto data);
+        Task<(bool, string)> DeleteUsedCoupon(Guid couponId);
+        Task<List<UsedCodeModel>> GetUserUsedCoupons(Guid userId);
     }
 }

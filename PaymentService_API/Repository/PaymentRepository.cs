@@ -116,10 +116,16 @@ namespace PaymentService_API.Repository
         }
 
         public async Task<ResponseDto> GetPaymentMethods() => new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<PaymentMethodsDto>>(await cacheService.GetMethodsFromCache()));
-        
+
+        public async Task<ResponseDto> GetUserPayments(Guid userId)
+        {
+            var payments = await db.Payments.Where(x => x.UserId == userId).ToListAsync();
+            return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<GetPaymentsDto>>(payments));
+        }
+
         public async Task<ResponseDto> PaymentCompleted(string sessionId, PaymentStatus status, string Access_Token)
         {
-            var payment = await db.Payments.FirstOrDefaultAsync(x => x.StripeId == sessionId);
+            var payment = await db.Payments.FirstOrDefaultAsync(x => x.PaymentId == sessionId);
             if (payment is null || payment.PaymentStatus != PaymentStatus.Inprogress) return new ResponseDto(false, StatusCodes.Status400BadRequest, new { });
             payment.PaymentStatus = status;
             await db.SaveChangesAsync();

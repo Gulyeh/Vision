@@ -103,16 +103,12 @@ namespace VisionClient.ViewModels
             try
             {
                 await orderService_Hubs.CreateHubConnection(Product.Id, SelectedPayment.Id, Product.OrderType, Product.GameId, CouponCodeVerified);
-                dialogService.ShowDialog("PurchaseProgressControl", null, async r =>
+                dialogService.ShowDialog("PurchaseProgressControl", null, r =>
                 {
                     switch (r.Result)
                     {
                         case ButtonResult.OK:
-                            await orderService_Hubs.Disconnect();
                             GoBackward();
-                            break;
-                        case ButtonResult.Cancel:
-                            await orderService_Hubs.Disconnect();
                             break;
                         default:
                             break;

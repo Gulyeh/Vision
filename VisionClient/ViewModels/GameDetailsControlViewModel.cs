@@ -259,8 +259,10 @@ namespace VisionClient.ViewModels
             {
                 ErrorText = string.Empty;
                 this.GameModel = _gameModel;
-                await GetNews();
-                await GetProducts();
+
+                var getProducts = GetProducts();
+                var getNews = GetNews();
+                await Task.WhenAll(getProducts, getNews);
             }
             catch (Exception)
             {

@@ -67,5 +67,21 @@ namespace CodesService_API.Controllers
             if (!ModelState.IsValid) return BadRequest();
             return CheckActionResult(await codesRepository.AddCode(data));
         }
+
+        [Authorize(Roles = StaticData.AdminRole)]
+        [HttpGet("GetUserUsedCodes")]
+        public async Task<ActionResult<ResponseDto>> GetUserUsedCodes([FromQuery] Guid userId)
+        {
+            if (userId == Guid.Empty) return BadRequest();
+            return CheckActionResult(await codesRepository.GetUserUsedCodes(userId));
+        }
+
+        [Authorize(Roles = StaticData.AdminRole)]
+        [HttpDelete("DeleteUsedCode")]
+        public async Task<ActionResult<ResponseDto>> DeleteUsedCode([FromQuery] Guid codeId)
+        {
+            if (codeId == Guid.Empty) return BadRequest();
+            return CheckActionResult(await codesRepository.RemoveUsedCode(codeId));
+        }
     }
 }

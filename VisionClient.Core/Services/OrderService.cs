@@ -40,5 +40,16 @@ namespace VisionClient.Core.Services
 
             return response;
         }
+
+        public async Task<ResponseDto?> GetUserOrders()
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.GET,
+                ApiUrl = $"{ConnectionData.GatewayUrl}/order/GetUserOrders"
+            });
+
+            return response;
+        }
     }
 }

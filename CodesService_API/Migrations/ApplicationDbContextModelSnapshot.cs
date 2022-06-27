@@ -59,28 +59,26 @@ namespace CodesService_API.Migrations
                     b.HasIndex("Code")
                         .IsUnique();
 
-                    b.ToTable("Codes", (string)null);
+                    b.ToTable("Codes");
                 });
 
             modelBuilder.Entity("CodesService_API.Entites.CodesUsed", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("CodeId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("userId")
+                    b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CodeId");
 
-                    b.ToTable("CodesUsed", (string)null);
+                    b.ToTable("CodesUsed");
                 });
 
             modelBuilder.Entity("CodesService_API.Entites.CodesUsed", b =>

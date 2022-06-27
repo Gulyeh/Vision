@@ -40,5 +40,19 @@ namespace Identity_API.Controllers
             var userId = HttpContext.User.GetId();
             return CheckActionResult(await accessRepository.GetServerData(sessionToken, userId));
         }
+
+        [HttpGet("GetRoles")]
+        public async Task<ActionResult<ResponseDto>> GetRoles()
+        {
+            return CheckActionResult(new ResponseDto(true, StatusCodes.Status200OK, await accessRepository.GetRoles()));
+        }
+
+        [HttpPost("ChangeUserRole")]
+        public async Task<ActionResult<ResponseDto>> ChangeUserRole([FromQuery] Guid userId, [FromQuery] string role)
+        {
+            if(userId == Guid.Empty || string.IsNullOrWhiteSpace(role)) return BadRequest();
+            var requester = User.GetId();
+            return CheckActionResult(await accessRepository.ChangeUserRole(userId, role, requester));
+        }
     }
 }
