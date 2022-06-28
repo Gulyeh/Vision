@@ -159,5 +159,12 @@ namespace VisionClient.Core.Repository
             if(!response.isSuccess) return (false, ResponseToJsonHelper.GetJson(response));
             return ((bool)response.Response, string.Empty);
         }
+
+        public async Task<string> GiveUserProduct(GiveProductDto data)
+        {
+            var response = await gamesService.GiveUserProduct(data);
+            if (response is null) throw new Exception();
+            return ResponseToJsonHelper.GetJson(response);
+        }
     }
 }

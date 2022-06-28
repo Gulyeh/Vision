@@ -209,5 +209,17 @@ namespace VisionClient.Core.Services
 
             return response;
         }
+
+        public async Task<ResponseDto?> GiveUserProduct(GiveProductDto data)
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.POST,
+                ApiUrl = $"{ConnectionData.GatewayUrl}/access/GiveUserProduct",
+                Data = data
+            });
+
+            return response;
+        }
     }
 }

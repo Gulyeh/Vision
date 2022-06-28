@@ -21,5 +21,6 @@ namespace VisionClient.Core.Services.IServices
         Task<ResponseDto?> BanUser(BanGameDto data);
         Task<ResponseDto?> UnbanUser(Guid userId, Guid gameId);
         Task<ResponseDto?> CheckIfUserIsBanned(Guid userId, Guid gameId);
+        Task<ResponseDto?> GiveUserProduct(GiveProductDto data);
     }
 }

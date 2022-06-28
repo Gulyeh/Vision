@@ -110,7 +110,7 @@
                     VerticalAlignment="Center">
             <TextBlock Text="{Binding Message}" TextWrapping="Wrap"
                        Foreground="White" FontSize="15" 
-                       Margin="10,0,10,0"
+                       Margin="10,0,10,0" Width="350"
                        TextAlignment="Center"/>
         </StackPanel>
 

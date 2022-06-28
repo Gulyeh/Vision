@@ -23,5 +23,6 @@ namespace VisionClient.Core.Repository.IRepository
         Task<(bool, string)> BanUser(BanGameDto data);
         Task<(bool, string)> UnbanUser(Guid userId, Guid gameId);
         Task<(bool, string)> CheckIfUserIsBanned(Guid userId, Guid gameId);
+        Task<string> GiveUserProduct(GiveProductDto data);
     }
 }

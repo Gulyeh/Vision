@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:VisionClient.Views.AdminPanel.UserControls"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              mc:Ignorable="d" 
              d:DesignHeight="850" d:DesignWidth="400"
              xmlns:prism="http://prismlibrary.com/"
@@ -50,22 +51,30 @@
         <StackPanel HorizontalAlignment="Center" 
                     VerticalAlignment="Top" Margin="0,20,0,0"
                     Orientation="Vertical">
-            <ComboBox
+            <ComboBox IsHitTestVisible="{Binding IsButtonEnabled}"
                     Width="200" 
                     Height="25"
                     ItemsSource="{Binding StaticData.GameModels}"
                     DisplayMemberPath="Name"
-                    SelectedItem="{Binding SelectedGame}"
+                    SelectedValuePath="Id"
+                    SelectedValue="{Binding ProductModel.GameId}"
                     HorizontalAlignment="Center"
                     BorderThickness="0"
                     Foreground="Black" 
-                    Margin="0,0,0,20"/>
-            <ComboBox
+                    Margin="0,0,0,20">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="SelectionChanged">
+                        <prism:InvokeCommandAction Command="{Binding GetGameProductsCommand}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </ComboBox>
+            <ComboBox IsHitTestVisible="{Binding IsButtonEnabled}"
                     Width="200" 
                     Height="25"
-                    ItemsSource="{Binding StaticData.GameModels}"
-                    DisplayMemberPath="Name"
-                    SelectedItem="{Binding SelectedGame}"
+                    ItemsSource="{Binding GameProductsList}"
+                    DisplayMemberPath="Title"
+                    SelectedValuePath="Id"
+                    SelectedValue="{Binding ProductModel.ProductId}"
                     HorizontalAlignment="Center"
                     BorderThickness="0"
                     Foreground="Black" 

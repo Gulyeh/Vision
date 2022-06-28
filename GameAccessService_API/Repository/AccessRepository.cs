@@ -74,6 +74,7 @@ namespace GameAccessService_API.Repository
         {
             var productData = addProductProcessor.GenerateProduct(gameId);
             productData.SetData(userId, gameId, productId);
+            if(await productData.OwnsProduct()) return false;
             await productData.SaveData();
 
             if (await db.SaveChangesAsync() > 0)

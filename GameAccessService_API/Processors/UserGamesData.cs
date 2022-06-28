@@ -2,6 +2,7 @@ using GameAccessService_API.DbContexts;
 using GameAccessService_API.Entites;
 using GameAccessService_API.Helpers;
 using GameAccessService_API.Processors.Interfaces;
+using GameAccessService_API.Repository.IRepository;
 using GameAccessService_API.Services.IServices;
 
 namespace GameAccessService_API.Processors
@@ -33,6 +34,11 @@ namespace GameAccessService_API.Processors
         public async Task SaveData()
         {
             await db.UsersGames.AddAsync(userGames);
+        }
+
+        public async Task<bool> OwnsProduct(){
+            var cached = await cacheService.TryGetFromCache<UserGames>(CacheType.OwnGame, userGames.UserId);
+            return cached.Any(x => x.GameId == userGames.GameId);
         }
     }
 }

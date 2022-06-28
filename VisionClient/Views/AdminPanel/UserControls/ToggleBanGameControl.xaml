@@ -58,6 +58,7 @@
                     Width="200" 
                     Height="25"
                     ItemsSource="{Binding StaticData.GameModels}"
+                    IsHitTestVisible="{Binding IsButtonEnabled}"
                     DisplayMemberPath="Name"
                     SelectedValuePath="Id"
                     SelectedValue="{Binding BanModel.GameId}"

@@ -64,5 +64,20 @@ namespace GameAccessService_API.Controllers
             if (productId == Guid.Empty) return BadRequest();
             return Ok(new ResponseDto(true, StatusCodes.Status200OK, new HasAccess(await accessRepository.CheckUserHasProduct(productId, gameId, User.GetId()))));
         }
+
+        [HttpPost("GiveUserProduct")]
+        public async Task<ActionResult<ResponseDto>> GiveUserProduct([FromBody] GiveUserProductDto data)
+        {
+            if (!ModelState.IsValid) return BadRequest();
+
+            var product = data.ProductId != Guid.Empty ? data.ProductId : data.GameId;
+            var game = data.ProductId != Guid.Empty ? data.GameId : Guid.Empty;
+
+            var gaveAccess = await accessRepository.AddProductOrGame(data.UserId, game, product);
+            var item = data.ProductId == Guid.Empty ? "game" : "product";
+            
+            if(!gaveAccess) return CheckActionResult(new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { $"Could not give access to {item}" }));
+            return CheckActionResult(new ResponseDto(true, StatusCodes.Status200OK, new[] { $"Gave access to {item}" }));
+        }
     }
 }
