@@ -155,5 +155,17 @@ namespace VisionClient.Core.Services
 
             return response;
         }
+
+        public async Task<ResponseDto?> DeleteAccount(LoginModel data)
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.DELETE,
+                ApiUrl = $"{ConnectionData.GatewayUrl}/account/DeleteAccount",
+                Data = data
+            });
+
+            return response;
+        }
     }
 }

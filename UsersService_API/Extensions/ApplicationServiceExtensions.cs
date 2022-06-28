@@ -27,6 +27,7 @@ namespace UsersService_API.Extensions
             services.AddHostedService<RabbitMQCouponAccessConsumer>();
             services.AddHostedService<RabbitMQBanUserConsumer>();
             services.AddHostedService<RabbitMQUnbanUserConsumer>();
+            services.AddHostedService<RabbitMQDeleteUserConsumer>();
             services.AddHostedService<RabbitMQKickUserConsumer>();
             services.AddSingleton<IRabbitMQSender, RabbitMQMessageSender>();
             services.AddScoped<ICacheService, CacheService>();

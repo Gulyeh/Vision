@@ -244,6 +244,34 @@ namespace Identity_API.Repository
             return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Confirmation email has been sent. Check your mailbox" });
         }
 
+        public async Task<ResponseDto> DeleteAccount(LoginDto data)
+        {
+            var user = await userManager.Users.FirstOrDefaultAsync(u => u.Email == data.Email);
+            if (user is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "User does not exist" });
+
+            var results = await signInManager.CheckPasswordSignInAsync(user, data.Password, false);
+            if (!results.Succeeded) return new ResponseDto(false, StatusCodes.Status401Unauthorized, new[] { "Wrong email or password" });
+
+            if (user.TwoFactorEnabled && string.IsNullOrEmpty(data.AuthCode)) return new ResponseDto(false, StatusCodes.Status403Forbidden, new{});
+            else if (user.TwoFactorEnabled && !string.IsNullOrEmpty(data.AuthCode))
+            {
+                var TFAResults = await userManager.VerifyTwoFactorTokenAsync(user, userManager.Options.Tokens.AuthenticatorTokenProvider, data.AuthCode);
+                if (!TFAResults)
+                {
+                    return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Provided code is wrong" });
+                }
+            }
+
+            db.Users.Remove(user);
+            if(await db.SaveChangesAsync() > 0){
+                rabbitMQSender.SendMessage(user.Id, "DeleteAccountQueue");
+                logger.LogInformation("Deleted account for User with ID: {userId}", user.Id);
+                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Account has been deleted" });
+            }
+
+            logger.LogError("Could not delete account for User with ID: {userId}", user.Id);
+            return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Account could not be deleted" });
+        }
 
         private async Task SendConfirmationEmail(ApplicationUser user)
         {

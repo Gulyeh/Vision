@@ -17,5 +17,6 @@ namespace VisionClient.Core.Services.IServices
         Task<ResponseDto?> GetRoles();
         Task<ResponseDto?> BanUser(BanModelDto data);
         Task<ResponseDto?> UnbanUser(Guid userId);
+        Task<ResponseDto?> DeleteAccount(LoginModel data);
     }
 }

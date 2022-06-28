@@ -1,4 +1,5 @@
-﻿using VisionClient.Core.Dtos;
+﻿using Microsoft.AspNetCore.Http;
+using VisionClient.Core.Dtos;
 using VisionClient.Core.Models.Account;
 
 namespace VisionClient.Core.Repository.IRepository
@@ -17,5 +18,6 @@ namespace VisionClient.Core.Repository.IRepository
         Task<string> ChangeUserRole(Guid userId, string roleName);
         Task<(bool, string)> UnbanUser(Guid userId);
         Task<(bool, string)> BanUser(BanModelDto data);
+        Task<(string, int)> DeleteAccount(LoginModel data);
     }
 }

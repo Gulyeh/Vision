@@ -13,5 +13,6 @@ namespace Identity_API.Repository.IRepository
         Task<ResponseDto> ChangePassword(PasswordDataDto data);
         Task<ResponseDto> Toggle2FA(Guid userId, string code);
         Task<ResponseDto> Generate2FA(Guid userId);
+        Task<ResponseDto> DeleteAccount(LoginDto data);
     }
 }

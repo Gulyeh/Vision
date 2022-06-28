@@ -219,5 +219,20 @@ namespace UsersService_API.Repository
             var cachedIds = await cacheService.TryGetFromCache(HubTypes.Users);
             if (cachedIds.Any(x => x.Key == userId)) await usersHub.Clients.Clients(cachedIds[(Guid)userId]).SendAsync("UserKicked", reason); 
         }
+
+        public async Task DeleteUser(Guid userId)
+        {
+            var user = await db.Users.FirstOrDefaultAsync(x => x.UserId == userId);
+            if(user is null) return;
+
+            user.IsDeletedAccount = true;
+            user.Username = "Deleted Account";
+            user.Description = string.Empty;
+            
+            if(await db.SaveChangesAsync() > 0){
+                await KickUser(userId);
+                if(!string.IsNullOrWhiteSpace(user.PhotoId)) await uploadService.DeletePhoto(user.PhotoId);
+            }
+        }
     }
 }

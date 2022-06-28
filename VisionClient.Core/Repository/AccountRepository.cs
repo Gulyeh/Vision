@@ -183,5 +183,15 @@ namespace VisionClient.Core.Repository
             if (response is null) throw new Exception();
             return (response.isSuccess, ResponseToJsonHelper.GetJson(response));
         }
+
+        public async Task<(string, int)> DeleteAccount(LoginModel data)
+        {
+            var response = await accountService.DeleteAccount(data);
+            if (response is null) throw new Exception();
+            if (!response.isSuccess && response.Status != StatusCodes.Status403Forbidden)
+                return (ResponseToJsonHelper.GetJson(response), response.Status);
+            return (string.Empty, response.Status);
+        }
     }
 }
+

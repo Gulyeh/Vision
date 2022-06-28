@@ -67,7 +67,7 @@ namespace Identity_API.Controllers
         [HttpPost("ChangePassword")]
         public async Task<ActionResult<ResponseDto>> ChangePassword([FromBody] PasswordDataDto data)
         {
-            data.userId = HttpContext.User.GetId();
+            data.userId = User.GetId();
             if (!ModelState.IsValid || data.userId == Guid.Empty) return BadRequest(new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Wrong data" }));
             return CheckActionResult(await accountRepository.ChangePassword(data));
         }
@@ -76,7 +76,7 @@ namespace Identity_API.Controllers
         [HttpGet("Generate2FA")]
         public async Task<ActionResult<ResponseDto>> Generate2FA()
         {
-            var userId = HttpContext.User.GetId();
+            var userId = User.GetId();
             if (userId == Guid.Empty) return BadRequest(new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Wrong data" }));
             return CheckActionResult(await accountRepository.Generate2FA(userId));
         }
@@ -85,9 +85,17 @@ namespace Identity_API.Controllers
         [HttpPost("Toggle2FA")]
         public async Task<ActionResult<ResponseDto>> Toggle2FA([FromQuery] string code)
         {
-            var userId = HttpContext.User.GetId();
+            var userId = User.GetId();
             if (userId == Guid.Empty || string.IsNullOrEmpty(code)) return BadRequest(new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Wrong data" }));
             return CheckActionResult(await accountRepository.Toggle2FA(userId, code));
+        }
+
+        [Authorize]
+        [HttpDelete("DeleteAccount")]
+        public async Task<ActionResult<ResponseDto>> DeleteAccount([FromBody] LoginDto data)
+        {
+            if(!ModelState.IsValid) return BadRequest();
+            return CheckActionResult(await accountRepository.DeleteAccount(data));
         }
     }
 }
