@@ -175,5 +175,39 @@ namespace VisionClient.Core.Services
 
             return response;
         }
+
+        public async Task<ResponseDto?> BanUser(BanGameDto data)
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.PUT,
+                ApiUrl = $"{ConnectionData.GatewayUrl}/access/BanUserFromGame",
+                Data = data
+            });
+
+            return response;
+        }
+
+        public async Task<ResponseDto?> UnbanUser(Guid userId, Guid gameId)
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.DELETE,
+                ApiUrl = $"{ConnectionData.GatewayUrl}/access/UnbanUserFromGame?userId={userId}&gameId={gameId}"
+            });
+
+            return response;
+        }
+
+        public async Task<ResponseDto?> CheckIfUserIsBanned(Guid userId, Guid gameId)
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.GET,
+                ApiUrl = $"{ConnectionData.GatewayUrl}/access/CheckUserIsBanned?userId={userId}&gameId={gameId}"
+            });
+
+            return response;
+        }
     }
 }

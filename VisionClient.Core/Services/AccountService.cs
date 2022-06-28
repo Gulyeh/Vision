@@ -132,5 +132,28 @@ namespace VisionClient.Core.Services
 
             return response;
         }
+
+        public async Task<ResponseDto?> BanUser(BanModelDto data)
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.PUT,
+                ApiUrl = $"{ConnectionData.GatewayUrl}/access/BanUser",
+                Data = data
+            });
+
+            return response;
+        }
+
+        public async Task<ResponseDto?> UnbanUser(Guid userId)
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.DELETE,
+                ApiUrl = $"{ConnectionData.GatewayUrl}/access/UnbanUser?userId={userId}"
+            });
+
+            return response;
+        }
     }
 }

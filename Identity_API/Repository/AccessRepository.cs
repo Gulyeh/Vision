@@ -38,20 +38,27 @@ namespace Identity_API.Repository
             this.logger = logger;
         }
 
-        public async Task<ResponseDto> BanUser(BannedUsersDto data)
+        public async Task<ResponseDto> BanUser(BannedUsersDto data, Guid adminId)
         {
             var user = await userManager.Users.FirstOrDefaultAsync(x => x.Id == data.UserId);
-            if (user is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "User does not exist" });
+            var requester = await userManager.Users.FirstOrDefaultAsync(x => x.Id == adminId);
+            if (user is null || requester is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "User does not exist" });
 
             var alreadyBanned = await db.BannedUsers.FirstOrDefaultAsync(x => x.UserId == data.UserId);
-            if (alreadyBanned is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "User has beed already banned" });
+            if (alreadyBanned is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "User has been already banned" });
 
-            var mapped = mapper.Map<BannedUsers>(data);
-            await db.BannedUsers.AddAsync(mapped);
-            if (await db.SaveChangesAsync() > 0)
-            {
-                logger.LogInformation("User with ID: {Id} has been banned successfully", data.UserId);
-                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "User has been banned successfully" });
+            (var requesterRoleValue, string requesterRoleName) = await GetUserRankValue(requester);
+            (var userRoleValue, string userRoleName) = await GetUserRankValue(user);
+            
+            if(requesterRoleValue > userRoleValue) {
+                var mapped = mapper.Map<BannedUsers>(data);
+                await db.BannedUsers.AddAsync(mapped);
+                if (await db.SaveChangesAsync() > 0)
+                {
+                    rabbitMQSender.SendMessage(data.UserId, "BanUserQueue");
+                    logger.LogInformation("User with ID: {Id} has been banned successfully", data.UserId);
+                    return new ResponseDto(true, StatusCodes.Status200OK, new[] { "User has been banned successfully" });
+                }
             }
 
             logger.LogError("Could not ban User with ID: {Id}", data.UserId);
@@ -69,6 +76,7 @@ namespace Identity_API.Repository
             db.BannedUsers.Remove(alreadyBanned);
             if (await db.SaveChangesAsync() > 0)
             {
+                rabbitMQSender.SendMessage(userId, "UnbanUserQueue");
                 logger.LogInformation("User with ID: {Id} has been unbanned successfully", userId);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "User has been unbanned successfully" });
             }
@@ -103,26 +111,27 @@ namespace Identity_API.Repository
             if(user is null || requester is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "User does not exist" });
             if(await userManager.IsInRoleAsync(user, roleData.Name)) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "User already has this role" });
 
-            var requesterRole = await userManager.GetRolesAsync(requester);
-            var actualUserRole = await userManager.GetRolesAsync(user);
-        
-            if(actualUserRole.Any() && requesterRole.Any()){
-                var requesterRoleValue = (int)Enum.Parse(typeof(RoleValue), requesterRole.First());
-                var userRoleValue = (int)Enum.Parse(typeof(RoleValue), actualUserRole.First());
-                var requestedRoleValue = (int)Enum.Parse(typeof(RoleValue), roleData.Name);
+            (var requesterRoleValue, string requesterRoleName) = await GetUserRankValue(requester);
+            (var userRoleValue, string userRoleName) = await GetUserRankValue(user);
+            var requestedRoleValue = (int)Enum.Parse(typeof(RoleValue), roleData.Name);
 
-                if(requesterRoleValue > userRoleValue && requestedRoleValue <= requesterRoleValue){
-                    await userManager.RemoveFromRoleAsync(user, actualUserRole.First());
-                    await userManager.AddToRoleAsync(user, roleData.Name);
+            if(requesterRoleValue > userRoleValue && requestedRoleValue <= requesterRoleValue){
+                await userManager.RemoveFromRoleAsync(user, userRoleName);
+                await userManager.AddToRoleAsync(user, roleData.Name);
 
-                    rabbitMQSender.SendMessage(userId, "KickUserQueue");
-                    logger.LogInformation($"{userId} role has been changed from {actualUserRole.First()} to {roleData.Name}");
-                    return new ResponseDto(true, StatusCodes.Status200OK, new[] { $"User's role has been changed from {actualUserRole.First()} to {roleData.Name}" });              
-                }
+                rabbitMQSender.SendMessage(userId, "KickUserQueue");
+                logger.LogInformation($"{userId} role has been changed from {userRoleName} to {roleData.Name}");
+                return new ResponseDto(true, StatusCodes.Status200OK, new[] { $"User's role has been changed from {userRoleName} to {roleData.Name}" });              
             }
 
             logger.LogError($"{userId} role could not be changed");
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "User's role could not be changed" });
+        }
+
+        private async Task<(int, string)> GetUserRankValue(ApplicationUser user){
+            var userRole = await userManager.GetRolesAsync(user);
+            if(userRole.Any()) return ((int)Enum.Parse(typeof(RoleValue), userRole.First()), userRole.First());
+            return (0, StaticData.UserRole);
         }
     }
 }

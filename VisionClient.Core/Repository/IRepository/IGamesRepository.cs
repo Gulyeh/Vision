@@ -20,5 +20,8 @@ namespace VisionClient.Core.Repository.IRepository
         Task<(bool, string)> DeleteGame(Guid gameId);
         Task<(bool, string)> DeleteProduct(Guid productId, Guid gameId);
         Task<(bool, string)> EditPackage(EditPackageDto data);
+        Task<(bool, string)> BanUser(BanGameDto data);
+        Task<(bool, string)> UnbanUser(Guid userId, Guid gameId);
+        Task<(bool, string)> CheckIfUserIsBanned(Guid userId, Guid gameId);
     }
 }

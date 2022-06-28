@@ -26,20 +26,29 @@ namespace GameAccessService_API.Controllers
         }
 
         [Authorize(Policy = "HasAdminRole")]
-        [HttpPost("BanUser")]
+        [HttpPut("BanUserFromGame")]
         public async Task<ActionResult<ResponseDto>> BanUser([FromBody] UserAccessDto data)
         {
             if (!ModelState.IsValid) return BadRequest();
-            if (User?.GetId() == data.UserId) return BadRequest(new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "You cannot ban yourself" }));
+            if (User.GetId() == data.UserId) return BadRequest(new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "You cannot ban yourself" }));
             return CheckActionResult(await accessRepository.BanUserAccess(data));
         }
 
         [Authorize(Policy = "HasAdminRole")]
-        [HttpDelete("UnbanUser")]
-        public async Task<ActionResult<ResponseDto>> UnbanUser([FromBody] AccessDataDto data)
+        [HttpDelete("UnbanUserFromGame")]
+        public async Task<ActionResult<ResponseDto>> UnbanUser([FromQuery] Guid userId, [FromQuery] Guid gameId)
         {
-            if (!ModelState.IsValid) return BadRequest();
-            return CheckActionResult(await accessRepository.UnbanUserAccess(data));
+            if (userId == Guid.Empty || gameId == Guid.Empty) return BadRequest();
+            if (User.GetId() == userId) return BadRequest(new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "You cannot unban yourself" }));
+            return CheckActionResult(await accessRepository.UnbanUserAccess(userId, gameId));
+        }
+
+        [HttpGet("CheckUserIsBanned")]
+        public async Task<ActionResult<ResponseDto>> CheckUserIsBanned([FromQuery] Guid userId, [FromQuery] Guid gameId)
+        {
+            if (userId == Guid.Empty || gameId == Guid.Empty) return BadRequest();
+            if (User.GetId() == userId) return BadRequest(new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "You cannot check ban for yourself" }));
+            return CheckActionResult(new ResponseDto(true, StatusCodes.Status200OK, await accessRepository.CheckUserIsBanned(userId, gameId)));
         }
 
         [HttpGet("BoughtGame")]

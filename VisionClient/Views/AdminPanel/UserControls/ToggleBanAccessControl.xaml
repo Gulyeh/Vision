@@ -5,12 +5,15 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:VisionClient.Views.AdminPanel.UserControls"
              mc:Ignorable="d" 
+             xmlns:Converter="clr-namespace:VisionClient.Converters"
              d:DesignHeight="850" d:DesignWidth="400"
              xmlns:prism="http://prismlibrary.com/"
              xmlns:editors="http://schemas.syncfusion.com/wpf"
              prism:ViewModelLocator.AutoWireViewModel="True"
              Background="#0c3c60">
     <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <Converter:BoolNegationConverter x:Key="BoolNegation"/>
         <Style TargetType="Button">
             <Setter Property="Template">
                 <Setter.Value>
@@ -56,15 +59,17 @@
                         FontSize="12"
                         Height="25"
                         MaxLength="50"
-                        Text="{Binding CouponModel.Code}"
+                        IsHitTestVisible="{Binding IsBanned, Converter={StaticResource BoolNegation}}"
+                        Text="{Binding BanModel.Reason}"
                         Watermark="Reason"/>
             <TextBlock Text="Expires" Margin="0,20,0,0"
                        HorizontalAlignment="Center" Foreground="Gray"/>
             <editors:DateTimeEdit 
                             ShowMaskOnNullValue="True"
                             NoneDateText="Expire Date"
+                            IsHitTestVisible="{Binding IsBanned, Converter={StaticResource BoolNegation}}"
                             Height="25"
-                            DateTime="{Binding CouponModel.ExpireDate}"
+                            DateTime="{Binding BanModel.BanExpires}"
                             Width="200" Margin="0,5,0,0" Pattern="FullDateTime"/>
             <StackPanel Orientation="Vertical" Margin="0,20,0,0" Grid.Row="1">
                 <TextBlock Text="{Binding ErrorText}"
@@ -74,6 +79,7 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <Button Width="100"
                         Height="30" 
+                        IsEnabled="{Binding IsBanned, Converter={StaticResource BoolNegation}}"        
                         IsHitTestVisible="{Binding IsButtonEnabled}"
                         Content="Save"
                         Background="DarkRed"
@@ -84,10 +90,11 @@
                         Height="30" 
                         IsHitTestVisible="{Binding IsButtonEnabled}"
                         Content="Unban"
+                        Visibility="{Binding IsBanned, Converter={StaticResource BoolToVis}}"
                         Background="#0AA1DD"
                         Foreground="White"
                         Margin="10,0,0,0"
-                        Command="{Binding ExecuteCommand}"
+                        Command="{Binding ExecuteUnbanCommand}"
                         BorderThickness="0"/>
                 </StackPanel>
             </StackPanel>

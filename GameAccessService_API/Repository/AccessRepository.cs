@@ -30,17 +30,20 @@ namespace GameAccessService_API.Repository
 
         public async Task<ResponseDto> BanUserAccess(UserAccessDto data)
         {
+            var hasGame = await CheckUserHasGame(data.GameId, data.UserId);
+            if(!hasGame) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "User does not own this game" });
+
             var userAccess = await cacheService.TryGetFromCache<UserAccess>(CacheType.GameAccess, data.UserId);
             var isBanned = userAccess.FirstOrDefault(x => x.GameId == data.GameId && x.BanExpires > DateTime.UtcNow);
             if (isBanned is not null) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "User is already banned on this game" });
 
             var mapped = mapper.Map<UserAccess>(data);
-            var result = await db.UsersGameAccess.AddAsync(mapped);
+            await db.UsersGameAccess.AddAsync(mapped);
 
             if (await db.SaveChangesAsync() > 0)
             {
                 await cacheService.TryAddToCache<UserAccess>(CacheType.GameAccess, mapped);
-                logger.LogInformation("User with ID: {userId} has been banned successfuly until: {date}", data.UserId, data.ExpireDate);
+                logger.LogInformation("User with ID: {userId} has been banned successfuly until: {date}", data.UserId, data.BanExpires);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "User has been banned successfuly" });
             }
 
@@ -86,21 +89,25 @@ namespace GameAccessService_API.Repository
             return false;
         }
 
-        public async Task<ResponseDto> UnbanUserAccess(AccessDataDto data)
+        public async Task<ResponseDto> UnbanUserAccess(Guid userId, Guid gameId)
         {
-            var userAccess = await cacheService.TryGetFromCache<UserAccess>(CacheType.GameAccess, data.UserId);
-            var isBanned = userAccess.FirstOrDefault(x => x.GameId == data.GameId);
+            var userAccess = await cacheService.TryGetFromCache<UserAccess>(CacheType.GameAccess, userId);
+            var isBanned = userAccess.FirstOrDefault(x => x.GameId == gameId);
             if (isBanned is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "User is not banned in this game" });
 
             db.UsersGameAccess.Remove(isBanned);
             if (await db.SaveChangesAsync() > 0)
             {
-                await cacheService.TryRemoveFromCache<UserAccess>(CacheType.GameAccess, isBanned);
-                logger.LogInformation("User with ID: {userId} has been unbanned successfuly", data.UserId);
+                var cachedData = await cacheService.TryGetFromCache<UserAccess>(CacheType.GameAccess, userId);
+                if(cachedData is not null && cachedData.Any()) {
+                    var bannedGame = cachedData.FirstOrDefault(x => x.GameId == gameId);
+                    if(bannedGame is not null) await cacheService.TryRemoveFromCache<UserAccess>(CacheType.GameAccess, bannedGame);
+                }
+                logger.LogInformation("User with ID: {userId} has been unbanned successfuly", userId);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "User has been unbanned successfuly" });
             }
 
-            logger.LogError("User with ID: {userId} could not be unbanned", data.UserId);
+            logger.LogError("User with ID: {userId} could not be unbanned", userId);
             return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not unban a user" });
         }
 
@@ -202,6 +209,18 @@ namespace GameAccessService_API.Repository
             
             db.UsersProducts.RemoveRange(products);
             if(await db.SaveChangesAsync() > 0) await cacheService.TryUpdateCache<UserProducts>(CacheType.OwnProduct);
+        }
+
+        public async Task<bool> CheckUserIsBanned(Guid userId, Guid gameId)
+        {
+            var hasGame = await CheckUserHasGame(gameId, userId);
+            if(!hasGame) return false;
+
+            var userAccess = await cacheService.TryGetFromCache<UserAccess>(CacheType.GameAccess, userId);
+            var isBanned = userAccess.FirstOrDefault(x => x.GameId == gameId && x.BanExpires > DateTime.UtcNow);
+            if (isBanned is not null) return true;
+
+            return false;
         }
     }
 }

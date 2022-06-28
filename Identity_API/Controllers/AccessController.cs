@@ -16,13 +16,14 @@ namespace Identity_API.Controllers
             this.accessRepository = accessRepository;
         }
 
-        [HttpPost("BanUser")]
+        [HttpPut("BanUser")]
         [Authorize(Policy = "HasAdminRole")]
         public async Task<ActionResult<ResponseDto>> BanUserAccount([FromBody] BannedUsersDto data)
         {
             if (!ModelState.IsValid) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Wrong data" });
-            if (data.UserId == User.GetId()) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "You cannot ban yourself" });
-            return CheckActionResult(await accessRepository.BanUser(data));
+            var userId = User.GetId();
+            if (data.UserId == userId) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "You cannot ban yourself" });
+            return CheckActionResult(await accessRepository.BanUser(data, userId));
         }
 
         [HttpDelete("UnbanUser")]
@@ -30,6 +31,8 @@ namespace Identity_API.Controllers
         public async Task<ActionResult<ResponseDto>> UnbanUserAccount([FromQuery] Guid userId)
         {
             if (userId == Guid.Empty) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Wrong data" });
+            var adminId = User.GetId();
+            if (userId == adminId) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "You cannot unban yourself" });
             return CheckActionResult(await accessRepository.UnbanUser(userId));
         }
 

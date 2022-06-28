@@ -169,5 +169,19 @@ namespace VisionClient.Core.Repository
             if (response is null) throw new Exception();
             return ResponseToJsonHelper.GetJson(response);
         }
+
+        public async Task<(bool, string)> UnbanUser(Guid userId)
+        {
+            var response = await accountService.UnbanUser(userId);
+            if (response is null) throw new Exception();
+            return (response.isSuccess, ResponseToJsonHelper.GetJson(response));
+        }
+
+        public async Task<(bool, string)> BanUser(BanModelDto data)
+        {
+            var response = await accountService.BanUser(data);
+            if (response is null) throw new Exception();
+            return (response.isSuccess, ResponseToJsonHelper.GetJson(response));
+        }
     }
 }

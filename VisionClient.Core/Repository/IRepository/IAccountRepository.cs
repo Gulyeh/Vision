@@ -1,4 +1,5 @@
-﻿using VisionClient.Core.Models.Account;
+﻿using VisionClient.Core.Dtos;
+using VisionClient.Core.Models.Account;
 
 namespace VisionClient.Core.Repository.IRepository
 {
@@ -14,5 +15,7 @@ namespace VisionClient.Core.Repository.IRepository
         Task<bool> GetServerData();
         Task<List<string>> GetRoles();
         Task<string> ChangeUserRole(Guid userId, string roleName);
+        Task<(bool, string)> UnbanUser(Guid userId);
+        Task<(bool, string)> BanUser(BanModelDto data);
     }
 }

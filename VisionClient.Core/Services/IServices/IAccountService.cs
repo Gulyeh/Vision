@@ -15,5 +15,7 @@ namespace VisionClient.Core.Services.IServices
         Task<ResponseDto> GetServerData(Guid sessionId);
         Task<ResponseDto?> ChangeUserRole(Guid userId, string roleName);
         Task<ResponseDto?> GetRoles();
+        Task<ResponseDto?> BanUser(BanModelDto data);
+        Task<ResponseDto?> UnbanUser(Guid userId);
     }
 }

@@ -18,5 +18,8 @@ namespace VisionClient.Core.Services.IServices
         Task<ResponseDto?> DeleteGame(Guid gameId);
         Task<ResponseDto?> DeletePackage(Guid packageId, Guid gameId);
         Task<ResponseDto?> EditPackage(EditPackageDto data);
+        Task<ResponseDto?> BanUser(BanGameDto data);
+        Task<ResponseDto?> UnbanUser(Guid userId, Guid gameId);
+        Task<ResponseDto?> CheckIfUserIsBanned(Guid userId, Guid gameId);
     }
 }

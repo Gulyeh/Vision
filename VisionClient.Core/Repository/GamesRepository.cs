@@ -137,5 +137,27 @@ namespace VisionClient.Core.Repository
             if (response is null) throw new Exception();
             return (response.isSuccess, ResponseToJsonHelper.GetJson(response));
         }
+
+        public async Task<(bool, string)> BanUser(BanGameDto data)
+        {
+            var response = await gamesService.BanUser(data);
+            if (response is null) throw new Exception();
+            return (response.isSuccess, ResponseToJsonHelper.GetJson(response));
+        }
+
+        public async Task<(bool, string)> UnbanUser(Guid userId, Guid gameId)
+        {
+            var response = await gamesService.UnbanUser(userId, gameId);
+            if (response is null) throw new Exception();
+            return (response.isSuccess, ResponseToJsonHelper.GetJson(response));
+        }
+
+        public async Task<(bool, string)> CheckIfUserIsBanned(Guid userId, Guid gameId)
+        {
+            var response = await gamesService.CheckIfUserIsBanned(userId, gameId);
+            if (response is null) throw new Exception();
+            if(!response.isSuccess) return (false, ResponseToJsonHelper.GetJson(response));
+            return ((bool)response.Response, string.Empty);
+        }
     }
 }

@@ -6,6 +6,7 @@ namespace VisionClient.Core.Helpers
     {
         public static void OpenUrl(string url)
         {
+            if (string.IsNullOrEmpty(url)) return;
             Process.Start(new ProcessStartInfo
             {
                 FileName = url,

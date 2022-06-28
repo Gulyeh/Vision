@@ -4,7 +4,7 @@ namespace Identity_API.Repository.IRepository
 {
     public interface IAccessRepository
     {
-        Task<ResponseDto> BanUser(BannedUsersDto data);
+        Task<ResponseDto> BanUser(BannedUsersDto data, Guid adminId);
         Task<ResponseDto> UnbanUser(Guid userId);
         Task<ResponseDto> GetServerData(Guid sessionToken, Guid userId);
         Task<IEnumerable<string>> GetRoles();

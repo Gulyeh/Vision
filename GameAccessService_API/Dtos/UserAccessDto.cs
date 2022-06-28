@@ -14,7 +14,12 @@ namespace GameAccessService_API.Dtos
         [Required]
         public Guid GameId { get; set; }
         public string Reason { get; set; }
+        private DateTime banExpires;
         [Required]
-        public DateTime ExpireDate { get; set; }
+        public DateTime BanExpires 
+        { 
+            get => banExpires; 
+            set => banExpires = value.ToUniversalTime();
+        }
     }
 }
