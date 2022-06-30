@@ -1,0 +1,276 @@
+﻿<Window x:Class="VisionClient.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:prism="http://prismlibrary.com/"
+        prism:ViewModelLocator.AutoWireViewModel="True"
+        xmlns:local="clr-namespace:VisionClient" 
+        xmlns:tb="http://www.hardcodet.net/taskbar"
+        xmlns:notifications="clr-namespace:Notification.Wpf.Controls;assembly=Notification.Wpf"
+        mc:Ignorable="d"
+        Title="Vision"
+        Name="MainVisionWindow"
+        WindowStyle="None" WindowState="Normal" ResizeMode="CanResize"
+        MinHeight="700" MinWidth="1050"
+        Height="700" Width="1250"
+        WindowStartupLocation="CenterScreen"
+        BorderThickness="2" BorderBrush="#0f3452"
+        Closed="Window_Closed"
+        PreviewKeyDown="Window_PreviewKeyDown" KeyboardNavigation.TabNavigation="None">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0"/>
+    </WindowChrome.WindowChrome>
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <Style TargetType="Button" x:Key="NaviButtons">
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="0.5"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Opacity" Value="0.8"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style TargetType="Button" x:Key="VisionButton">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border">
+                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="ToggleButton" x:Key="ToggleMenuButton">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="Border">
+                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Border" Property="Opacity" Value="1"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="False">
+                                <Setter TargetName="Border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="RadioButton" BasedOn="{StaticResource {x:Type ToggleButton}}" x:Key="ToggleNavigation">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="Border">
+                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Border" Property="Opacity" Value="1"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="False">
+                                <Setter TargetName="Border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="Button" x:Key="BuyButton">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border" Background="{TemplateBinding Background}">
+                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Opacity" Value="0.8"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Window.Visibility>
+        <Binding Path="IsWindowVisible" Mode="TwoWay" Converter="{StaticResource BoolToVis}" />
+    </Window.Visibility>
+
+    <Grid UseLayoutRounding="True">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+        
+        <tb:TaskbarIcon Name="NotfyIcon"
+                        Visibility="Visible"
+                        ToolTipText="Vision"
+                        MenuActivation="RightClick"
+                        LeftClickCommand="{Binding SwitchVisibilityCommand}"
+                        LeftClickCommandParameter="Show"
+                        
+                        IconSource="pack://application:,,,/Vision.ico">
+            <tb:TaskbarIcon.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Vision Client" IsEnabled="False"/>
+                    <Separator/>
+                    <MenuItem Header="Show" Command="{Binding SwitchVisibilityCommand}"
+                        CommandParameter="Show"/>
+                    <MenuItem Header="Exit" Click="ExitApplication"/>
+                </ContextMenu>
+            </tb:TaskbarIcon.ContextMenu>
+        </tb:TaskbarIcon>
+        
+        <notifications:NotificationArea Panel.ZIndex="3" Grid.Row="1" x:Name="MainWindowArea" Position="BottomRight" MaxItems="3"/>
+        <Border Background="Black" Grid.Row="0" Grid.RowSpan="2" 
+                Panel.ZIndex="1" Opacity="0.5"
+                Visibility="{Binding BorderVisibility, Mode=OneWay}"/>
+        <DockPanel Grid.Row="0" Background="#0f3452" MouseLeftButtonDown="StackPanel_MouseLeftButtonDown">
+            <DockPanel Grid.Row="0" DockPanel.Dock="Right">
+                <Button Margin="0,0,10,0" Style="{StaticResource NaviButtons}"
+                        DockPanel.Dock="Right" Height="25"
+                        Background="Transparent" Width="28"
+                        BorderThickness="0"
+                        Command="{Binding SwitchVisibilityCommand}"
+                        CommandParameter="Hide">
+                    <Image Source="pack://application:,,,/Images/Exit.png" 
+                           Height="12"
+                           Width="20"
+                           DockPanel.Dock="Right"/>
+                </Button>
+                <Button Margin="0,0,10,0" DockPanel.Dock="Right" 
+                        Height="25" Width="28" Background="Transparent"
+                        BorderThickness="0" Style="{StaticResource NaviButtons}"
+                        Click="MaximizeApplication">
+                    <Image Source="pack://application:,,,/Images/Maximize.png" 
+                           Height="12"
+                           Width="20"
+                           DockPanel.Dock="Right"/>
+                </Button>
+                <Button Margin="0,0,10,0" DockPanel.Dock="Right"
+                        Height="25" Width="28" Background="Transparent"
+                        BorderThickness="0" Style="{StaticResource NaviButtons}"
+                        Click="MinimizeApplication">
+                    <Image Source="pack://application:,,,/Images/Minimize.png" 
+                           Height="12"
+                           Width="20"
+                           DockPanel.Dock="Right"/>
+                </Button>
+                <RadioButton Height="25"
+                    Background="Transparent" 
+                    GroupName="NaviButtons"
+                    Style="{StaticResource ToggleNavigation}"
+                    Content="Settings"
+                    BorderThickness="0" 
+                    Foreground="White" 
+                    FontWeight="Medium" 
+                    FontSize="13" 
+                    DockPanel.Dock="Right" 
+                    Margin="0,0,40,0"
+                    Command="{Binding NavigateCommand}"
+                    CommandParameter="SettingsControl">
+                </RadioButton>
+            </DockPanel>
+            <DockPanel DockPanel.Dock="Left" Grid.Row="0">
+                <RadioButton Background="Transparent"
+                    Content="Home"
+                    IsChecked="True"
+                    GroupName="NaviButtons"
+                    Style="{StaticResource ToggleNavigation}"
+                    BorderThickness="0" 
+                    Foreground="White" 
+                    FontWeight="Medium" 
+                    Height="25" 
+                    FontSize="13" 
+                    DockPanel.Dock="Left"  
+                    Margin="20,0,0,0"
+                    Command="{Binding NavigateCommand}"
+                    CommandParameter="HomeControl">
+                </RadioButton>
+                <RadioButton Height="25"
+                    Background="Transparent"
+                    GroupName="NaviButtons"
+                    Style="{StaticResource ToggleNavigation}"
+                    Content="Library"
+                    BorderThickness="0" 
+                    Foreground="White" 
+                    FontWeight="Medium" 
+                    FontSize="13" 
+                    DockPanel.Dock="Left" 
+                    Margin="20,0,0,0"
+                    Command="{Binding NavigateCommand}"
+                    CommandParameter="LibraryControl">
+                </RadioButton>
+            </DockPanel>
+            <ToggleButton Margin="83,0,0,0" HorizontalAlignment="Center" 
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Name="VisionButton"
+                    Style="{StaticResource ToggleMenuButton}">
+                <Image Source="pack://application:,,,/Images/VisionLogo.png" Height="30"/>
+            </ToggleButton>
+        </DockPanel>
+        <Border Grid.Row="1" Panel.ZIndex="1" HorizontalAlignment="Center" 
+                VerticalAlignment="Top" Height="90" Width="100" Background="#0f3452"
+                Visibility="{Binding ElementName=VisionButton, Path=IsChecked, Converter={StaticResource BoolToVis}}">
+            <StackPanel Orientation="Vertical"
+                            HorizontalAlignment="Center" 
+                            VerticalAlignment="Center"
+                            Margin="10,10,10,10">
+                <TextBlock Text="{Binding StaticData.UserData.CurrencyValue}" FontSize="14" Foreground="DarkGoldenrod"
+                           HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,10"/>
+                <Button Content="Buy More"
+                        Style="{StaticResource BuyButton}"
+                        Command="{Binding BuyMoreCommand}"
+                        Background="Transparent"
+                        Foreground="White"
+                        FontSize="12"
+                        VerticalAlignment="Bottom"
+                        HorizontalAlignment="Center"/>
+                <Button Content="Use Code"
+                        Style="{StaticResource BuyButton}"
+                        Command="{Binding UseCodeCommand}"
+                        Margin="0,10,0,0"
+                        Background="Transparent"
+                        Foreground="White"
+                        FontSize="12"
+                        VerticalAlignment="Bottom"
+                        HorizontalAlignment="Center"/>
+
+            </StackPanel>
+            <Border.Effect>
+                <DropShadowEffect Color="Black" 
+                                  Direction="280" 
+                                  ShadowDepth="1" 
+                                  BlurRadius="10"/>
+            </Border.Effect>
+        </Border>
+        <ContentControl Grid.Row="1" 
+                        Grid.Column="0" 
+                        prism:RegionManager.RegionName="ContentRegion"
+                        Panel.ZIndex="0">
+            <ContentControl.Effect>
+                <DropShadowEffect Color="Black" 
+                                  Direction="80" 
+                                  ShadowDepth="1" 
+                                  BlurRadius="5"/>
+            </ContentControl.Effect>
+        </ContentControl>
+    </Grid>
+</Window>

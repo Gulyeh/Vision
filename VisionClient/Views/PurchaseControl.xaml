@@ -1,0 +1,245 @@
+﻿<UserControl x:Class="VisionClient.Views.PurchaseControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:VisionClient.Views"
+             xmlns:prism="http://prismlibrary.com/" 
+             xmlns:Converters="clr-namespace:VisionClient.Converters"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             mc:Ignorable="d" 
+             Background="#164971"
+             d:DesignHeight="800" d:DesignWidth="800"
+             Loaded="ResetControls_Loaded">
+    <UserControl.Resources>
+        <Converters:DiscountToVisibilityConverter x:Key="DiscountToVis"/>
+        <Converters:NullToBooleanConverter x:Key="NullToBool"/>
+        <Style TargetType="Button">
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="Width" Value="100"/>
+            <Setter Property="Height" Value="33"/>
+            <Setter Property="Background" Value="#0AA1DD"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#0f3452"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Name="Border" Background="{TemplateBinding Background}">
+                            <ContentPresenter VerticalAlignment="Center"
+                                          HorizontalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.3"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="Button" x:Key="ArrowButton">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border">
+                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Hidden"
+                  CanContentScroll="False">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="200"/>
+                <RowDefinition Height="150"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="130"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <DockPanel Grid.Row="0">
+                <Button Name="BackButton" Foreground="White"
+                        Style="{StaticResource ArrowButton}"
+                        Command="{Binding GoBackCommand}"
+                        BorderThickness="0" 
+                        Background="Transparent"
+                        FontSize="45" 
+                        Width="20"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Margin="20,20,0,0"
+                        Panel.ZIndex="1">
+                    <Image Source="pack://application:,,,/Images/LeftArrow.png" Height="20"/>
+                </Button>
+                <Image Margin="-30,0,0,0"
+                       Source="{Binding Product.PhotoUrl, IsAsync=True}"
+                       HorizontalAlignment="Center"                 
+                       DockPanel.Dock="Top">
+                    <Image.OpacityMask>
+                        <RadialGradientBrush RadiusY="3">
+                            <GradientStop Color="#00000000" Offset="1"/>
+                            <GradientStop Color="Black" Offset="0.5"/>
+                        </RadialGradientBrush>
+                    </Image.OpacityMask>
+                </Image>
+            </DockPanel>
+            <DockPanel Grid.Row="1" >
+                <Border Background="#0f3452" DockPanel.Dock="Top" Margin="0,0,0,10">
+                    <TextBlock Text="{Binding Product.Title}" FontSize="20" 
+                           Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,10,0,10"/>
+                </Border>
+                <Border Background="#0f3452" CornerRadius="5" BorderThickness="0" Width="120" Height="50"
+                        Margin="0,5,0,20">
+                    <DockPanel>
+                        <Border Background="DarkRed" CornerRadius="16" Height="25" Width="25"
+                                        Margin="0,-12,-10,0" VerticalAlignment="Top" DockPanel.Dock="Right"
+                                        Visibility="{Binding Product.Discount, Converter={StaticResource DiscountToVis}}">
+                            <TextBlock Text="{Binding Product.DiscountText}" Foreground="White" FontSize="8"
+                                                VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="{Binding Product.Price, StringFormat=C, UpdateSourceTrigger=PropertyChanged}" FontSize="20" VerticalAlignment="Center" 
+                           Foreground="White" HorizontalAlignment="Center" Margin="17,0,0,0"/>
+                    </DockPanel>
+                </Border>
+            </DockPanel>
+            <DockPanel Grid.Row="2" Margin="0,0,0,20">
+                <TextBlock Text="Includes:" FontSize="15" 
+                           Foreground="Gray" HorizontalAlignment="Left" 
+                           DockPanel.Dock="Top" Margin="20,10,0,10"/>
+                <Border Background="#0f3452">
+                    <ItemsControl HorizontalAlignment="Center" ItemsSource="{Binding Product.DetailsList}" Margin="10,10,10,30">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <BulletDecorator Width="Auto">
+                                    <BulletDecorator.Bullet>
+                                        <Ellipse Fill="DarkGray" Stroke="DarkGray" StrokeThickness="1" Width="8" Height="8"/>
+                                    </BulletDecorator.Bullet>
+                                    <TextBlock Text="{Binding}" Foreground="LightGray" FontSize="18" Margin="10,0,0,0" TextWrapping="Wrap"/>
+                                </BulletDecorator>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                        <ItemsControl.ItemContainerStyle>
+                            <Style>
+                                <Setter Property="FrameworkElement.Margin" Value="0,20,0,0"/>
+                                <Setter Property="FrameworkElement.HorizontalAlignment" Value="Center"/>
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
+                    </ItemsControl>
+                </Border>
+            </DockPanel>
+            <DockPanel Grid.Row="3">
+                <TextBlock Text="Payment Method:" FontSize="15" 
+                           Foreground="Gray" HorizontalAlignment="Left" 
+                           DockPanel.Dock="Top" Margin="20,10,0,0"/>
+                <ListView Background="Transparent" 
+                          PreviewMouseWheel="HandlePreviewMouseWheel"
+                          Name="PaymentList"
+                          BorderThickness="0"
+                          VirtualizingPanel.ScrollUnit="Pixel"
+                          ScrollViewer.HorizontalScrollBarVisibility="Auto" 
+                          HorizontalAlignment="Left"
+                          SelectionMode="Single"
+                          Margin="20,0,10,0"
+                          SelectionChanged="PaymentList_SelectionChanged"
+                          ItemsSource="{Binding PaymentMethodsList}"
+                          SelectedItem="{Binding SelectedPayment, Mode=OneWayToSource}"
+                          ScrollViewer.CanContentScroll="False">
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel VerticalAlignment="Center" Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <DockPanel Width="100" Height="70" Background="#0AA1DD">
+                                <DockPanel>
+                                    <Image Source="{Binding PhotoUrl, IsAsync=True}"
+                                            Height="40" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                </DockPanel>
+                                <DockPanel.Effect>
+                                    <DropShadowEffect/>
+                                </DockPanel.Effect>
+                            </DockPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="Margin" Value="0,0,20,0" />
+                            <Setter Property="IsHitTestVisible" Value="{Binding IsAvailable}"/>
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                        <ContentPresenter />
+                                        <ControlTemplate.Triggers>
+                                            <MultiTrigger>
+                                                <MultiTrigger.Conditions>
+                                                    <Condition Property="IsMouseOver" Value="True"/>
+                                                    <Condition Property="IsSelected" Value="False"/>
+                                                </MultiTrigger.Conditions>
+                                                <MultiTrigger.Setters>
+                                                    <Setter Property="Opacity" Value="0.5"/>
+                                                </MultiTrigger.Setters>
+                                            </MultiTrigger>
+                                            <Trigger Property="IsSelected" Value="true">
+                                                <Setter Property="IsHitTestVisible" Value="False"/>
+                                                <Setter Property="Opacity" Value="0.5"/>
+                                            </Trigger>
+                                            <Trigger Property="IsHitTestVisible" Value="False">
+                                                <Setter Property="Opacity" Value="0.3"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                </ListView>
+            </DockPanel>
+            <DockPanel Grid.Row="4" Margin="20,40,20,40" VerticalAlignment="Bottom">
+                <DockPanel DockPanel.Dock="Top">
+                    <TextBlock Text="Discount Code:" FontSize="13" Margin="0,0,0,5"
+                       Foreground="Gray" />
+                    <TextBlock Text="{Binding ErrorText}" FontSize="10" Margin="0,0,0,5"
+                       Foreground="Red" HorizontalAlignment="Right"/>
+                </DockPanel>
+                <Border Width="350"
+                        Background="DarkGray"
+                        HorizontalAlignment="Left">
+                    <DockPanel IsHitTestVisible="{Binding CouponCodeVerified, Converter={StaticResource NullToBool}}">
+                        <Button Width="88" Content="Apply Code"
+                                Command="{Binding ApplyCodeCommand}"/>
+                        <TextBox Text="{Binding Code, Mode=OneWayToSource}"
+                                 Name="CodeText"
+                                 FontSize="15"
+                                 MaxLength="50"
+                                 Margin="10,5,10,5"
+                                 BorderThickness="0"
+                                 HorizontalAlignment="Stretch"
+                                 Foreground="Black"
+                                 Background="Transparent"/>
+                    </DockPanel>
+                </Border>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Name="PayButton"
+                            Content="Pay"
+                            IsEnabled="False"
+                            Command="{Binding ExecutePayment}"/>
+                </StackPanel>
+            </DockPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

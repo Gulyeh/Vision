@@ -1,0 +1,244 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <PackageIcon>Vision.png</PackageIcon>
+    <ApplicationIcon>Vision.ico</ApplicationIcon>
+    <Product>$(AssemblyName)</Product>
+    <Company>$(Authors)</Company>
+    <Version>1.4.2</Version>
+    <Authors>$(AssemblyName)</Authors>
+    <PackageId>$(AssemblyName)</PackageId>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Images\Add.png" />
+    <None Remove="Images\AddBanner.png" />
+    <None Remove="Images\AddHomeBanner.png" />
+    <None Remove="Images\AddIcon.png" />
+    <None Remove="Images\AppleStore.png" />
+    <None Remove="Images\Exit.png" />
+    <None Remove="Images\Facebook.png" />
+    <None Remove="Images\Google.png" />
+    <None Remove="Images\GooglePlay.png" />
+    <None Remove="Images\LeftArrow.png" />
+    <None Remove="Images\Maximize.png" />
+    <None Remove="Images\Minimize.png" />
+    <None Remove="Images\NoAttachment.png" />
+    <None Remove="Images\NotFound.png" />
+    <None Remove="Images\RightArrow.png" />
+    <None Remove="Images\SendMessage.png" />
+    <None Remove="Images\VisionLogo.png" />
+    <None Remove="Resources\password.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Images\AddBanner.png" />
+    <Resource Include="Images\AddHomeBanner.png" />
+    <Resource Include="Images\AddIcon.png" />
+    <Resource Include="Images\AppleStore.png" />
+    <Resource Include="Images\Google.png" />
+    <Resource Include="Images\NoAttachment.png" />
+    <Resource Include="Vision.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Autoupdater.NET.Official" Version="1.7.3" />
+    <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="1.1.0" />
+    <PackageReference Include="Notification.WPF" Version="6.1.0.5" />
+    <PackageReference Include="Prism.Unity" Version="8.1.97" />
+    <PackageReference Include="Prism.Unity.Extensions" Version="8.0.62" />
+    <PackageReference Include="Prism.Wpf" Version="8.1.97" />
+    <PackageReference Include="QRCoder" Version="1.4.3" />
+    <PackageReference Include="Syncfusion.SfGrid.WPF" Version="20.2.0.36" />
+    <PackageReference Include="Syncfusion.SfInput.WPF" Version="20.2.0.36" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\VisionClient.Core\VisionClient.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Images\Add.png" />
+    <Resource Include="Images\Exit.png" />
+    <Resource Include="Images\Facebook.png" />
+    <Resource Include="Images\GooglePlay.png" />
+    <Resource Include="Images\LeftArrow.png" />
+    <Resource Include="Images\Maximize.png" />
+    <Resource Include="Images\Minimize.png" />
+    <Resource Include="Images\NotFound.png" />
+    <Resource Include="Images\RightArrow.png" />
+    <Resource Include="Images\SendMessage.png" />
+    <Resource Include="Images\VisionLogo.png" />
+    <Resource Include="Resources\password.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Views\AdminPanel\ManageControls\EditCouponControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\AdminPanel\ManageControls\EditUsersControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\AdminPanel\ManageControls\ManageCouponsControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\AdminPanel\ManageControls\ManageUsersControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\AdminPanel\ManageControls\ManageOrdersControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\AdminPanel\ManageControls\ManagePaymentControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\AdminPanel\ManageControls\EditPackageControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\AdminPanel\ManageControls\ManageGamesControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\AdminPanel\ManageControls\ManageProductsControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\AdminPanel\UserControls\ChangeUserRoleControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\AdminPanel\UserControls\GiveUserProductControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\AdminPanel\UserControls\ChangeUserCurrencyControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\AdminPanel\UserControls\UserUsedCodesControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\AdminPanel\UserControls\ToggleBanAccessControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\AdminPanel\UserControls\ToggleBanGameControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\Dialogs\PurchaseProgressControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\Dialogs\InformationControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\Login\Dialogs\ResendEmailControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\Login\Dialogs\ForgotPasswordControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Views\AdminPanel\ManageControls\EditCouponControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\AdminPanel\ManageControls\EditUsersControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\AdminPanel\ManageControls\ManageCouponsControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\AdminPanel\ManageControls\ManageUsersControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\AdminPanel\ManageControls\ManageOrdersControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\AdminPanel\ManageControls\ManagePaymentControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\AdminPanel\ManageControls\EditPackageControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\AdminPanel\ManageControls\ManageGamesControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\AdminPanel\ManageControls\ManageProductsControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\AdminPanel\UserControls\ChangeUserRoleControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\AdminPanel\UserControls\GiveUserProductControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\AdminPanel\UserControls\ChangeUserCurrencyControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\AdminPanel\UserControls\UserUsedCodesControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\AdminPanel\UserControls\ToggleBanAccessControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\AdminPanel\UserControls\ToggleBanGameControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Dialogs\PurchaseProgressControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Dialogs\InformationControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Login\Dialogs\ResendEmailControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Login\Dialogs\ForgotPasswordControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="C:\Users\Gulyeh\.nuget\packages\prism.unity.extensions\8.0.62\buildTransitive\PreserveContainerExtension.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="C:\Users\Gulyeh\.nuget\packages\prism.unity.extensions\8.0.62\buildTransitive\PreserveContainerExtension.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="C:\Users\Gulyeh\.nuget\packages\prism.unity.extensions\8.0.62\buildTransitive\PreserveContainerExtension.cs" />
+  </ItemGroup>
+
+</Project>

@@ -1,25 +1,22 @@
+using Ocelot.DependencyInjection;
+using Ocelot.Middleware;
+using Serilog;
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+builder.Host.UseSerilog((context, config) =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    config.WriteTo.Console();
+    config.WriteTo.Seq(builder.Configuration["SeqServer"], apiKey: builder.Configuration["SeqAPI"]);
+    config.MinimumLevel.Information();
+    config.Enrich.FromLogContext();
+    config.Enrich.WithMachineName();
+    config.Enrich.WithProcessId();
+    config.Enrich.WithThreadId();
+    config.MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning);
+});
 
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
+builder.Services.AddCors();
+builder.Services.AddOcelot();
+var app = builder.Build();
+app.UseCors(x => x.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+await app.UseOcelot();
+app.Run("http://*:7271");

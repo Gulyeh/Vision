@@ -1,0 +1,101 @@
+﻿<UserControl x:Class="VisionClient.Views.AdminPanel.AddControls.AddPaymentControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:VisionClient.Views.AdminPanel.AddControls"
+             mc:Ignorable="d" 
+             xmlns:prism="http://prismlibrary.com/"
+             xmlns:editors="http://schemas.syncfusion.com/wpf"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             d:DesignHeight="850" d:DesignWidth="600" 
+             Background="#0c3c60">
+    <UserControl.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border" 
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Background="{TemplateBinding Background}">
+                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Opacity" Value="0.8"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Border" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    <ScrollViewer Grid.Column="0" CanContentScroll="False" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled">
+        <Grid>
+            <StackPanel Orientation="Vertical" 
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Top"
+                        Margin="0,20,0,0">
+                <Button Width="80" Height="80" 
+                            Background="Transparent" BorderThickness="1"
+                            Command="{Binding OpenImageCommand}"
+                            CommandParameter="Icon">
+                    <Image Source="{Binding IconImage, IsAsync=True}"/>
+                </Button>
+                <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+                    <ComboBox
+                        Width="200" 
+                        Height="25"
+                        Foreground="Black"
+                        VerticalAlignment="Center"
+                        ItemsSource="{Binding ProvidersList}"
+                        SelectedValue="{Binding PaymentMethod.Provider}"
+                        BorderThickness="0"/>
+                    <Button Width="100"
+                        Height="30" 
+                        Content="Update List"
+                        Background="#0AA1DD"
+                        Foreground="White"
+                        Command="{Binding ExecuteUpdateCommand}"
+                        BorderThickness="0"
+                        Margin="10,0,0,0"
+                        HorizontalAlignment="Left"/>
+                </StackPanel>
+                <editors:ComboBoxAdv 
+                              Width="100" 
+                              Height="25"
+                              Background="#164971"
+                              Foreground="Black" 
+                              SelectedValue="{Binding PaymentMethod.IsAvailable}"
+                              SelectedValuePath="Tag"
+                              DefaultText="Is Available"
+                              Margin="0,20,0,0">
+                    <editors:ComboBoxItemAdv Content="Is Available" FontSize="10" IsEnabled="False"/>
+                    <editors:ComboBoxItemAdv Content="True" Tag="True" FontSize="10"/>
+                    <editors:ComboBoxItemAdv Content="False" Tag="False" FontSize="10"/>
+                </editors:ComboBoxAdv>
+                <StackPanel Orientation="Vertical" Margin="0,25,0,0" >
+                    <TextBlock Text="{Binding ErrorText}"
+                       FontSize="10" Foreground="Red"
+                       Margin="0,0,0,10"
+                       HorizontalAlignment="Center"/>
+                    <Button Width="100"
+                            Height="30" 
+                            IsHitTestVisible="{Binding IsButtonEnabled}"
+                            Content="Save"
+                            Background="#0AA1DD"
+                            Foreground="White"
+                            Command="{Binding ExecuteCommand}"
+                            BorderThickness="0"/>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

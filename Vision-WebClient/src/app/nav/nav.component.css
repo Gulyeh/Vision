@@ -1,0 +1,15 @@
+.container{
+    justify-content: center;
+    display: flex;
+}
+
+img{
+    margin-top: 10px;
+    height: 50px;
+    width: 50px;
+}
+
+nav{
+    background-color: #0f3452;
+    height: 70px;
+}
