@@ -9,10 +9,11 @@
     <ApplicationIcon>Vision.ico</ApplicationIcon>
     <Product>$(AssemblyName)</Product>
     <Company>$(Authors)</Company>
-    <Version>1.4</Version>
+    <Version>1.4.2</Version>
     <Authors>$(AssemblyName)</Authors>
     <PackageId>$(AssemblyName)</PackageId>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <ItemGroup>

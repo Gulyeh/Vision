@@ -96,6 +96,7 @@
                 PreviewMouseWheel="HandlePreviewMouseWheel"
                 QueryRowHeight="dataGrid_QueryRowHeight"
                 ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                 ShowRowHeader="False"
                 AllowEditing="False"
                 Foreground="White">

@@ -120,6 +120,7 @@ namespace VisionClient.SignalR
             if (MessageHubConnection is null) return;
             await MessageHubConnection.DisposeAsync();
             MessageHubConnection = null;
+            StaticData.Messages.Clear();
         }
 
         public async Task Send(string methodName, object? data)

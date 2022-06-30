@@ -19,6 +19,7 @@ import { InternalServerComponent } from './errors/internal-server/internal-serve
 import { ErrorInterceptor } from './_interceptors/error.interceptor';
 import { UnauthorizedComponent } from './errors/unauthorized/unauthorized.component';
 import { HashLocationStrategy, LocationStrategy } from '@angular/common';
+import { HomeComponent } from './home/home.component';
 
 @NgModule({
   declarations: [
@@ -32,6 +33,7 @@ import { HashLocationStrategy, LocationStrategy } from '@angular/common';
     BadRequestComponent,
     InternalServerComponent,
     UnauthorizedComponent,
+    HomeComponent,
   ],
   imports: [
     BrowserModule,

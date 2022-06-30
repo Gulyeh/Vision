@@ -6,6 +6,7 @@ import { BadRequestComponent } from './errors/bad-request/bad-request.component'
 import { InternalServerComponent } from './errors/internal-server/internal-server.component';
 import { NotFoundComponent } from './errors/not-found/not-found.component';
 import { UnauthorizedComponent } from './errors/unauthorized/unauthorized.component';
+import { HomeComponent } from './home/home.component';
 import { FailedComponent } from './payment/failed/failed.component';
 import { SuccessComponent } from './payment/success/success.component';
 
@@ -18,7 +19,8 @@ const routes: Routes = [
   {path: 'error/badrequest', component:BadRequestComponent},
   {path: 'error/internal', component:InternalServerComponent},
   {path: 'error/unauthorized', component:UnauthorizedComponent},
-  {path: '**', component: NotFoundComponent, pathMatch: 'full'}
+  {path: '', component: HomeComponent},
+  {path: '**', component: HomeComponent, pathMatch: 'full'}
 ];
 
 @NgModule({
