@@ -297,6 +297,11 @@ namespace VisionClient.SignalR
                 await Disconnect();
             });
 
+            userHubConnection.On<int>("UserCurrencyChanged", (amount) =>
+            {
+                StaticData.UserData.CurrencyValue += amount;
+            });
+
             userHubConnection.On<ChangedUserDataDto>("ChangedData", (userData) =>
             {
                 if (userData is null) return;

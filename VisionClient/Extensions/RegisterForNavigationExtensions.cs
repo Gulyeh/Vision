@@ -56,6 +56,7 @@ namespace VisionClient.Extensions
             containerRegistry.RegisterForNavigation<ChangeUserRoleControl>("ChangeUserRoleControl");
             containerRegistry.RegisterForNavigation<KickControl>("KickControl");
             containerRegistry.RegisterForNavigation<TransactionsHistoryControl>("TransactionsHistoryControl");
+            containerRegistry.RegisterForNavigation<ChangeUserCurrencyControl>("ChangeUserCurrencyControl");
         }
     }
 }

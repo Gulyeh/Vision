@@ -60,6 +60,7 @@ namespace VisionClient
             ViewModelLocationProvider.Register(typeof(GiveUserProductControl).ToString(), typeof(GiveUserProductControlViewModel));
             ViewModelLocationProvider.Register(typeof(ChangeUserRoleControl).ToString(), typeof(ChangeUserRoleControlViewModel));
             ViewModelLocationProvider.Register(typeof(TransactionsHistoryControl).ToString(), typeof(TransactionsHistoryControlViewModel));
+            ViewModelLocationProvider.Register(typeof(ChangeUserCurrencyControl).ToString(), typeof(ChangeUserCurrencyControlViewModel));
         }
     }
 }

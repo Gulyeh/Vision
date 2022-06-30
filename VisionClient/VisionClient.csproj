@@ -9,9 +9,10 @@
     <ApplicationIcon>Vision.ico</ApplicationIcon>
     <Product>$(AssemblyName)</Product>
     <Company>$(Authors)</Company>
-    <Version>1.1.0</Version>
+    <Version>1.4</Version>
     <Authors>$(AssemblyName)</Authors>
     <PackageId>$(AssemblyName)</PackageId>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
 
   <ItemGroup>
@@ -115,6 +116,9 @@
     <Compile Update="Views\AdminPanel\UserControls\GiveUserProductControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\AdminPanel\UserControls\ChangeUserCurrencyControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\AdminPanel\UserControls\UserUsedCodesControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -187,6 +191,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\AdminPanel\UserControls\GiveUserProductControl.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\AdminPanel\UserControls\ChangeUserCurrencyControl.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>

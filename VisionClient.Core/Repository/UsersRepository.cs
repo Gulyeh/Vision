@@ -16,6 +16,13 @@ namespace VisionClient.Core.Repository
             this.StaticData = staticData;
         }
 
+        public async Task<string> ChangeCurrency(Guid userId, int Amount)
+        {
+            var response = await usersService.ChangeCurrency(userId, Amount);
+            if (response == null) throw new Exception();
+            return ResponseToJsonHelper.GetJson(response);
+        }
+
         public async Task ChangePhoto(string image)
         {
             var response = await usersService.ChangePhoto(image);

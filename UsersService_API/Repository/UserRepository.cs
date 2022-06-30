@@ -212,8 +212,8 @@ namespace UsersService_API.Repository
 
         public async Task KickUser(Guid userId, string? reason = null)
         {
-            var cachedIds = await cacheService.TryGetFromCache(HubTypes.Users);
-            if (cachedIds.Any(x => x.Key == userId)) await usersHub.Clients.Clients(cachedIds[(Guid)userId]).SendAsync("UserKicked", reason);
+            var cachedIds = await CheckUserIsOnline(userId, HubTypes.Users);
+            if (cachedIds.Any()) await usersHub.Clients.Clients(cachedIds).SendAsync("UserKicked", reason);
         }
 
         public async Task DeleteUser(Guid userId)
@@ -235,8 +235,7 @@ namespace UsersService_API.Repository
 
         public async Task SendUserMessageNotification(Guid receiverId, Guid senderId)
         {
-            var userExists = await UserExists(receiverId);
-            if (userExists)
+            if (await UserExists(receiverId))
             {
                 var connIds = await cacheService.TryGetFromCache(HubTypes.Users);
                 if (connIds.ContainsKey(receiverId))
@@ -256,6 +255,23 @@ namespace UsersService_API.Repository
                 if (await db.SaveChangesAsync() > 0) return true;
             }
             return false;
+        }
+
+        public async Task<ResponseDto> ChangeCurrency(Guid userId, int Amount)
+        {
+            var user = await db.Users.FirstOrDefaultAsync(x => x.UserId == userId);
+            if(user is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "User does not exist" });
+            user.CurrencyValue += Amount;
+            
+            if (await db.SaveChangesAsync() > 0){
+                var cachedIds = await CheckUserIsOnline(userId, HubTypes.Users);
+                if(cachedIds.Any()) await usersHub.Clients.Clients(cachedIds).SendAsync("UserCurrencyChanged", Amount);
+                logger.LogInformation($"Changed user: {userId} - currency value by {Amount}");
+                return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { $"Changed user's currency value by {Amount}" });
+            }
+
+            logger.LogError($"Could not change user: {userId} currency value");
+            return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not change value" });
         }
     }
 }

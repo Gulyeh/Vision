@@ -15,13 +15,13 @@
     {
         "Entry"
         {
-        "MsmKey" = "8:_47FA4CD33A33440BB493202B88A26C6B"
+        "MsmKey" = "8:_89B7AC2D1573400EBB0A1C251CE616A7"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_89B7AC2D1573400EBB0A1C251CE616A7"
+        "MsmKey" = "8:_D20B2162FED344A2BD9221ADBE50D14A"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -43,6 +43,22 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.7.2"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.7.2 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.7.2"
+                    }
+                }
+            }
         }
         "Release"
         {
@@ -59,6 +75,22 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.7.2"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.7.2 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.7.2"
+                    }
+                }
+            }
         }
     }
     "Deployable"
@@ -166,15 +198,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Vision"
-        "ProductCode" = "8:{F5A2596C-1428-4C8B-860E-CCA474FA8A47}"
-        "PackageCode" = "8:{B1D6C4C7-09C5-4874-813B-FC024819B1B6}"
-        "UpgradeCode" = "8:{BCCC8C7B-B731-4EB8-A37D-2D7B776DFA11}"
+        "ProductCode" = "8:{F71DC189-D1AD-4F8F-B528-79AFB32D5BBF}"
+        "PackageCode" = "8:{3360D4A2-E72E-4D99-A615-7BCB716F458D}"
+        "UpgradeCode" = "8:{302AA384-B06C-4470-A155-EF1C153432F9}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
-        "RemovePreviousVersions" = "11:FALSE"
+        "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.1.0"
+        "ProductVersion" = "8:1.4"
         "Manufacturer" = "8:Vision"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
@@ -184,7 +216,7 @@
         "Keywords" = "8:"
         "ARPCOMMENTS" = "8:"
         "ARPURLINFOABOUT" = "8:"
-        "ARPPRODUCTICON" = "8:"
+        "ARPPRODUCTICON" = "8:_89B7AC2D1573400EBB0A1C251CE616A7"
         "ARPIconIndex" = "3:0"
         "SearchPath" = "8:"
         "UseSystemSearchPath" = "11:TRUE"
@@ -287,7 +319,7 @@
         }
         "Shortcut"
         {
-            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_2B659315B61041EA9356DEB8FDDC3809"
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_520A11D9DFC145E3B1F9F68FCDAD13D9"
             {
             "Name" = "8:Vision"
             "Arguments" = "8:"
@@ -295,7 +327,7 @@
             "ShowCmd" = "3:1"
             "IconIndex" = "3:0"
             "Transitive" = "11:FALSE"
-            "Target" = "8:_47FA4CD33A33440BB493202B88A26C6B"
+            "Target" = "8:_D20B2162FED344A2BD9221ADBE50D14A"
             "Folder" = "8:_9D3B25C8F80E499E8B1FA25B04ED1E50"
             "WorkingFolder" = "8:_5E938723464A4EDAA7DCA6789A754521"
             "Icon" = "8:_89B7AC2D1573400EBB0A1C251CE616A7"
@@ -700,7 +732,7 @@
         }
         "ProjectOutput"
         {
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_47FA4CD33A33440BB493202B88A26C6B"
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_D20B2162FED344A2BD9221ADBE50D14A"
             {
             "SourcePath" = "8:..\\VisionClient\\obj\\Release\\net6.0-windows\\apphost.exe"
             "TargetName" = "8:"

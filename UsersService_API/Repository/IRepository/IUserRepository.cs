@@ -22,5 +22,6 @@ namespace UsersService_API.Repository.IRepository
         Task DeleteUser(Guid userId);
         Task SendUserMessageNotification(Guid receiverId, Guid senderId);
         Task<bool> BanUser(Guid userId);
+        Task<ResponseDto> ChangeCurrency(Guid userId, int Amount);
     }
 }

@@ -11,20 +11,17 @@ namespace UsersService_API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class UsersController : ControllerBase
+    public class UsersController : BaseApiController
     {
         private readonly IUserRepository userRepository;
         private readonly ICacheService cacheService;
-        private readonly IHubContext<UsersHub> hubContext;
 
-        public UsersController(IUserRepository userRepository, ICacheService cacheService, IHubContext<UsersHub> hubContext)
+        public UsersController(IUserRepository userRepository, ICacheService cacheService)
         {
             this.userRepository = userRepository;
             this.cacheService = cacheService;
-            this.hubContext = hubContext;
         }
 
-        [Authorize]
         [HttpGet("FindUser")]
         public async Task<ActionResult<ResponseDto>> FindUsers([FromQuery] string containsString)
         {
@@ -41,13 +38,20 @@ namespace UsersService_API.Controllers
             return Ok(new ResponseDto(true, StatusCodes.Status200OK, await userRepository.FindDetailedUsers(containsString)));
         }
 
-        [Authorize]
         [HttpPost("ChangePhoto")]
         public async Task<ActionResult<ResponseDto>> ChangePhoto([FromBody] string image)
         {
             if (string.IsNullOrEmpty(image)) return BadRequest();
             var userId = HttpContext.User.GetId();
             return Ok(new ResponseDto(true, StatusCodes.Status200OK, await userRepository.ChangePhoto(userId, image)));
+        }
+
+        [Authorize(Policy = "HasAdminRole")]
+        [HttpPut("ChangeCurrency")]
+        public async Task<ActionResult<ResponseDto>> ChangeCurrency([FromQuery] Guid userId, [FromQuery] int amount)
+        {
+            if (userId == Guid.Empty) return BadRequest();
+            return CheckActionResult(await userRepository.ChangeCurrency(userId, amount));
         }
     }
 }

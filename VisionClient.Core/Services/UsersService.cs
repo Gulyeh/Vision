@@ -44,5 +44,16 @@ namespace VisionClient.Core.Services
 
             return response;
         }
+
+        public async Task<ResponseDto?> ChangeCurrency(Guid userId, int Amount)
+        {
+            var response = await SendAsync<ResponseDto>(new ApiRequest()
+            {
+                ApiType = APIType.PUT,
+                ApiUrl = $"{ConnectionData.GatewayUrl}/Users/ChangeCurrency?userId={userId}&amount={Amount}",
+            });
+
+            return response;
+        }
     }
 }
