@@ -9,7 +9,7 @@
     <ApplicationIcon>Vision.ico</ApplicationIcon>
     <Product>$(AssemblyName)</Product>
     <Company>$(Authors)</Company>
-    <Version>$(VersionPrefix)</Version>
+    <Version>1.1.0</Version>
     <Authors>$(AssemblyName)</Authors>
     <PackageId>$(AssemblyName)</PackageId>
   </PropertyGroup>
@@ -46,14 +46,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Autoupdater.NET.Official" Version="1.7.3" />
     <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="1.1.0" />
     <PackageReference Include="Notification.WPF" Version="6.1.0.5" />
     <PackageReference Include="Prism.Unity" Version="8.1.97" />
     <PackageReference Include="Prism.Unity.Extensions" Version="8.0.62" />
     <PackageReference Include="Prism.Wpf" Version="8.1.97" />
     <PackageReference Include="QRCoder" Version="1.4.3" />
-    <PackageReference Include="Syncfusion.SfGrid.WPF" Version="20.1.0.61" />
-    <PackageReference Include="Syncfusion.SfInput.WPF" Version="20.1.0.60" />
+    <PackageReference Include="Syncfusion.SfGrid.WPF" Version="20.2.0.36" />
+    <PackageReference Include="Syncfusion.SfInput.WPF" Version="20.2.0.36" />
   </ItemGroup>
 
   <ItemGroup>

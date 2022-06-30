@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using VisionClient.Core.Enums;
-using VisionClient.Core.Helpers;
 using VisionClient.Core.Models;
 
 namespace VisionClient.Core.Extends
@@ -26,22 +19,22 @@ namespace VisionClient.Core.Extends
                 if (e.OldItems is null) return;
                 foreach (T item in e.OldItems)
                 {
-                   item.PropertyChanged -= ItemPropertyChanged;
+                    item.PropertyChanged -= ItemPropertyChanged;
                 }
             }
             else if (e.Action == NotifyCollectionChangedAction.Add)
             {
-                if(e.NewItems is null) return;
+                if (e.NewItems is null) return;
                 foreach (T item in e.NewItems)
                 {
-                   item.PropertyChanged += ItemPropertyChanged;
+                    item.PropertyChanged += ItemPropertyChanged;
                 }
             }
         }
 
         public void ItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if(sender is null) return;
+            if (sender is null) return;
 
             if ("Status".Equals(e.PropertyName) || "Username".Equals(e.PropertyName))
             {

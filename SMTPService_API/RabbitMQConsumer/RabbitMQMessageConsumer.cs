@@ -39,10 +39,17 @@ namespace SMTPService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
-                logger.LogInformation("Received message from queue: SendEmailQueue");
-                var content = Encoding.UTF8.GetString(args.Body.ToArray());
-                EmailDataDto? emailData = JsonConvert.DeserializeObject<EmailDataDto>(content);
-                HandleMessage(emailData).GetAwaiter().GetResult();
+                try
+                {
+                    logger.LogInformation("Received message from queue: SendEmailQueue");
+                    var content = Encoding.UTF8.GetString(args.Body.ToArray());
+                    EmailDataDto? emailData = JsonConvert.DeserializeObject<EmailDataDto>(content);
+                    HandleMessage(emailData).GetAwaiter().GetResult();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex.ToString());
+                }
                 channel.BasicAck(args.DeliveryTag, false);
             };
             channel.BasicConsume("SendEmailQueue", false, consumer);

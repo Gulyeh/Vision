@@ -9,7 +9,7 @@
         public static string FriendsHub = string.Empty;
         public static string MessageHub = string.Empty;
         public static string OrderHub = string.Empty;
-        public static string UpdateData = "https://gist.github.com/Gulyeh/be47e02d0950aed152385f5b8b3fe5ce#file-updateversion-xml";
+        public static string UpdateData = "http://vision.servegame.com/Update.xml";
     }
 
 }

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using UsersService_API.Statics;
 
 namespace UsersService_API.Helpers
 {
@@ -8,7 +9,7 @@ namespace UsersService_API.Helpers
         {
             PhotoUrl = string.Empty;
             Username = string.Empty;
-            PhotoUrl = "https://res.cloudinary.com/dhj8btqwp/image/upload/v1653243593/default_ya5gro.png";
+            PhotoUrl = StaticData.DefaultPhoto;
             Username = "VisionUser";
             Status = Status.Offline;
             Description = string.Empty;

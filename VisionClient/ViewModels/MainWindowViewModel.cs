@@ -1,12 +1,9 @@
-﻿using AutoUpdaterDotNET;
-using Prism.Commands;
+﻿using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
 using Prism.Regions;
 using Prism.Services.Dialogs;
-using System;
 using System.Windows;
-using System.Windows.Threading;
 using VisionClient.Core;
 using VisionClient.Core.Enums;
 using VisionClient.Core.Events;
@@ -29,8 +26,8 @@ namespace VisionClient.ViewModels
         public bool IsWindowVisible
         {
             get { return isWindowVisible; }
-            set 
-            { 
+            set
+            {
                 SetProperty(ref isWindowVisible, value);
                 StaticData.IsMainWindowVisible = value;
             }

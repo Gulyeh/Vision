@@ -1,8 +1,8 @@
 using OrderService_API.Helpers;
 using OrderService_API.Processors.Interfaces;
+using OrderService_API.RabbitMQRPC;
 using OrderService_API.RabbitMQSender;
 using OrderService_API.Repository.IRepository;
-using OrderService_API.Services.IServices;
 
 namespace OrderService_API.Processors
 {
@@ -15,12 +15,12 @@ namespace OrderService_API.Processors
     {
         private readonly IOrderRepository orderRepository;
         private readonly IRabbitMQSender? rabbitMQSender;
-        private readonly IProductsService productsService;
+        private readonly IRabbitMQRPC rabbitMQRPC;
 
-        public OrderTypeProcessor(IOrderRepository orderRepository, IProductsService productsService, IRabbitMQSender rabbitMQSender)
+        public OrderTypeProcessor(IOrderRepository orderRepository, IRabbitMQSender rabbitMQSender, IRabbitMQRPC rabbitMQRPC)
         {
             this.rabbitMQSender = rabbitMQSender;
-            this.productsService = productsService;
+            this.rabbitMQRPC = rabbitMQRPC;
             this.orderRepository = orderRepository;
         }
 
@@ -28,9 +28,9 @@ namespace OrderService_API.Processors
         {
             return orderType switch
             {
-                OrderType.Currency => new CurrencyOrder(orderRepository, rabbitMQSender, productsService),
-                OrderType.Game => new GameOrder(orderRepository, rabbitMQSender, productsService),
-                OrderType.Product => new ProductOrder(orderRepository, rabbitMQSender, productsService),
+                OrderType.Currency => new CurrencyOrder(orderRepository, rabbitMQSender, rabbitMQRPC),
+                OrderType.Game => new GameOrder(orderRepository, rabbitMQSender, rabbitMQRPC),
+                OrderType.Product => new ProductOrder(orderRepository, rabbitMQSender, rabbitMQRPC),
                 _ => null
             };
         }

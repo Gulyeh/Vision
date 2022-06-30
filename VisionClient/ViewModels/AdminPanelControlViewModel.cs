@@ -21,7 +21,7 @@ namespace VisionClient.ViewModels
         }
 
         private void SwitchContent(string name) => regionManager.RequestNavigate("AdminPanelRegion", name);
-        
-        private void NavigateToGames() => regionManager.RequestNavigate("LibraryContentRegion", "GamesControl");      
+
+        private void NavigateToGames() => regionManager.RequestNavigate("LibraryContentRegion", "GamesControl");
     }
 }

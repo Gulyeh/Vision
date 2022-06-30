@@ -44,11 +44,17 @@ namespace GameAccessService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
-                logger.LogInformation("RabbitMQ Consumed request from queue: AccessProductQueue");
-                var content = Encoding.UTF8.GetString(args.Body.ToArray());
-                UserPurchaseDto? gameData = JsonConvert.DeserializeObject<UserPurchaseDto>(content);
-                HandleMessage(gameData).GetAwaiter().GetResult();
-
+                try
+                {
+                    logger.LogInformation("RabbitMQ Consumed request from queue: AccessProductQueue");
+                    var content = Encoding.UTF8.GetString(args.Body.ToArray());
+                    UserPurchaseDto? gameData = JsonConvert.DeserializeObject<UserPurchaseDto>(content);
+                    HandleMessage(gameData).GetAwaiter().GetResult();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex.ToString());
+                }
                 channel.BasicAck(args.DeliveryTag, false);
             };
             channel.BasicConsume("AccessProductQueue", false, consumer);
@@ -66,7 +72,6 @@ namespace GameAccessService_API.RabbitMQConsumer
                     var accessRepository = scope.ServiceProvider.GetRequiredService<IAccessRepository>();
                     data.IsSuccess = await accessRepository.AddProductOrGame(data.UserId, data.GameId, data.ProductId);
                     rabbitMQSender.SendMessage(data, "ProductAccessDoneQueue");
-                    scope.Dispose();
                 }
                 catch (Exception)
                 {

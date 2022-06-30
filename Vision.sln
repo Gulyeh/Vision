@@ -25,11 +25,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameAccessService_API", "Ga
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderService_API", "OrderService_API\OrderService_API.csproj", "{E641F431-FD97-4C00-8189-0B16C0B6A1D9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisionClient", "VisionClient\VisionClient.csproj", "{60EA226C-22A0-46C4-BEF2-9E3374A552AC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VisionClient", "VisionClient\VisionClient.csproj", "{60EA226C-22A0-46C4-BEF2-9E3374A552AC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "VisionDesktop", "VisionDesktop", "{E11B0AE0-A74A-4EC0-BFD5-EDA9B9BF933F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisionClient.Core", "VisionClient.Core\VisionClient.Core.csproj", "{47AD79D6-919F-4BF6-BE28-9D62B7527832}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VisionClient.Core", "VisionClient.Core\VisionClient.Core.csproj", "{47AD79D6-919F-4BF6-BE28-9D62B7527832}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "VisionSetup", "VisionSetup\VisionSetup.vdproj", "{01E10658-465A-4F5F-85C6-AD1677FE90BD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -89,6 +91,8 @@ Global
 		{47AD79D6-919F-4BF6-BE28-9D62B7527832}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{47AD79D6-919F-4BF6-BE28-9D62B7527832}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{47AD79D6-919F-4BF6-BE28-9D62B7527832}.Release|Any CPU.Build.0 = Release|Any CPU
+		{01E10658-465A-4F5F-85C6-AD1677FE90BD}.Debug|Any CPU.ActiveCfg = Debug
+		{01E10658-465A-4F5F-85C6-AD1677FE90BD}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -96,6 +100,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{60EA226C-22A0-46C4-BEF2-9E3374A552AC} = {E11B0AE0-A74A-4EC0-BFD5-EDA9B9BF933F}
 		{47AD79D6-919F-4BF6-BE28-9D62B7527832} = {E11B0AE0-A74A-4EC0-BFD5-EDA9B9BF933F}
+		{01E10658-465A-4F5F-85C6-AD1677FE90BD} = {E11B0AE0-A74A-4EC0-BFD5-EDA9B9BF933F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {55FC610D-3CD0-473A-9C2E-004D0B190E47}

@@ -2,10 +2,7 @@
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using VisionClient.Core;
 using VisionClient.Core.Dtos;
@@ -57,17 +54,17 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
         public GameModel? SelectedGame
         {
             get { return selectedGame; }
-            set 
+            set
             {
                 var prop = value?.Clone() as GameModel;
-                if(prop is not null)
+                if (prop is not null)
                 {
                     IconImage = prop.IconUrl;
                     HomeImage = prop.CoverUrl;
                     BannerImage = prop.BannerUrl;
                 }
 
-                SetProperty(ref selectedGame, prop); 
+                SetProperty(ref selectedGame, prop);
             }
         }
 
@@ -142,7 +139,7 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
                 }
                 IsButtonEnabled = true;
             }
-            catch(Exception)
+            catch (Exception)
             {
                 ErrorText = "Something went wrong";
                 IsButtonEnabled = true;

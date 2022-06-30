@@ -44,10 +44,17 @@ namespace CodesService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
-                logger.LogInformation("Received message from queue: CouponFailedQueue");
-                var content = Encoding.UTF8.GetString(args.Body.ToArray());
-                CodeFailedDto? codeData = JsonConvert.DeserializeObject<CodeFailedDto>(content);
-                HandleMessage(codeData).GetAwaiter().GetResult();
+                try
+                {
+                    logger.LogInformation("Received message from queue: CouponFailedQueue");
+                    var content = Encoding.UTF8.GetString(args.Body.ToArray());
+                    CodeFailedDto? codeData = JsonConvert.DeserializeObject<CodeFailedDto>(content);
+                    HandleMessage(codeData).GetAwaiter().GetResult();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex.ToString());
+                }
                 channel.BasicAck(args.DeliveryTag, false);
             };
             channel.BasicConsume("CouponFailedQueue", false, consumer);
@@ -62,7 +69,6 @@ namespace CodesService_API.RabbitMQConsumer
                 using var scope = serviceScopeFactory.CreateScope();
                 var codesRepository = scope.ServiceProvider.GetRequiredService<ICodesRepository>();
                 await codesRepository.RemoveUsedCode(data.Code, data.UserId);
-                scope.Dispose();
             }
         }
     }

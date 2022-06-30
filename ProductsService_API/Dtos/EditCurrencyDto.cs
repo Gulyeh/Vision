@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ProductsService_API.Dtos
 {
@@ -11,9 +7,9 @@ namespace ProductsService_API.Dtos
         public EditCurrencyDto()
         {
             Title = string.Empty;
-            Details = string.Empty;         
+            Details = string.Empty;
         }
-        
+
         [Required]
         public Guid Id { get; set; }
         [Required]

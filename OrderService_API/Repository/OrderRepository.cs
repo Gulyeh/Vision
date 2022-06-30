@@ -1,13 +1,14 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using OrderService_API.Builders;
 using OrderService_API.DbContexts;
 using OrderService_API.Dtos;
 using OrderService_API.Entities;
 using OrderService_API.Helpers;
 using OrderService_API.Messages;
+using OrderService_API.RabbitMQRPC;
 using OrderService_API.Repository.IRepository;
-using OrderService_API.Services.IServices;
 
 namespace OrderService_API.Repository
 {
@@ -15,19 +16,14 @@ namespace OrderService_API.Repository
     {
         private readonly IMapper mapper;
         private readonly ApplicationDbContext db;
-        private readonly IProductsService productsService;
-        private readonly ICouponService couponService;
         private readonly ILogger<OrderRepository> logger;
-        private readonly IGameAccessService accessService;
+        private readonly IRabbitMQRPC rabbitMQRPC;
 
-        public OrderRepository(IMapper mapper, ApplicationDbContext db, IProductsService productsService,
-            ICouponService couponService, ILogger<OrderRepository> logger, IGameAccessService accessService)
+        public OrderRepository(IMapper mapper, ApplicationDbContext db, ILogger<OrderRepository> logger, IRabbitMQRPC rabbitMQRPC)
         {
-            this.accessService = accessService;
+            this.rabbitMQRPC = rabbitMQRPC;
             this.mapper = mapper;
             this.db = db;
-            this.productsService = productsService;
-            this.couponService = couponService;
             this.logger = logger;
         }
 
@@ -35,8 +31,21 @@ namespace OrderService_API.Repository
         {
             CouponDataDto couponDiscount = new();
 
-            if (await accessService.CheckProductAccess(data)) return null;
-            if (!string.IsNullOrEmpty(data.Coupon)) couponDiscount = await couponService.ApplyCoupon(data.Coupon, data.Access_Token, CodeTypes.Discount);
+            if (data.OrderType != OrderType.Currency)
+            {
+                var response = await rabbitMQRPC.SendAsync("CheckProductAccessQueue", new CheckProductAccessDto(data.UserId, data.ProductId, data.GameId));
+                if (string.IsNullOrWhiteSpace(response) || bool.Parse(response)) return null;
+            }
+
+            if (!string.IsNullOrEmpty(data.Coupon))
+            {
+                var responseCoupon = await rabbitMQRPC.SendAsync("ApplyCouponQueue", new ApplyCouponDto(data.Coupon, CodeTypes.Discount, data.UserId));
+                if (!string.IsNullOrWhiteSpace(responseCoupon) && responseCoupon is not null)
+                {
+                    var json = JsonConvert.DeserializeObject<CouponDataDto>(responseCoupon);
+                    if (json is not null) couponDiscount = json;
+                }
+            }
 
             var newOrder = mapper.Map<Order>(data);
             newOrder.Title = product.Title;
@@ -47,7 +56,6 @@ namespace OrderService_API.Repository
             messageBuilder.SetPaymentMethodId(data.PaymentMethodId);
             messageBuilder.SetTitle(product.Title);
             messageBuilder.SetUserId(data.UserId);
-            messageBuilder.SetAccessToken(data.Access_Token);
 
             await db.Orders.AddAsync(newOrder);
             if (await SaveChangesAsync())
@@ -73,14 +81,15 @@ namespace OrderService_API.Repository
             return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<GetOrdersDto>>(orders));
         }
 
-        public async Task<bool> ChangeOrderStatus(Guid orderId, bool isPaid, Guid? paymentId = null){
+        public async Task<bool> ChangeOrderStatus(Guid orderId, bool isPaid, Guid? paymentId = null)
+        {
             var order = await db.Orders.FirstOrDefaultAsync(x => x.Id == orderId);
             if (order is not null)
             {
                 order.Paid = isPaid;
-                if(paymentId is not null && paymentId != Guid.Empty) order.PaymentId = paymentId;
+                if (paymentId is not null && paymentId != Guid.Empty) order.PaymentId = paymentId;
                 order.PaymentDate = DateTime.Now;
-                if(await SaveChangesAsync()) return true;
+                if (await SaveChangesAsync()) return true;
             }
             return false;
         }
@@ -93,8 +102,8 @@ namespace OrderService_API.Repository
 
         public async Task<ResponseDto> GetOrders(string orderId)
         {
-             var order = await db.Orders.Where(x => x.Id.ToString().Contains(orderId)).ToListAsync();
-             return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<GetOrdersDto>>(order));
+            var order = await db.Orders.Where(x => x.Id.ToString().Contains(orderId)).ToListAsync();
+            return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<GetOrdersDto>>(order));
         }
     }
 }

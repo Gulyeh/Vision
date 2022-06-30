@@ -3,11 +3,8 @@ using Prism.Events;
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using VisionClient.Core.Events;
 using VisionClient.Core.Models;
@@ -52,7 +49,8 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
                 UserId = x.Item1.UserId;
             }, ThreadOption.PublisherThread, false, x => x.Item2.Equals("UserUsedCodes"));
 
-            eventAggregator.GetEvent<SendEvent<DetailedUserModel>>().Subscribe(x => {
+            eventAggregator.GetEvent<SendEvent<DetailedUserModel>>().Subscribe(x =>
+            {
                 ErrorText = string.Empty;
                 UserId = x.UserId;
             });

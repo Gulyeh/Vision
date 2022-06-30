@@ -2,7 +2,8 @@ using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 using Serilog;
 var builder = WebApplication.CreateBuilder(args);
-builder.Host.UseSerilog((context, config) => {
+builder.Host.UseSerilog((context, config) =>
+{
     config.WriteTo.Console();
     config.WriteTo.Seq(builder.Configuration["SeqServer"], apiKey: builder.Configuration["SeqAPI"]);
     config.MinimumLevel.Information();

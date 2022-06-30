@@ -1,6 +1,4 @@
-using ProductsService_API.Helpers;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.CodeAnalysis;
 
 namespace ProductsService_API.Dtos
 {

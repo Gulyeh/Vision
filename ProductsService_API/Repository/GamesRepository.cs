@@ -1,6 +1,6 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
+using ProdcutsService_API.RabbitMQRPC;
 using ProductsService_API.DbContexts;
 using ProductsService_API.Dtos;
 using ProductsService_API.Entites;
@@ -16,27 +16,25 @@ namespace ProductsService_API.Repository
         private readonly ApplicationDbContext db;
         private readonly IMapper mapper;
         private readonly ICacheService cacheService;
-        private readonly IGameDataService gameDataService;
         private readonly ILogger<GamesRepository> logger;
         private readonly IGetCachedGames getCachedGames;
-        private readonly IGameAccessService gameAccessService;
+        private readonly IRabbitMQRPC rabbitMQRPC;
         private readonly IUploadService uploadService;
 
         public GamesRepository(ApplicationDbContext db, IMapper mapper, ICacheService cacheService,
-            IGameDataService gameDataService, ILogger<GamesRepository> logger, IGetCachedGames getCachedGames, IGameAccessService gameAccessService,
+            ILogger<GamesRepository> logger, IGetCachedGames getCachedGames, IRabbitMQRPC rabbitMQRPC,
             IUploadService uploadService)
         {
             this.getCachedGames = getCachedGames;
-            this.gameAccessService = gameAccessService;
+            this.rabbitMQRPC = rabbitMQRPC;
             this.uploadService = uploadService;
-            this.gameDataService = gameDataService;
             this.logger = logger;
             this.db = db;
             this.mapper = mapper;
             this.cacheService = cacheService;
         }
 
-        public async Task<ResponseDto> GetGame(Guid gameId, string Access_Token)
+        public async Task<ResponseDto> GetGame(Guid gameId, Guid userId)
         {
             var cacheGame = await getCachedGames.GetGames();
             var gameFound = cacheGame.FirstOrDefault(x => x.GameId == gameId);
@@ -44,17 +42,10 @@ namespace ProductsService_API.Repository
 
             var mapped = mapper.Map<GamesDto>(gameFound);
 
-            var response = await gameAccessService.CheckGameAccess(gameId, Access_Token);
-            if (response is null) return new ResponseDto(false, StatusCodes.Status500InternalServerError, string.Empty);
+            var response = await rabbitMQRPC.SendAsync("CheckProductAccessQueue", new CheckProductAccessDto(userId, gameId, Guid.Empty));
+            if (response is null || string.IsNullOrEmpty(response)) return new ResponseDto(false, StatusCodes.Status500InternalServerError, string.Empty);
 
-            var responseString = response.Response.ToString();
-            if (string.IsNullOrEmpty(responseString)) return new ResponseDto(false, StatusCodes.Status500InternalServerError, string.Empty);
-            else
-            {
-                var json = JsonConvert.DeserializeObject<HasAccess>(responseString);
-                if (json is null) mapped.IsPurchased = false;
-                else mapped.IsPurchased = json.hasAccess;
-            }
+            mapped.IsPurchased = bool.Parse(response);
 
             return new ResponseDto(true, StatusCodes.Status200OK, mapped);
         }
@@ -67,7 +58,8 @@ namespace ProductsService_API.Repository
             var mapped = mapper.Map<Games>(data);
 
             await db.Games.AddAsync(mapped);
-            if (await SaveChangesAsync()) {
+            if (await SaveChangesAsync())
+            {
                 await cacheService.TryAddToCache<Games>(CacheType.Games, mapped);
                 logger.LogInformation("Added Game with ID: {gameId} for purchase successfully", data.GameId);
                 return;
@@ -82,29 +74,31 @@ namespace ProductsService_API.Repository
 
             db.Games.Remove(game);
 
-            if (await SaveChangesAsync()) {
-                foreach(var product in game.Products) await uploadService.DeletePhoto(product.PhotoId);
+            if (await SaveChangesAsync())
+            {
+                foreach (var product in game.Products) await uploadService.DeletePhoto(product.PhotoId);
                 var cachedGame = await FindGame(gameId);
-                if(cachedGame is not null) await cacheService.DeleteFromCache<Games>(CacheType.Games, cachedGame);
+                if (cachedGame is not null) await cacheService.DeleteFromCache<Games>(CacheType.Games, cachedGame);
 
                 logger.LogInformation("Deleted Game with ID: {gameId}", gameId);
-                return true;  
-            }                
-            
+                return true;
+            }
+
             logger.LogError("Could not delete Game with ID: {gameId}", gameId);
             return false;
         }
 
-        public async Task UpdateGameData(GameProductData data){
+        public async Task UpdateGameData(GameProductData data)
+        {
             var game = await db.Games.Include(x => x.Products).FirstOrDefaultAsync(x => x.GameId == data.GameId);
             if (game is null) return;
 
             game.PhotoUrl = data.PhotoUrl;
             game.PhotoId = data.PhotoId;
             game.Title = data.Name;
-            
-            if(await SaveChangesAsync()) await cacheService.TryReplaceCache<Games>(CacheType.Games, game);
-            
+
+            if (await SaveChangesAsync()) await cacheService.TryReplaceCache<Games>(CacheType.Games, game);
+
         }
 
         public async Task<ResponseDto> EditGame(EditPackageDto data)
@@ -118,7 +112,7 @@ namespace ProductsService_API.Repository
             {
                 logger.LogInformation("Edited Game with ID: {gameId} successfully", data.Id);
                 await cacheService.TryReplaceCache<Games>(CacheType.Games, game);
-                
+
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Game has been edited successfuly" });
             }
 

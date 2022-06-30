@@ -1,6 +1,5 @@
 using GamesDataService_API.Dtos;
 using GamesDataService_API.Repository.IRepository;
-using GamesDataService_API.Statics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -42,13 +41,6 @@ namespace GamesDataService_API.Controllers
         {
             if (gameId == Guid.Empty) return BadRequest();
             return CheckActionResult(await gamesRepository.DeleteGame(gameId));
-        }
-
-        [HttpGet("CheckGame")]
-        public async Task<ActionResult<ResponseDto>> CheckGame([FromQuery] Guid gameId)
-        {
-            if (gameId == Guid.Empty) return BadRequest();
-            return CheckActionResult(await gamesRepository.CheckGame(gameId));
         }
     }
 }

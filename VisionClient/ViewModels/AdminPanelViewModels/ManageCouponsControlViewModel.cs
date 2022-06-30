@@ -4,11 +4,8 @@ using Prism.Mvvm;
 using Prism.Regions;
 using Prism.Services.Dialogs;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using VisionClient.Core.Events;
 using VisionClient.Core.Models;
@@ -71,7 +68,7 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
             {
                 CodesList.Clear();
                 var list = await couponRepository.GetCoupons();
-                if(list.Any() && list is not null) CodesList.AddRange(list);
+                if (list.Any() && list is not null) CodesList.AddRange(list);
                 LoadingVisibility = Visibility.Collapsed;
             }
             catch (Exception)
@@ -105,8 +102,8 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
             try
             {
                 (bool success, ErrorText) = await couponRepository.DeleteCoupon(code);
-                if (success) CodesList.Remove(CodesList.First(x => x.Code == code));    
-               
+                if (success) CodesList.Remove(CodesList.First(x => x.Code == code));
+
                 LoadingVisibility = Visibility.Collapsed;
             }
             catch (Exception)

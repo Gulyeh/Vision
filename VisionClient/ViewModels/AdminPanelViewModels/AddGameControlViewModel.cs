@@ -1,16 +1,9 @@
 ﻿using Prism.Commands;
 using Prism.Mvvm;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using VisionClient.Core.Dtos;
-using VisionClient.Core.Models;
 using VisionClient.Core.Repository.IRepository;
 using VisionClient.Extensions;
 using VisionClient.Utility;
@@ -123,7 +116,7 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
 
                 (bool success, ErrorText) = await gamesRepository.AddGame(GameModel);
                 IsButtonEnabled = true;
-                if(success) ClearData();
+                if (success) ClearData();
             }
             catch (Exception)
             {

@@ -23,8 +23,8 @@ namespace VisionClient.ViewModels
             StaticData = staticData;
         }
 
-        private void SwitchPanel(string name) => regionManager.RequestNavigate("SearchUserContent", name);   
+        private void SwitchPanel(string name) => regionManager.RequestNavigate("SearchUserContent", name);
 
-        private void GoBackward() => regionManager.RequestNavigate("LibraryContentRegion", "GamesControl");      
+        private void GoBackward() => regionManager.RequestNavigate("LibraryContentRegion", "GamesControl");
     }
 }

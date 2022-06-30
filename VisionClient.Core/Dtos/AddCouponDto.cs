@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using VisionClient.Core.Helpers;
+﻿using VisionClient.Core.Helpers;
 
 namespace VisionClient.Core.Dtos
 {
@@ -56,17 +51,17 @@ namespace VisionClient.Core.Dtos
         }
 
         private string codeType;
-        public string CodeType 
+        public string CodeType
         {
             get => codeType;
             set
             {
                 codeType = value;
                 ResetProperties();
-            } 
+            }
         }
         private int uses;
-        public int Uses 
+        public int Uses
         {
             get => uses;
             set
@@ -87,14 +82,14 @@ namespace VisionClient.Core.Dtos
 
         public bool Validator()
         {
-            if(string.IsNullOrWhiteSpace(Code) || string.IsNullOrWhiteSpace(CodeValue) || ExpireDate <= DateTime.Now || (IsLimited && Uses < 1)) return false;
+            if (string.IsNullOrWhiteSpace(Code) || string.IsNullOrWhiteSpace(CodeValue) || ExpireDate <= DateTime.Now || (IsLimited && Uses < 1)) return false;
 
             switch (CodeType)
             {
                 case "Discount":
                     return !string.IsNullOrWhiteSpace(Signature);
                 case "Package":
-                    return GameId != Guid.Empty;                 
+                    return GameId != Guid.Empty;
                 default:
                     break;
             }

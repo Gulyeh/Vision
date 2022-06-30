@@ -8,6 +8,6 @@ namespace GamesDataService_API.Repository.IRepository
         Task<ResponseDto> EditGameData(EditGameDto data);
         Task<ResponseDto> DeleteGame(Guid gameId);
         Task<ResponseDto> AddGame(AddGamesDto data);
-        Task<ResponseDto> CheckGame(Guid gameId);
+        Task<bool> CheckGame(Guid gameId);
     }
 }

@@ -1,11 +1,7 @@
 ﻿using Prism.Commands;
 using Prism.Mvvm;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using VisionClient.Core;
 using VisionClient.Core.Dtos;
@@ -41,7 +37,7 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
         public GameModel SelectedGame
         {
             get { return selectedGame; }
-            set 
+            set
             {
                 if (value is null)
                 {
@@ -55,7 +51,7 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
                 if (CouponModel.CodeType.Equals("Package")) CouponModel.GameId = value.Id;
                 else if (CouponModel.CodeType.Equals("Game")) CouponModel.CodeValue = value.Id.ToString();
 
-                SetProperty(ref selectedGame, value); 
+                SetProperty(ref selectedGame, value);
             }
         }
 
@@ -63,7 +59,7 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
         public ProductsModel SelectedPackage
         {
             get { return selectedPackage; }
-            set 
+            set
             {
                 if (value is null)
                 {
@@ -72,7 +68,7 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
                 }
 
                 CouponModel.CodeValue = value.Id.ToString();
-                SetProperty(ref selectedPackage, value); 
+                SetProperty(ref selectedPackage, value);
             }
         }
 
@@ -106,7 +102,7 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
             {
                 ProductsList.Clear();
                 var list = await gamesRepository.GetProducts(Id);
-                foreach (var product in list.Products) ProductsList.Add(product); 
+                foreach (var product in list.Products) ProductsList.Add(product);
                 LoadingVisibility = Visibility.Collapsed;
             }
             catch (Exception)

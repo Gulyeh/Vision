@@ -40,11 +40,11 @@ namespace GamesDataService_API.Services
         {
             List<T> value;
             memoryCache.TryGetValue(type, out value);
-            if(value is null) return Task.CompletedTask;
-            
+            if (value is null) return Task.CompletedTask;
+
             value.Remove(data);
             SetCache<T>(type, value);
-            
+
             return Task.CompletedTask;
         }
 
@@ -52,13 +52,12 @@ namespace GamesDataService_API.Services
         {
             List<T> value;
             memoryCache.TryGetValue(type, out value);
-            if(value is null) return Task.CompletedTask;
+            if (value is null) return Task.CompletedTask;
 
-            var found = value.FirstOrDefault(source);
-            if(found is not null) {
-                value.Remove(found);
-                value.Add(data);
-            }
+            value.Remove(source);
+            value.Add(data);
+            SetCache<T>(type, value);
+
             return Task.CompletedTask;
         }
 

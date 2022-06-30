@@ -3,6 +3,7 @@ using UsersService_API.DbContexts;
 using UsersService_API.Helpers;
 using UsersService_API.Middleware;
 using UsersService_API.RabbitMQConsumer;
+using UsersService_API.RabbitMQRPC;
 using UsersService_API.RabbitMQSender;
 using UsersService_API.Repository;
 using UsersService_API.Repository.IRepository;
@@ -29,8 +30,12 @@ namespace UsersService_API.Extensions
             services.AddHostedService<RabbitMQUnbanUserConsumer>();
             services.AddHostedService<RabbitMQDeleteUserConsumer>();
             services.AddHostedService<RabbitMQKickUserConsumer>();
+            services.AddHostedService<RabbitMQUserExistsConsumer>();
+            services.AddHostedService<RabbitMQIsUserBlockedConsumer>();
+            services.AddHostedService<RabbitMQMessageNotificationConsumer>();
             services.AddSingleton<IRabbitMQSender, RabbitMQMessageSender>();
             services.AddScoped<ICacheService, CacheService>();
+            services.AddSingleton<IRabbitMQRPC, RabbitMQRPCSender>();
             services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));
             services.AddScoped<IFriendsRepository, FriendsRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
@@ -38,8 +43,6 @@ namespace UsersService_API.Extensions
             services.AddScoped<ICurrencyRepository, CurrencyRepository>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<ErrorHandler>();
-            services.AddHttpClient<IMessageService, MessageService>();
-            services.AddScoped<IMessageService, MessageService>();
 
             return services;
         }

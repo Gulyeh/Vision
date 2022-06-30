@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using ProdcutsService_API.RabbitMQConsumer;
+using ProdcutsService_API.RabbitMQRPC;
 using ProdcutsService_API.RabbitMQSender;
 using ProductsService_API.DbContexts;
 using ProductsService_API.Helpers;
@@ -24,17 +26,16 @@ namespace ProductsService_API.Extensions
             services.AddHostedService<RabbitMQNewGameConsumer>();
             services.AddHostedService<RabbitMQDeleteGameConsumer>();
             services.AddHostedService<RabbitMQEditGameConsumer>();
+            services.AddHostedService<RabbitMQGetProductsConsumer>();
+            services.AddHostedService<RabbitMQCheckProductExistsConsumer>();
             services.AddSingleton<IRabbitMQSender, RabbitMQMessageSender>();
             services.Configure<RabbitMQSettings>(config.GetSection("RabbitMQSettings"));
-            services.AddHttpClient<IGameDataService, GameDataService>();
-            services.AddHttpClient<IGameAccessService, GameAccessService>();
-            services.AddScoped<IGameAccessService, GameAccessService>();
-            services.AddScoped<IGameDataService, GameDataService>();
             services.AddScoped<IGetCachedGames, GetCachedGames>();
             services.AddScoped<ICacheService, CacheService>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<ErrorHandler>();
             services.AddScoped<IUploadService, UploadService>();
+            services.AddSingleton<IRabbitMQRPC, RabbitMQRPCSender>();
             services.AddScoped<IProductsRepository, ProductsRepository>();
             services.AddScoped<IGamesRepository, GamesRepository>();
             services.AddScoped<ICurrencyRepository, CurrencyRepository>();

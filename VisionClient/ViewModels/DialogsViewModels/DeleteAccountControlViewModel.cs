@@ -36,7 +36,7 @@ namespace VisionClient.ViewModels.DialogsViewModels
         private readonly IAccountRepository accountRepository;
         private readonly IDialogService dialogService;
 
-        public DeleteAccountControlViewModel(IEventAggregator eventAggregator, IAccountRepository accountRepository, 
+        public DeleteAccountControlViewModel(IEventAggregator eventAggregator, IAccountRepository accountRepository,
             IStaticData staticData, IDialogService dialogService) : base(eventAggregator)
         {
             this.accountRepository = accountRepository;
@@ -53,7 +53,7 @@ namespace VisionClient.ViewModels.DialogsViewModels
         protected override async void Execute(object? data)
         {
             ErrorText = string.Empty;
-            if(LoginModel.Password.Length < 8)
+            if (LoginModel.Password.Length < 8)
             {
                 ErrorText = "Password requires at least 8 and maximum 15 characters";
                 return;
@@ -62,7 +62,7 @@ namespace VisionClient.ViewModels.DialogsViewModels
             try
             {
                 (ErrorText, int status) = await accountRepository.DeleteAccount(LoginModel);
-                if(status == 403) dialogService.ShowDialog(nameof(TFAControl));
+                if (status == 403) dialogService.ShowDialog(nameof(TFAControl));
                 IsButtonEnabled = true;
             }
             catch (Exception)

@@ -23,7 +23,6 @@ namespace Identity_API.RabbitMQSender
             if (ConnectionExists())
             {
                 using var channel = connection?.CreateModel();
-                channel?.QueueDeclare(queue: queueName, false, false, false, arguments: null);
                 var json = JsonConvert.SerializeObject(message);
                 var body = Encoding.UTF8.GetBytes(json);
                 channel.BasicPublish(exchange: "", routingKey: queueName, basicProperties: null, body: body);

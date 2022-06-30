@@ -1,12 +1,10 @@
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
 using UsersService_API.Helpers;
-using UsersService_API.Repository.IRepository;
 using UsersService_API.Services.IServices;
 using UsersService_API.SignalR;
 
@@ -43,10 +41,17 @@ namespace UsersService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
-                logger.LogInformation("Received message from queue: KickUserQueue");
-                var content = Encoding.UTF8.GetString(args.Body.ToArray());
-                Guid? userId = JsonConvert.DeserializeObject<Guid>(content);
-                HandleMessage(userId).GetAwaiter().GetResult();
+                try
+                {
+                    logger.LogInformation("Received message from queue: KickUserQueue");
+                    var content = Encoding.UTF8.GetString(args.Body.ToArray());
+                    Guid? userId = JsonConvert.DeserializeObject<Guid>(content);
+                    HandleMessage(userId).GetAwaiter().GetResult();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex.ToString());
+                }
                 channel.BasicAck(args.DeliveryTag, false);
             };
             channel.BasicConsume("KickUserQueue", false, consumer);
@@ -63,7 +68,7 @@ namespace UsersService_API.RabbitMQConsumer
                 var usersHub = scope.ServiceProvider.GetRequiredService<IHubContext<UsersHub>>();
 
                 var cachedIds = await cache.TryGetFromCache(HubTypes.Users);
-                if (cachedIds.Any(x => x.Key == userId)) await usersHub.Clients.Clients(cachedIds[(Guid)userId]).SendAsync("UserKicked", string.Empty);                         
+                if (cachedIds.Any(x => x.Key == userId)) await usersHub.Clients.Clients(cachedIds[(Guid)userId]).SendAsync("UserKicked", string.Empty);
             }
         }
     }

@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProductsService_API.Dtos;
 using ProductsService_API.Repository.IRepository;
-using ProductsService_API.Statics;
 
 namespace ProductsService_API.Controllers
 {
@@ -13,14 +12,6 @@ namespace ProductsService_API.Controllers
         public ProductsController(IProductsRepository productsRepository)
         {
             this.productsRepository = productsRepository;
-        }
-
-        [HttpGet("GetGameProducts")]
-        public async Task<ActionResult<ResponseDto>> GetGameProducts([FromQuery] Guid GameId, [FromQuery] Guid ProductId)
-        {
-            if (GameId == Guid.Empty) return BadRequest();
-            var token = HttpContext.Request.Headers["Authorization"][0];
-            return CheckActionResult(await productsRepository.GetProduct(GameId, ProductId, token));
         }
 
         [HttpDelete("DeleteProduct")]
@@ -44,8 +35,7 @@ namespace ProductsService_API.Controllers
         public async Task<ActionResult<ResponseDto>> AddProduct([FromBody] AddProductsDto data)
         {
             if (!ModelState.IsValid) return BadRequest();
-            var token = HttpContext.Request.Headers["Authorization"][0];
-            return CheckActionResult(await productsRepository.AddProduct(data, token));
+            return CheckActionResult(await productsRepository.AddProduct(data));
         }
     }
 }

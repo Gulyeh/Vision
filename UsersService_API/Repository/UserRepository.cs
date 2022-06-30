@@ -8,6 +8,7 @@ using UsersService_API.Helpers;
 using UsersService_API.Repository.IRepository;
 using UsersService_API.Services.IServices;
 using UsersService_API.SignalR;
+using UsersService_API.Statics;
 
 namespace UsersService_API.Repository
 {
@@ -31,12 +32,7 @@ namespace UsersService_API.Repository
             this.usersHub = usersHub;
         }
 
-        public Task<ResponseDto> IsUserBlocked(Guid userId, Guid user2Id)
-        {
-            var response = new ResponseDto(true, StatusCodes.Status200OK,
-                db.BlockedUsers.Any(x => (x.BlockedId == userId && x.BlockerId == user2Id) || (x.BlockedId == user2Id && x.BlockerId == userId)));
-            return Task.FromResult(response);
-        }
+        public Task<bool> IsUserBlocked(Guid senderId, Guid receiverId) => Task.FromResult(db.BlockedUsers.Any(x => (x.BlockedId == senderId && x.BlockerId == receiverId) || (x.BlockedId == receiverId && x.BlockerId == senderId)));
 
         public async Task<string> ChangePhoto(Guid userId, string base64)
         {
@@ -169,17 +165,17 @@ namespace UsersService_API.Repository
 
         public async Task<IEnumerable<GetUserDto>> FindUsers(string containsString, Guid userId)
         {
-            var foundUsers = await db.Users.Where(x => x.Username.ToLower().Contains(containsString.ToLower())).Take(25).ToListAsync();
+            var foundUsers = await db.Users.Where(x => x.Username.ToLower().Contains(containsString.ToLower()) && !x.IsDeletedAccount).OrderBy(x => x.Username).Take(25).ToListAsync();
             if (foundUsers.Any(x => x.UserId == userId)) foundUsers.Remove(foundUsers.First(x => x.UserId == userId));
             return mapper.Map<IEnumerable<GetUserDto>>(foundUsers);
         }
-        
 
-        public async Task<ResponseDto> UserExists(Guid userId)
+
+        public async Task<bool> UserExists(Guid userId)
         {
             var user = await db.Users.FirstOrDefaultAsync(x => x.UserId == userId);
-            if (user is null) return new ResponseDto(true, StatusCodes.Status200OK, false);
-            return new ResponseDto(true, StatusCodes.Status200OK, true);
+            if (user is null) return false;
+            return true;
         }
 
         public async Task CreateUser(Guid userId)
@@ -207,8 +203,8 @@ namespace UsersService_API.Repository
         {
             List<Users> users = new();
             var tryGuidParse = Guid.TryParse(containsString, out Guid userId);
-            
-            if(tryGuidParse) users = await db.Users.Where(x => x.UserId == userId).OrderBy(x => x.Username).Take(500).ToListAsync();
+
+            if (tryGuidParse) users = await db.Users.Where(x => x.UserId == userId).OrderBy(x => x.Username).Take(500).ToListAsync();
             else users = await db.Users.Where(x => x.Username.ToLower().Contains(containsString.ToLower())).OrderBy(x => x.Username).Take(500).ToListAsync();
 
             return mapper.Map<IEnumerable<GetDetailedUsersDto>>(users);
@@ -217,22 +213,49 @@ namespace UsersService_API.Repository
         public async Task KickUser(Guid userId, string? reason = null)
         {
             var cachedIds = await cacheService.TryGetFromCache(HubTypes.Users);
-            if (cachedIds.Any(x => x.Key == userId)) await usersHub.Clients.Clients(cachedIds[(Guid)userId]).SendAsync("UserKicked", reason); 
+            if (cachedIds.Any(x => x.Key == userId)) await usersHub.Clients.Clients(cachedIds[(Guid)userId]).SendAsync("UserKicked", reason);
         }
 
         public async Task DeleteUser(Guid userId)
         {
             var user = await db.Users.FirstOrDefaultAsync(x => x.UserId == userId);
-            if(user is null) return;
+            if (user is null) return;
 
             user.IsDeletedAccount = true;
             user.Username = "Deleted Account";
             user.Description = string.Empty;
-            
-            if(await db.SaveChangesAsync() > 0){
+            user.PhotoUrl = StaticData.DefaultPhoto;
+
+            if (await db.SaveChangesAsync() > 0)
+            {
                 await KickUser(userId);
-                if(!string.IsNullOrWhiteSpace(user.PhotoId)) await uploadService.DeletePhoto(user.PhotoId);
+                if (!string.IsNullOrWhiteSpace(user.PhotoId)) await uploadService.DeletePhoto(user.PhotoId);
             }
+        }
+
+        public async Task SendUserMessageNotification(Guid receiverId, Guid senderId)
+        {
+            var userExists = await UserExists(receiverId);
+            if (userExists)
+            {
+                var connIds = await cacheService.TryGetFromCache(HubTypes.Users);
+                if (connIds.ContainsKey(receiverId))
+                {
+                    var userIds = connIds.GetValueOrDefault(receiverId);
+                    if (userIds is not null) await usersHub.Clients.Clients(userIds).SendAsync("ChatNotification", senderId);
+                }
+            }
+        }
+
+        public async Task<bool> BanUser(Guid userId)
+        {
+            var user = await db.Users.FirstOrDefaultAsync(x => x.UserId == userId);
+            if (user is not null)
+            {
+                user.IsBanned = true;
+                if (await db.SaveChangesAsync() > 0) return true;
+            }
+            return false;
         }
     }
 }

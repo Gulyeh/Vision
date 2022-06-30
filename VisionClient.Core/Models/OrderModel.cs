@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using VisionClient.Core.Helpers;
+﻿using VisionClient.Core.Helpers;
 
 namespace VisionClient.Core.Models
 {
@@ -28,9 +23,9 @@ namespace VisionClient.Core.Models
         }
 
         private bool paid;
-        public bool Paid 
+        public bool Paid
         {
-            get => paid; 
+            get => paid;
             set
             {
                 paid = value;

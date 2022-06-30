@@ -117,7 +117,8 @@ namespace VisionClient.ViewModels
             if (e.Data.GameId != Guid.Empty && GameModel.Id != e.Data.GameId) return;
             else if (e.Data.GameId == Guid.Empty && GameModel.Id != e.Data.ProductId) return;
 
-            if (e.Data.GameId != Guid.Empty) {
+            if (e.Data.GameId != Guid.Empty)
+            {
                 var product = GameProducts.Products.FirstOrDefault(x => x.Id == e.Data.ProductId);
                 if (product is null) return;
 

@@ -1,10 +1,11 @@
+using Newtonsoft.Json;
 using OrderService_API.Dtos;
 using OrderService_API.Helpers;
 using OrderService_API.Messages;
 using OrderService_API.Processors.Interfaces;
+using OrderService_API.RabbitMQRPC;
 using OrderService_API.RabbitMQSender;
 using OrderService_API.Repository.IRepository;
-using OrderService_API.Services.IServices;
 
 namespace OrderService_API.Processors
 {
@@ -12,18 +13,21 @@ namespace OrderService_API.Processors
     {
         private readonly IOrderRepository orderRepository;
         private readonly IRabbitMQSender? rabbitMQSender;
-        private readonly IProductsService productsService;
+        private readonly IRabbitMQRPC rabbitMQRPC;
 
-        public ProductOrder(IOrderRepository orderRepository, IRabbitMQSender? rabbitMQSender, IProductsService productsService)
+        public ProductOrder(IOrderRepository orderRepository, IRabbitMQSender? rabbitMQSender, IRabbitMQRPC rabbitMQRPC)
         {
+            this.rabbitMQRPC = rabbitMQRPC;
             this.rabbitMQSender = rabbitMQSender;
-            this.productsService = productsService;
             this.orderRepository = orderRepository;
         }
 
         public async Task<PaymentMessage?> CreateOrder(CreateOrderData data)
         {
-            var product = await productsService.CheckProductExists<ProductDto>(data.ProductId, data.Access_Token, data.OrderType, data.GameId);
+            var response = await rabbitMQRPC.SendAsync("GetProductsQueue", new GetProductDto(data.ProductId, data.GameId, data.OrderType, data.UserId));
+            if (response is null || string.IsNullOrWhiteSpace(response)) return null;
+
+            var product = JsonConvert.DeserializeObject<ProductDto>(response);
             if (product is null || !product.IsAvailable || product.IsPurchased) return null;
 
             return await orderRepository.CreateOrder<ProductDto>(data, product);

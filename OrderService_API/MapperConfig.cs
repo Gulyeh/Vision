@@ -18,9 +18,9 @@ namespace OrderService_API
 
         private string GetEnumString<T>(T data)
         {
-            if(data is null || !typeof(T).IsEnum) return string.Empty;
+            if (data is null || !typeof(T).IsEnum) return string.Empty;
             var parsed = Enum.GetName(typeof(T), data);
-            if(parsed is null) return string.Empty;
+            if (parsed is null) return string.Empty;
             return parsed;
         }
     }

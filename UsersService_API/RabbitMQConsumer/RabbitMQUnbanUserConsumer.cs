@@ -1,6 +1,4 @@
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
@@ -8,9 +6,6 @@ using RabbitMQ.Client.Events;
 using System.Text;
 using UsersService_API.DbContexts;
 using UsersService_API.Helpers;
-using UsersService_API.Repository.IRepository;
-using UsersService_API.Services.IServices;
-using UsersService_API.SignalR;
 
 namespace UsersService_API.RabbitMQConsumer
 {
@@ -45,10 +40,17 @@ namespace UsersService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
-                logger.LogInformation("Received message from queue: UnbanUserQueue");
-                var content = Encoding.UTF8.GetString(args.Body.ToArray());
-                Guid? userId = JsonConvert.DeserializeObject<Guid>(content);
-                HandleMessage(userId).GetAwaiter().GetResult();
+                try
+                {
+                    logger.LogInformation("Received message from queue: UnbanUserQueue");
+                    var content = Encoding.UTF8.GetString(args.Body.ToArray());
+                    Guid? userId = JsonConvert.DeserializeObject<Guid>(content);
+                    HandleMessage(userId).GetAwaiter().GetResult();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex.ToString());
+                }
                 channel.BasicAck(args.DeliveryTag, false);
             };
             channel.BasicConsume("UnbanUserQueue", false, consumer);
@@ -63,11 +65,12 @@ namespace UsersService_API.RabbitMQConsumer
                 using var scope = serviceScopeFactory.CreateScope();
                 var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-                var user = await db.Users.FirstOrDefaultAsync(x => x.UserId == userId);    
-                if(user is not null){
+                var user = await db.Users.FirstOrDefaultAsync(x => x.UserId == userId);
+                if (user is not null)
+                {
                     user.IsBanned = false;
                     await db.SaveChangesAsync();
-                }              
+                }
             }
         }
     }

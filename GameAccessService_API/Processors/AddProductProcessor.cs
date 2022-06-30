@@ -1,6 +1,5 @@
 using GameAccessService_API.DbContexts;
 using GameAccessService_API.Processors.Interfaces;
-using GameAccessService_API.Repository.IRepository;
 using GameAccessService_API.Services.IServices;
 
 namespace GameAccessService_API.Processors

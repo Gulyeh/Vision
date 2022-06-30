@@ -39,10 +39,17 @@ namespace UsersService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
-                logger.LogInformation("Received message from queue: DeleteAccountQueue");
-                var content = Encoding.UTF8.GetString(args.Body.ToArray());
-                Guid? userId = JsonConvert.DeserializeObject<Guid>(content);
-                HandleMessage(userId).GetAwaiter().GetResult();
+                try
+                {
+                    logger.LogInformation("Received message from queue: DeleteAccountQueue");
+                    var content = Encoding.UTF8.GetString(args.Body.ToArray());
+                    Guid? userId = JsonConvert.DeserializeObject<Guid>(content);
+                    HandleMessage(userId).GetAwaiter().GetResult();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex.ToString());
+                }
                 channel.BasicAck(args.DeliveryTag, false);
             };
             channel.BasicConsume("DeleteAccountQueue", false, consumer);
@@ -54,11 +61,9 @@ namespace UsersService_API.RabbitMQConsumer
         {
             if (data is not null && data != Guid.Empty)
             {
-                try{
-                    using var scope = serviceScopeFactory.CreateScope();
-                    var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
-                    await userRepository.DeleteUser((Guid)data);
-                }catch(Exception){}
+                using var scope = serviceScopeFactory.CreateScope();
+                var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+                await userRepository.DeleteUser((Guid)data);
             }
         }
     }

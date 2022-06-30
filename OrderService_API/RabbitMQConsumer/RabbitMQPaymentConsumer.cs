@@ -43,10 +43,17 @@ namespace OrderService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
-                logger.LogInformation("Received data from queue: PaymentUrlQueue");
-                var content = Encoding.UTF8.GetString(args.Body.ToArray());
-                PaymentUrlData? paymentUrl = JsonConvert.DeserializeObject<PaymentUrlData>(content);
-                HandleMessage(paymentUrl).GetAwaiter().GetResult();
+                try
+                {
+                    logger.LogInformation("Received data from queue: PaymentUrlQueue");
+                    var content = Encoding.UTF8.GetString(args.Body.ToArray());
+                    PaymentUrlData? paymentUrl = JsonConvert.DeserializeObject<PaymentUrlData>(content);
+                    HandleMessage(paymentUrl).GetAwaiter().GetResult();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex.ToString());
+                }
                 channel.BasicAck(args.DeliveryTag, false);
             };
             channel.BasicConsume("PaymentUrlQueue", false, consumer);

@@ -35,10 +35,9 @@ namespace UsersService_API.SignalR
         public override async Task OnConnectedAsync()
         {
             Guid userId = GetId();
-            var token = Context.GetHttpContext()?.Request.Headers["Authorization"][0];
             await Clients.Caller.SendAsync("GetFriendsData", await friendsRepository.GetPendingRequests(userId),
                 await friendsRepository.GetFriendRequests(userId),
-                await friendsRepository.GetFriends(userId, token));
+                await friendsRepository.GetFriends(userId));
             await cacheService.TryAddToCache(new OnlineUsersData(userId, Context.ConnectionId, HubTypes.Friends));
             logger.LogInformation("User with ID: {userId} has connected to FriendsHub with ID: {connId}", userId, Context.ConnectionId);
         }

@@ -91,9 +91,10 @@ namespace UsersService_API.SignalR
             await CheckIfMultipleClients("ChangedStatus", newStatus, userId);
         }
 
-        public async Task KickUser(KickUserDto data) {
+        public async Task KickUser(KickUserDto data)
+        {
             Guid userId = GetId();
-            if(userId.Equals(data.UserId)) return;
+            if (userId.Equals(data.UserId)) return;
             await CheckIfMultipleClients("UserKicked", data.Reason, data.UserId);
         }
 
@@ -102,7 +103,7 @@ namespace UsersService_API.SignalR
             var cachedIds = await cacheService.TryGetFromCache(HubTypes.Users);
             if (cachedIds.Any(x => x.Key == userId))
             {
-                if (cachedIds[userId].Count > 0) await Clients.Clients(cachedIds[userId]).SendAsync(connName, data);          
+                if (cachedIds[userId].Count > 0) await Clients.Clients(cachedIds[userId]).SendAsync(connName, data);
             }
         }
 

@@ -94,7 +94,7 @@ namespace Identity_API.Controllers
         [HttpDelete("DeleteAccount")]
         public async Task<ActionResult<ResponseDto>> DeleteAccount([FromBody] LoginDto data)
         {
-            if(!ModelState.IsValid) return BadRequest();
+            if (!ModelState.IsValid) return BadRequest();
             return CheckActionResult(await accountRepository.DeleteAccount(data));
         }
     }

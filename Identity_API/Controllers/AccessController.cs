@@ -55,7 +55,7 @@ namespace Identity_API.Controllers
         [Authorize(Policy = "HasAdminRole")]
         public async Task<ActionResult<ResponseDto>> ChangeUserRole([FromQuery] Guid userId, [FromQuery] string role)
         {
-            if(userId == Guid.Empty || string.IsNullOrWhiteSpace(role)) return BadRequest();
+            if (userId == Guid.Empty || string.IsNullOrWhiteSpace(role)) return BadRequest();
             var requester = User.GetId();
             return CheckActionResult(await accessRepository.ChangeUserRole(userId, role, requester));
         }

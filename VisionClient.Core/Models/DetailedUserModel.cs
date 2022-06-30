@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using VisionClient.Core.Helpers;
-
-namespace VisionClient.Core.Models
+﻿namespace VisionClient.Core.Models
 {
     public class DetailedUserModel
     {

@@ -24,7 +24,7 @@ namespace ProductsService_API.Services
             memoryCache.TryGetValue(type, out value);
             if (value is null) value = new List<T>();
             value.Add(data);
-            
+
             SetCache<T>(type, value);
             return Task.CompletedTask;
         }
@@ -64,14 +64,15 @@ namespace ProductsService_API.Services
             return value;
         }
 
-        public Task TryReplaceCache<T>(CacheType type, T replacement) where T: BaseProducts
+        public Task TryReplaceCache<T>(CacheType type, T replacement) where T : BaseProducts
         {
             List<T> value;
             memoryCache.TryGetValue(type, out value);
-            if(value is null) return Task.CompletedTask;
+            if (value is null) return Task.CompletedTask;
 
             var data = value.FirstOrDefault(x => x.Id == replacement.Id);
-            if(data is not null){
+            if (data is not null)
+            {
                 value.Remove(data);
                 value.Add(replacement);
                 SetCache<T>(type, value);

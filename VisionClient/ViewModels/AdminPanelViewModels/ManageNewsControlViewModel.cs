@@ -4,14 +4,10 @@ using Prism.Mvvm;
 using Prism.Regions;
 using Prism.Services.Dialogs;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using VisionClient.Core;
-using VisionClient.Core.Dtos;
 using VisionClient.Core.Events;
 using VisionClient.Core.Models;
 using VisionClient.Core.Repository.IRepository;
@@ -24,7 +20,7 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
         public Guid SelectedGameId
         {
             get { return selectedGameId; }
-            set 
+            set
             {
                 SetProperty(ref selectedGameId, value);
                 if (value != Guid.Empty) GetNewsFromPage();
@@ -73,7 +69,7 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
                 GetNewsFromPage();
             }, ThreadOption.PublisherThread, false, x => x.Equals("NewsUpdated"));
         }
- 
+
         private void EditNews(NewsModel model)
         {
             regionManager.RequestNavigate("AdminPanelRegion", "EditNewsControl");
@@ -83,7 +79,7 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
         private async void DeleteNews(Guid? newsId)
         {
             if (newsId == Guid.Empty || newsId is null || SelectedGameId == Guid.Empty) return;
-            
+
             bool result = false;
             dialogService.ShowDialog("ConfirmControl", new DialogParameters
             {
@@ -113,7 +109,7 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
             {
                 ErrorText = "Something went wrong";
                 LoadingVisibility = Visibility.Collapsed;
-            }          
+            }
         }
 
         private async void GetNewsFromPage()

@@ -41,10 +41,17 @@ namespace ProductsService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
-                logger.LogInformation("Received message from queue: CreateNewGameProductQueue");
-                var content = Encoding.UTF8.GetString(args.Body.ToArray());
-                NewProductDto? gameData = JsonConvert.DeserializeObject<NewProductDto>(content);
-                HandleMessage(gameData).GetAwaiter().GetResult();
+                try
+                {
+                    logger.LogInformation("Received message from queue: CreateNewGameProductQueue");
+                    var content = Encoding.UTF8.GetString(args.Body.ToArray());
+                    NewProductDto? gameData = JsonConvert.DeserializeObject<NewProductDto>(content);
+                    HandleMessage(gameData).GetAwaiter().GetResult();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex.ToString());
+                }
                 channel.BasicAck(args.DeliveryTag, false);
             };
             channel.BasicConsume("CreateNewGameProductQueue", false, consumer);
@@ -54,20 +61,12 @@ namespace ProductsService_API.RabbitMQConsumer
 
         private async Task HandleMessage(NewProductDto? data)
         {
-            try
+            if (data is not null)
             {
-                if (data is not null)
-                {
-                    using var scope = serviceScopeFactory.CreateScope();
-                    var gamesRepository = scope.ServiceProvider.GetRequiredService<IGamesRepository>();
-                    await gamesRepository.AddGame(data);
-                    scope.Dispose();
-                    return;
-                }
-            }
-            catch (Exception)
-            {
-                
+                using var scope = serviceScopeFactory.CreateScope();
+                var gamesRepository = scope.ServiceProvider.GetRequiredService<IGamesRepository>();
+                await gamesRepository.AddGame(data);
+                return;
             }
         }
     }

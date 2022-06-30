@@ -1,6 +1,7 @@
 using MessageService_API.Builders;
 using MessageService_API.DbContexts;
 using MessageService_API.Entites;
+using MessageService_API.RabbitMQRPC;
 using MessageService_API.Repository.IRepository;
 using MessageService_API.Services.IServices;
 using Microsoft.EntityFrameworkCore;
@@ -10,18 +11,18 @@ namespace MessageService_API.Repository
     public class ChatRepository : IChatRepository
     {
         private readonly ApplicationDbContext db;
-        private readonly IUsersService usersService;
         private readonly ILogger<ChatRepository> logger;
+        private readonly IRabbitMQRPC rabbitMQRPC;
         private readonly IChatCacheService chatCacheService;
         private readonly IUploadService uploadService;
         private readonly IConnectionsCacheService connectionsCache;
 
-        public ChatRepository(ApplicationDbContext db, IUsersService usersService, ILogger<ChatRepository> logger,
+        public ChatRepository(ApplicationDbContext db, ILogger<ChatRepository> logger, IRabbitMQRPC rabbitMQRPC,
             IChatCacheService chatCacheService, IUploadService uploadService, IConnectionsCacheService connectionsCache)
         {
             this.db = db;
-            this.usersService = usersService;
             this.logger = logger;
+            this.rabbitMQRPC = rabbitMQRPC;
             this.chatCacheService = chatCacheService;
             this.uploadService = uploadService;
             this.connectionsCache = connectionsCache;
@@ -31,8 +32,8 @@ namespace MessageService_API.Repository
         {
             Chat? chat;
             var cachedId = await chatCacheService.GetFromChatCache(user1, user2);
-            if (cachedId != Guid.Empty) chat = await db.Chats.Include(x => x.Messages).ThenInclude(x => x.Attachments).FirstOrDefaultAsync(x => x.Id == cachedId);
-            else chat = await db.Chats.Include(x => x.Messages).ThenInclude(x => x.Attachments).FirstOrDefaultAsync(x => (x.User1 == user1 && x.User2 == user2) || (x.User1 == user2 && x.User2 == user1));
+            if (cachedId != Guid.Empty) chat = await db.Chats.Include(x => x.Messages).ThenInclude(x => x.Attachments).AsSplitQuery().FirstOrDefaultAsync(x => x.Id == cachedId);
+            else chat = await db.Chats.Include(x => x.Messages).ThenInclude(x => x.Attachments).AsSplitQuery().FirstOrDefaultAsync(x => (x.User1 == user1 && x.User2 == user2) || (x.User1 == user2 && x.User2 == user1));
 
 
             if (chat is not null)
@@ -65,13 +66,10 @@ namespace MessageService_API.Repository
             return chat.Id;
         }
 
-        public async Task<Guid> CreateChat(Guid receiverId, Guid senderId, string Access_Token)
+        public async Task<Guid> CreateChat(Guid receiverId, Guid senderId)
         {
-            var response = await usersService.CheckUserExists(receiverId, Access_Token);
-            if (response is null) return Guid.Empty;
-
-            var responseString = response.Response.ToString();
-            if (string.IsNullOrWhiteSpace(responseString) || !bool.Parse(responseString)) return Guid.Empty;
+            var response = await rabbitMQRPC.SendAsync("CheckUserExistsQueue", receiverId);
+            if (response is null || string.IsNullOrWhiteSpace(response) || !bool.Parse(response)) return Guid.Empty;
 
             var chatBuilder = new ChatBuilder();
             chatBuilder.SetUser1(receiverId);

@@ -6,7 +6,8 @@ namespace Identity_API.DbContexts
 {
     public static class RoleSeeder
     {
-        public static async Task SeedRoles(WebApplication builder){
+        public static async Task SeedRoles(WebApplication builder)
+        {
             using var scope = builder.Services.GetRequiredService<IServiceScopeFactory>().CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var role = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();

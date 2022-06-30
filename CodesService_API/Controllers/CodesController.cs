@@ -2,7 +2,6 @@ using CodesService_API.Dtos;
 using CodesService_API.Extensions;
 using CodesService_API.Helpers;
 using CodesService_API.Repository.IRepository;
-using CodesService_API.Statics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,9 +22,8 @@ namespace CodesService_API.Controllers
         public async Task<ActionResult<ResponseDto>> ApplyCode([FromQuery] string code, [FromQuery] string codeType)
         {
             if (string.IsNullOrEmpty(code)) return BadRequest();
-            var token = HttpContext.Request.Headers["Authorization"][0];
             Enum.TryParse(codeType, true, out CodeTypes CodeType);
-            return CheckActionResult(await codesRepository.ApplyCode(code, User.GetId(), CodeType, token));
+            return CheckActionResult(await codesRepository.ApplyCode(code, User.GetId(), CodeType));
         }
 
         [HttpGet("ValidateCode")]

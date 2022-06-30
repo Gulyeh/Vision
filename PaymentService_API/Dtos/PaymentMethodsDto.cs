@@ -13,18 +13,20 @@ namespace PaymentService_API.Dtos
         public Guid Id { get; set; }
         public string PhotoUrl { get; set; }
         private string title;
-        public string Title 
-        { 
+        public string Title
+        {
             get => title;
-            set {
+            set
+            {
                 var parseInt = int.TryParse(value, out int EnumValue);
-                if(!parseInt){
+                if (!parseInt)
+                {
                     title = value;
                     return;
                 }
 
                 var parsedEnum = Enum.GetName(typeof(PaymentProvider), parseInt);
-                if(!string.IsNullOrEmpty(parsedEnum)) title = parsedEnum;
+                if (!string.IsNullOrEmpty(parsedEnum)) title = parsedEnum;
             }
         }
         public bool IsAvailable { get; set; }

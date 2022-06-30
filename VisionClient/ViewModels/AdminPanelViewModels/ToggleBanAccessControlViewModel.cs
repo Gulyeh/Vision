@@ -3,10 +3,6 @@ using Prism.Events;
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VisionClient.Core;
 using VisionClient.Core.Dtos;
 using VisionClient.Core.Events;
@@ -39,10 +35,10 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
             set { SetProperty(ref banModel, value); }
         }
         private bool isBanned = false;
-        public bool IsBanned 
+        public bool IsBanned
         {
             get => isBanned;
-            set { SetProperty(ref isBanned, value); } 
+            set { SetProperty(ref isBanned, value); }
         }
 
         private readonly IDialogService dialogService;
@@ -63,7 +59,8 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
                 IsBanned = x.Item1.IsBanned;
             }, ThreadOption.PublisherThread, false, x => x.Item2.Equals("ToggleBanAccess"));
 
-            eventAggregator.GetEvent<SendEvent<DetailedUserModel>>().Subscribe(x => {
+            eventAggregator.GetEvent<SendEvent<DetailedUserModel>>().Subscribe(x =>
+            {
                 ErrorText = string.Empty;
                 BanModel = new();
                 BanModel.UserId = x.UserId;
@@ -103,7 +100,7 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
                 ErrorText = "Please fill all needed data";
                 return;
             }
-            else if(BanModel.UserId == staticData.UserData.UserId)
+            else if (BanModel.UserId == staticData.UserData.UserId)
             {
                 ErrorText = "You cannot ban yourself";
                 return;

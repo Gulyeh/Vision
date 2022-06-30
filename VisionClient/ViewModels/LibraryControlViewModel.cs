@@ -3,7 +3,6 @@ using Prism.Mvvm;
 using Prism.Regions;
 using System;
 using System.Linq;
-using VisionClient.Core;
 using VisionClient.SignalR;
 using VisionClient.Views;
 
@@ -25,7 +24,7 @@ namespace VisionClient.ViewModels
         }
 
         protected virtual void RaiseIsActiveChanged() => IsActiveChanged?.Invoke(this, EventArgs.Empty);
-        
+
         private readonly IRegionManager regionManager;
         private readonly IMessageService_Hubs messageService_Hubs;
 

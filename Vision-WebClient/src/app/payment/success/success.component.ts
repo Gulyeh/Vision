@@ -13,19 +13,18 @@ import { PaymentService } from 'src/app/_services/payment.service';
 })
 export class SuccessComponent implements OnInit {
   paymentResponse!: PaymentData;
-  paymentModel: PaymentCompleted = {SessionId: '', Token: ''};
+  paymentModel: PaymentCompleted = {SessionId: ''};
   IsBusy = true;
 
   constructor(private route: ActivatedRoute, private router: Router, private paymentService: PaymentService, private busyService: BusyService) { 
     this.IsBusy = busyService.IsBusy;
     this.route.queryParams.subscribe(params => {
       this.paymentModel.SessionId = params["sessionId"];
-      this.paymentModel.Token = params["token"];
     });
   }
 
   ngOnInit(): void {
-    if(this.paymentModel.Token === '' || this.paymentModel.SessionId === ''){
+    if(this.paymentModel.SessionId === ''){
       this.router.navigateByUrl('error/badrequest');
       return;
     }   

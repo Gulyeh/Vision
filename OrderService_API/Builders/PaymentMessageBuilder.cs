@@ -1,4 +1,3 @@
-using OrderService_API.Dtos;
 using OrderService_API.Messages;
 
 namespace OrderService_API.Builders
@@ -10,11 +9,6 @@ namespace OrderService_API.Builders
         public PaymentMessageBuilder(decimal Price, decimal Discount, CouponDataDto couponData)
         {
             payment = new PaymentMessage(Price, Discount, couponData);
-        }
-
-        public void SetAccessToken(string token)
-        {
-            payment.Access_Token = token;
         }
 
         public void SetUserId(Guid userId)

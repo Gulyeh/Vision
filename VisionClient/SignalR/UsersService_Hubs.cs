@@ -5,11 +5,9 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Data;
 using VisionClient.Core;
 using VisionClient.Core.Dtos;
 using VisionClient.Core.Enums;
-using VisionClient.Core.Helpers;
 using VisionClient.Core.Models;
 using VisionClient.Utility;
 
@@ -211,13 +209,13 @@ namespace VisionClient.SignalR
 
                 var user = StaticData.FriendsList.FirstOrDefault(x => x.UserId == data.UserId);
                 if (user is null) return;
-                
+
                 user.Username = data.Username;
                 user.PhotoUrl = data.PhotoUrl;
                 user.Description = data.Description;
                 user.UserId = data.UserId;
                 user.Status = data.Status;
-                toastNotification.Show("", $"{data.Username} is online");          
+                toastNotification.Show("", $"{data.Username} is online");
             });
 
             userHubConnection.On<Guid>("UserIsOffline", (data) =>
@@ -235,8 +233,8 @@ namespace VisionClient.SignalR
                 var user = StaticData.FriendsList.FirstOrDefault(x => x.UserId == data.UserId);
                 if (user is not null)
                 {
-                    if(!user.Username.Equals(data.Username)) user.Username = data.Username;
-                    if(!user.Description.Equals(data.Description)) user.Description = data.Description;
+                    if (!user.Username.Equals(data.Username)) user.Username = data.Username;
+                    if (!user.Description.Equals(data.Description)) user.Description = data.Description;
                     return;
                 }
             });
@@ -302,8 +300,8 @@ namespace VisionClient.SignalR
             userHubConnection.On<ChangedUserDataDto>("ChangedData", (userData) =>
             {
                 if (userData is null) return;
-                if(!StaticData.UserData.Username.Equals(userData.Username)) StaticData.UserData.Username = userData.Username;
-                if(!StaticData.UserData.Description.Equals(userData.Description)) StaticData.UserData.Description = userData.Description;
+                if (!StaticData.UserData.Username.Equals(userData.Username)) StaticData.UserData.Username = userData.Username;
+                if (!StaticData.UserData.Description.Equals(userData.Description)) StaticData.UserData.Description = userData.Description;
             });
 
             userHubConnection.On<UserChangedStatusDto>("ChangedStatus", (userData) =>

@@ -1,7 +1,7 @@
 using CodesService_API.Helpers;
 using CodesService_API.Processor.Interfaces;
+using CodesService_API.RabbitMQRPC;
 using CodesService_API.RabbitMQSender;
-using CodesService_API.Services.IServices;
 
 namespace CodesService_API.Processor
 {
@@ -13,13 +13,13 @@ namespace CodesService_API.Processor
 
     public class CodeTypeProcessor : ICodeTypeProcessor
     {
-        private readonly IGameAccessService gameAccessService;
         private readonly IRabbitMQSender rabbitMQSender;
         private ProductType? productType { get; set; } = null;
+        private readonly IRabbitMQRPC rabbitMQRPC;
 
-        public CodeTypeProcessor(IGameAccessService gameAccessService, IRabbitMQSender rabbitMQSender)
+        public CodeTypeProcessor(IRabbitMQRPC rabbitMQRPC, IRabbitMQSender rabbitMQSender)
         {
-            this.gameAccessService = gameAccessService;
+            this.rabbitMQRPC = rabbitMQRPC;
             this.rabbitMQSender = rabbitMQSender;
         }
 
@@ -27,7 +27,7 @@ namespace CodesService_API.Processor
         {
             return codeType switch
             {
-                CodeTypes.Product => productType != null ? productType : productType = new ProductType(rabbitMQSender, gameAccessService),
+                CodeTypes.Product => productType != null ? productType : productType = new ProductType(rabbitMQSender, rabbitMQRPC),
                 _ => null
             };
         }
@@ -36,7 +36,7 @@ namespace CodesService_API.Processor
         {
             return codeType switch
             {
-                CodeTypes.Product => productType != null ? productType : productType = new ProductType(rabbitMQSender, gameAccessService),
+                CodeTypes.Product => productType != null ? productType : productType = new ProductType(rabbitMQSender, rabbitMQRPC),
                 CodeTypes.Currency => new CurrencyType(rabbitMQSender),
                 _ => null
             };

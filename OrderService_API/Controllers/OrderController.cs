@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using OrderService_API.Dtos;
 using OrderService_API.Extensions;
 using OrderService_API.Repository.IRepository;
-using OrderService_API.Statics;
 
 namespace OrderService_API.Controllers
 {
@@ -34,9 +33,10 @@ namespace OrderService_API.Controllers
 
         [HttpPost("ChangeToPaid")]
         [Authorize(Policy = "HasAdminRole")]
-        public async Task<ActionResult<ResponseDto>> ChangeToPaid([FromQuery] Guid orderId){
-            if(orderId == Guid.Empty) return BadRequest();
-            if(!await orderRepository.ChangeOrderStatus(orderId, true)) return CheckActionResult(new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not change status" }));
+        public async Task<ActionResult<ResponseDto>> ChangeToPaid([FromQuery] Guid orderId)
+        {
+            if (orderId == Guid.Empty) return BadRequest();
+            if (!await orderRepository.ChangeOrderStatus(orderId, true)) return CheckActionResult(new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not change status" }));
             return CheckActionResult(new ResponseDto(true, StatusCodes.Status200OK, new[] { "Status has been changed" }));
         }
     }

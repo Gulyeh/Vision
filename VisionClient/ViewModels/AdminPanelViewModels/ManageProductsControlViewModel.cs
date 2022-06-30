@@ -4,11 +4,8 @@ using Prism.Mvvm;
 using Prism.Regions;
 using Prism.Services.Dialogs;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using VisionClient.Core;
 using VisionClient.Core.Events;
@@ -102,7 +99,7 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
 
                 packages.Products.Insert(0, gameProduct);
 
-                foreach(var product in packages.Products)
+                foreach (var product in packages.Products)
                 {
                     if (product.OldPrice is not null) product.Price = (decimal)product.OldPrice;
                     ProductsList.Add(product);

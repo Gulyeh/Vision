@@ -1,9 +1,8 @@
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ProdcutsService_API.Extensions;
 using ProductsService_API.Dtos;
 using ProductsService_API.Repository.IRepository;
-using ProductsService_API.Statics;
 
 namespace ProductsService_API.Controllers
 {
@@ -18,9 +17,8 @@ namespace ProductsService_API.Controllers
         [HttpGet("GetProductGame")]
         public async Task<ActionResult<ResponseDto>> GetGame([FromQuery] Guid GameId)
         {
-            var token = await HttpContext.GetTokenAsync("access_token");
-            if (string.IsNullOrEmpty(token)) return new ResponseDto(false, StatusCodes.Status400BadRequest, false);
-            return CheckActionResult(await gamesRepository.GetGame(GameId, token));
+            if (GameId == Guid.Empty) return BadRequest();
+            return CheckActionResult(await gamesRepository.GetGame(GameId, User.GetId()));
         }
 
         [HttpPut("EditProductGame")]

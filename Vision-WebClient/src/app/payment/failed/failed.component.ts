@@ -13,7 +13,7 @@ import { PaymentService } from 'src/app/_services/payment.service';
 })
 export class FailedComponent implements OnInit {
   paymentResponse!: PaymentData;
-  paymentModel: PaymentCompleted = {SessionId: '', Token: ''};
+  paymentModel: PaymentCompleted = {SessionId: ''};
   IsBusy = true;
 
   constructor(private route: ActivatedRoute, private router: Router, private paymentService: PaymentService, private busyService: BusyService) { 

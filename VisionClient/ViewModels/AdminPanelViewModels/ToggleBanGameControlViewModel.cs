@@ -3,10 +3,6 @@ using Prism.Events;
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VisionClient.Core;
 using VisionClient.Core.Dtos;
 using VisionClient.Core.Events;
@@ -65,7 +61,8 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
                 BanModel.UserId = x.Item1.UserId;
             }, ThreadOption.PublisherThread, false, x => x.Item2.Equals("ToggleBanGame"));
 
-            eventAggregator.GetEvent<SendEvent<DetailedUserModel>>().Subscribe(x => {
+            eventAggregator.GetEvent<SendEvent<DetailedUserModel>>().Subscribe(x =>
+            {
                 BanModel = new();
                 ErrorText = string.Empty;
                 BanModel.UserId = x.UserId;

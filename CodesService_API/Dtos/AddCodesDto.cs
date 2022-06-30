@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using CodesService_API.Helpers;
 
 namespace CodesService_API.Dtos
 {
@@ -21,11 +20,12 @@ namespace CodesService_API.Dtos
         public DateTime ExpireDate { get; set; }
         private string codeType;
         [Required]
-        public string CodeType 
-        { 
-            get => codeType; 
-            set {
-                if(value.Equals("Game") || value.Equals("Package")) codeType = "Product";
+        public string CodeType
+        {
+            get => codeType;
+            set
+            {
+                if (value.Equals("Game") || value.Equals("Package")) codeType = "Product";
                 else codeType = value;
             }
         }

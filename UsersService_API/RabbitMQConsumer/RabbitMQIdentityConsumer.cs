@@ -44,10 +44,17 @@ namespace UsersService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
-                logger.LogInformation("Received message from queue: CreateUserQueue");
-                var content = Encoding.UTF8.GetString(args.Body.ToArray());
-                Message? userId = JsonConvert.DeserializeObject<Message>(content);
-                HandleMessage(userId).GetAwaiter().GetResult();
+                try
+                {
+                    logger.LogInformation("Received message from queue: CreateUserQueue");
+                    var content = Encoding.UTF8.GetString(args.Body.ToArray());
+                    Message? userId = JsonConvert.DeserializeObject<Message>(content);
+                    HandleMessage(userId).GetAwaiter().GetResult();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex.ToString());
+                }
                 channel.BasicAck(args.DeliveryTag, false);
             };
             channel.BasicConsume("CreateUserQueue", false, consumer);

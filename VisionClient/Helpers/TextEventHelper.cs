@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace VisionClient.Helpers
+﻿namespace VisionClient.Helpers
 {
     internal delegate void TextEventHandler(object sender, TextEventArgs e);
     internal class TextEventArgs
@@ -23,6 +17,6 @@ namespace VisionClient.Helpers
     {
         public event TextEventHandler? NotifyOpened;
 
-        public void Notify(string panelName) => NotifyOpened?.Invoke(this, new TextEventArgs(panelName));       
+        public void Notify(string panelName) => NotifyOpened?.Invoke(this, new TextEventArgs(panelName));
     }
 }

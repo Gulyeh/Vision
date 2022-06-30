@@ -1,6 +1,7 @@
 using GamesDataService_API.DbContexts;
 using GamesDataService_API.Helpers;
 using GamesDataService_API.Middleware;
+using GamesDataService_API.RabbitMQConsumer;
 using GamesDataService_API.RabbitMQSender;
 using GamesDataService_API.Repository;
 using GamesDataService_API.Repository.IRepository;
@@ -24,6 +25,7 @@ namespace GamesDataService_API.Extensions
             services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<ErrorHandler>();
+            services.AddHostedService<RabbitMQGameExistsConsumer>();
             services.AddScoped<IGamesRepository, GamesRepository>();
             services.AddScoped<INewsRepository, NewsRepository>();
             services.AddScoped<IUploadService, UploadService>();

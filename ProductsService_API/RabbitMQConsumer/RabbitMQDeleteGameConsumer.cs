@@ -3,7 +3,6 @@ using Newtonsoft.Json;
 using ProdcutsService_API.Messages;
 using ProdcutsService_API.RabbitMQSender;
 using ProductsService_API.Helpers;
-using ProductsService_API.Messages;
 using ProductsService_API.Repository.IRepository;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -45,10 +44,17 @@ namespace ProductsService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
-                logger.LogInformation("Received message from queue: DeleteGameProductQueue");
-                var content = Encoding.UTF8.GetString(args.Body.ToArray());
-                Guid gameId = JsonConvert.DeserializeObject<Guid>(content);
-                HandleMessage(gameId).GetAwaiter().GetResult();
+                try
+                {
+                    logger.LogInformation("Received message from queue: DeleteGameProductQueue");
+                    var content = Encoding.UTF8.GetString(args.Body.ToArray());
+                    Guid gameId = JsonConvert.DeserializeObject<Guid>(content);
+                    HandleMessage(gameId).GetAwaiter().GetResult();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex.ToString());
+                }
                 channel.BasicAck(args.DeliveryTag, false);
             };
             channel.BasicConsume("DeleteGameProductQueue", false, consumer);
@@ -58,23 +64,15 @@ namespace ProductsService_API.RabbitMQConsumer
 
         private async Task HandleMessage(Guid data)
         {
-            try
+            if (data != Guid.Empty)
             {
-                if (data != Guid.Empty)
-                {
-                    using var scope = serviceScopeFactory.CreateScope();
-                    var gamesRepository = scope.ServiceProvider.GetRequiredService<IGamesRepository>();
+                using var scope = serviceScopeFactory.CreateScope();
+                var gamesRepository = scope.ServiceProvider.GetRequiredService<IGamesRepository>();
 
-                    var game = await gamesRepository.FindGame(data);
-                    var isDeleted = await gamesRepository.DeleteGame(data);
-                    if(isDeleted && game is not null) rabbitMQSender.SendMessage(new DeleteGameDto(game.GameId, game.Products.Select(x => x.Id)), "DeleteGameAccessQueue");                  
-                    scope.Dispose();
-                    return;
-                }
-            }
-            catch (Exception)
-            {
-                
+                var game = await gamesRepository.FindGame(data);
+                var isDeleted = await gamesRepository.DeleteGame(data);
+                if (isDeleted && game is not null) rabbitMQSender.SendMessage(new DeleteGameDto(game.GameId, game.Products.Select(x => x.Id)), "DeleteGameAccessQueue");
+                return;
             }
         }
     }

@@ -11,7 +11,7 @@ namespace VisionClient.Core.Services.IServices
         Task<ResponseDto?> GetCoupons();
         Task<ResponseDto?> DeleteCoupon(string coupon);
         Task<ResponseDto?> UpdateCoupon(EditCouponDto data);
-        Task<ResponseDto?> DeleteUsedCoupon(Guid couponId); 
+        Task<ResponseDto?> DeleteUsedCoupon(Guid couponId);
         Task<ResponseDto?> GetUserUsedCoupons(Guid userId);
     }
 }

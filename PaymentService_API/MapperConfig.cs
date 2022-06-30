@@ -1,7 +1,6 @@
 using AutoMapper;
 using PaymentService_API.Dtos;
 using PaymentService_API.Entities;
-using PaymentService_API.Helpers;
 using PaymentService_API.Messages;
 
 namespace PaymentService_API

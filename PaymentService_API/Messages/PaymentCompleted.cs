@@ -1,5 +1,3 @@
-using System.Web;
-
 namespace PaymentService_API.Messages
 {
     public class PaymentCompleted
@@ -14,11 +12,5 @@ namespace PaymentService_API.Messages
         public Guid PaymentId { get; set; }
         public string Email { get; set; }
         public Guid OrderId { get; set; }
-        private string access_Token = string.Empty;
-        public string Access_Token
-        {
-            get => access_Token;
-            set => access_Token = $"Bearer {HttpUtility.UrlDecode(value)}";
-        }
     }
 }

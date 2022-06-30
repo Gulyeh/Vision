@@ -3,17 +3,10 @@ using Prism.Events;
 using Prism.Mvvm;
 using Prism.Regions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Media.Imaging;
 using VisionClient.Core.Dtos;
 using VisionClient.Core.Events;
 using VisionClient.Core.Models;
 using VisionClient.Core.Repository.IRepository;
-using VisionClient.Extensions;
-using VisionClient.Utility;
 
 namespace VisionClient.ViewModels.AdminPanelViewModels
 {
@@ -74,7 +67,7 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
         private async void Execute()
         {
             ErrorText = string.Empty;
-            if(!CurrencyModel.Validator())
+            if (!CurrencyModel.Validator())
             {
                 ErrorText = "Fill all data";
                 return;

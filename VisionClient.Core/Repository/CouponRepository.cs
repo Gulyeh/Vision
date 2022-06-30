@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using VisionClient.Core.Dtos;
+﻿using VisionClient.Core.Dtos;
 using VisionClient.Core.Enums;
 using VisionClient.Core.Helpers;
 using VisionClient.Core.Models;
@@ -72,7 +71,7 @@ namespace VisionClient.Core.Repository
             if (string.IsNullOrEmpty(coupon)) return (new(), "Field cannot be empty");
             var response = await couponService.VerifyCoupon(coupon, type);
             var json = ResponseToJsonHelper.GetJson<CouponModel>(response);
-            if (string.IsNullOrWhiteSpace(json.Coupon)) return (json, ResponseToJsonHelper.GetJson(response));       
+            if (string.IsNullOrWhiteSpace(json.Coupon)) return (json, ResponseToJsonHelper.GetJson(response));
             return (json, null);
         }
     }

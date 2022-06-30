@@ -47,10 +47,17 @@ namespace OrderService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
-                logger.LogInformation("Received data from queue: CurrencyPaymentDoneQueue");
-                var content = Encoding.UTF8.GetString(args.Body.ToArray());
-                CurrencyDoneDto? currencyData = JsonConvert.DeserializeObject<CurrencyDoneDto>(content);
-                HandleMessage(currencyData).GetAwaiter().GetResult();
+                try
+                {
+                    logger.LogInformation("Received data from queue: CurrencyPaymentDoneQueue");
+                    var content = Encoding.UTF8.GetString(args.Body.ToArray());
+                    CurrencyDoneDto? currencyData = JsonConvert.DeserializeObject<CurrencyDoneDto>(content);
+                    HandleMessage(currencyData).GetAwaiter().GetResult();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex.ToString());
+                }
                 channel.BasicAck(args.DeliveryTag, false);
             };
             channel.BasicConsume("CurrencyPaymentDoneQueue", false, consumer);
@@ -71,7 +78,6 @@ namespace OrderService_API.RabbitMQConsumer
 
                     connIds = await cacheService.TryGetFromCache(data.UserId);
                     if (connIds.Count() > 0) await hubContext.Clients.Clients(connIds).SendAsync("CurrencyPaymentDone", new CurrencyPurchasedDto(data.IsSuccess, data.Amount));
-                    scope.Dispose();
                 }
                 catch (Exception)
                 {

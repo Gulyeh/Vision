@@ -7,7 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Host.UseSerilog((context, config) => {
+builder.Host.UseSerilog((context, config) =>
+{
     config.WriteTo.Console();
     config.WriteTo.Seq(builder.Configuration["SeqServer"], apiKey: builder.Configuration["SeqAPI"]);
     config.MinimumLevel.Information();
@@ -34,7 +35,7 @@ if (app.Environment.IsDevelopment())
 
 await DbMigration.Migrate(app);
 app.UseMiddleware<ErrorHandler>();
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 

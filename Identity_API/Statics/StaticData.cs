@@ -1,5 +1,3 @@
-using System.Runtime.Serialization;
-
 namespace Identity_API.Statics
 {
     public class StaticData
@@ -15,6 +13,6 @@ namespace Identity_API.Statics
             Moderator = 1,
             Administrator = 2,
             Owner = 3
-        }      
+        }
     }
 }

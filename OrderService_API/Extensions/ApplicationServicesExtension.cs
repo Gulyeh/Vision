@@ -4,6 +4,7 @@ using OrderService_API.Helpers;
 using OrderService_API.Middleware;
 using OrderService_API.Processors;
 using OrderService_API.RabbitMQConsumer;
+using OrderService_API.RabbitMQRPC;
 using OrderService_API.RabbitMQSender;
 using OrderService_API.Repository;
 using OrderService_API.Repository.IRepository;
@@ -26,16 +27,13 @@ namespace OrderService_API.Extensions
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<ErrorHandler>();
             services.AddScoped<ICacheService, CacheService>();
-            services.AddHttpClient<IProductsService, ProductsService>();
-            services.AddScoped<IProductsService, ProductsService>();
             services.AddHostedService<RabbitMQPaymentConsumer>();
             services.AddHostedService<RabbitMQPaymentCompletedConsumer>();
             services.AddHostedService<RabbitMQAccessConsumer>();
             services.AddHostedService<RabbitMQCurrencyConsumer>();
             services.AddScoped<IOrderRepository, OrderRepository>();
-            services.AddScoped<ICouponService, CouponService>();
+            services.AddSingleton<IRabbitMQRPC, RabbitMQRPCSender>();
             services.AddSingleton<IRabbitMQSender, RabbitMQMessageSender>();
-            services.AddScoped<IGameAccessService, GameAccessService>();
             services.AddScoped<IOrderTypeProcessor, OrderTypeProcessor>();
             return services;
         }

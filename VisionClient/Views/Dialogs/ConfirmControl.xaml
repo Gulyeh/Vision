@@ -109,6 +109,7 @@
         <StackPanel Grid.Row="1" HorizontalAlignment="Center" 
                     VerticalAlignment="Center">
             <TextBlock Text="{Binding Message}" TextWrapping="Wrap"
+                       Width="350"
                        Foreground="White" FontSize="15" 
                        TextAlignment="Center"/>
         </StackPanel>

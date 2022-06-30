@@ -46,10 +46,17 @@ namespace OrderService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
-                logger.LogInformation("Received data from queue: ProductAccessDoneQueue");
-                var content = Encoding.UTF8.GetString(args.Body.ToArray());
-                UserAccessDto? access = JsonConvert.DeserializeObject<UserAccessDto>(content);
-                HandleMessage(access).GetAwaiter().GetResult();
+                try
+                {
+                    logger.LogInformation("Received data from queue: ProductAccessDoneQueue");
+                    var content = Encoding.UTF8.GetString(args.Body.ToArray());
+                    UserAccessDto? access = JsonConvert.DeserializeObject<UserAccessDto>(content);
+                    HandleMessage(access).GetAwaiter().GetResult();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex.ToString());
+                }
                 channel.BasicAck(args.DeliveryTag, false);
             };
             channel.BasicConsume("ProductAccessDoneQueue", false, consumer);
@@ -69,7 +76,6 @@ namespace OrderService_API.RabbitMQConsumer
                     var cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
                     connIds = await cacheService.TryGetFromCache(data.UserId);
                     if (connIds.Count() > 0) await hubContext.Clients.Clients(connIds).SendAsync("ProductPaymentDone", data.IsSuccess);
-                    scope.Dispose();
                 }
                 catch (Exception)
                 {

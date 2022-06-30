@@ -1,9 +1,6 @@
 ﻿using Prism.Events;
-using System.Windows.Controls;
-using VisionClient.Core;
 using VisionClient.Helpers;
 using VisionClient.SignalR;
-using VisionClient.Utility;
 
 namespace VisionClient.ViewModels.DialogsViewModels
 {

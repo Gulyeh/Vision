@@ -44,10 +44,17 @@ namespace PaymentService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
-                logger.LogInformation("Received message from queue: CreatePaymentQueue");
-                var content = Encoding.UTF8.GetString(args.Body.ToArray());
-                PaymentMessage? gameData = JsonConvert.DeserializeObject<PaymentMessage>(content);
-                HandleMessage(gameData).GetAwaiter().GetResult();
+                try
+                {
+                    logger.LogInformation("Received message from queue: CreatePaymentQueue");
+                    var content = Encoding.UTF8.GetString(args.Body.ToArray());
+                    PaymentMessage? gameData = JsonConvert.DeserializeObject<PaymentMessage>(content);
+                    HandleMessage(gameData).GetAwaiter().GetResult();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex.ToString());
+                }
                 channel.BasicAck(args.DeliveryTag, false);
             };
             channel.BasicConsume("CreatePaymentQueue", false, consumer);
@@ -67,8 +74,6 @@ namespace PaymentService_API.RabbitMQConsumer
                     await paymentRepository.CreatePayment(data);
                     var paymentData = await paymentRepository.RequestPayment(data);
                     rabbitMQSender.SendMessage(paymentData, "PaymentUrlQueue");
-
-                    scope.Dispose();
                     return;
                 }
                 rabbitMQSender.SendMessage(new PaymentUrlData(), "PaymentUrlQueue");

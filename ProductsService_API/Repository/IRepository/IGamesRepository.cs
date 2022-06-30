@@ -9,7 +9,7 @@ namespace ProductsService_API.Repository.IRepository
         Task AddGame(NewProductDto data);
         Task<bool> DeleteGame(Guid gameId);
         Task<ResponseDto> EditGame(EditPackageDto data);
-        Task<ResponseDto> GetGame(Guid gameId, string Access_Token);
+        Task<ResponseDto> GetGame(Guid gameId, Guid userId);
         Task UpdateGameData(GameProductData data);
         Task<Games?> FindGame(Guid gameId);
     }

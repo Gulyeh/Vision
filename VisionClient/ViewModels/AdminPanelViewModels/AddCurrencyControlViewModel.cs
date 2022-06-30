@@ -1,10 +1,6 @@
 ﻿using Prism.Commands;
 using Prism.Mvvm;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VisionClient.Core.Dtos;
 using VisionClient.Core.Repository.IRepository;
 
@@ -56,7 +52,7 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
             {
                 (bool success, ErrorText) = await currencyRepository.AddPackage(CurrencyModel);
                 IsButtonEnabled = true;
-                if(success) CurrencyModel = new();
+                if (success) CurrencyModel = new();
             }
             catch (Exception)
             {

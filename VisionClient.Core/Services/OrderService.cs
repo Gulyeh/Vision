@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using VisionClient.Core.Dtos;
+﻿using VisionClient.Core.Dtos;
 using VisionClient.Core.Enums;
 using VisionClient.Core.Helpers;
 using VisionClient.Core.Services.IServices;

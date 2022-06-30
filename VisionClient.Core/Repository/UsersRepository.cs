@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using VisionClient.Core.Helpers;
+﻿using VisionClient.Core.Helpers;
 using VisionClient.Core.Models;
 using VisionClient.Core.Repository.IRepository;
 using VisionClient.Core.Services.IServices;
@@ -38,7 +37,7 @@ namespace VisionClient.Core.Repository
         public async Task<List<DetailedUserModel>> GetDetailedUsers(string containsString)
         {
             var response = await usersService.GetDetailedUsers(containsString);
-            if(response is null) throw new Exception();
+            if (response is null) throw new Exception();
             return ResponseToJsonHelper.GetJson<List<DetailedUserModel>>(response);
         }
     }

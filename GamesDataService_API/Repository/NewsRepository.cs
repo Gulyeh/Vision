@@ -42,7 +42,7 @@ namespace GamesDataService_API.Repository
             mapped.PhotoId = results.PublicId;
             mapped.PhotoUrl = results.SecureUrl.AbsoluteUri;
 
-            if(!string.IsNullOrWhiteSpace(results.PublicId))
+            if (!string.IsNullOrWhiteSpace(results.PublicId))
             {
                 game.News?.Add(mapped);
                 if (await db.SaveChangesAsync() > 0)
@@ -70,7 +70,7 @@ namespace GamesDataService_API.Repository
             if (await db.SaveChangesAsync() > 0)
             {
                 var newsCache = await GetNewsFromCache(newsId);
-                if(newsCache is not null) await cacheService.TryRemoveFromCache<News>(CacheType.News, newsCache);
+                if (newsCache is not null) await cacheService.TryRemoveFromCache<News>(CacheType.News, newsCache);
 
                 await uploadService.DeletePhoto(news.PhotoId);
                 logger.LogInformation("Deleted News with ID: {newsId} from Game with ID: {gameId} successfully", newsId, gameId);
@@ -85,10 +85,7 @@ namespace GamesDataService_API.Repository
         {
             string oldPhotoId = string.Empty;
 
-            var game = await db.Games.Include(x => x.News).FirstOrDefaultAsync(x => x.Id == data.GameId);
-            if (game is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Game does not exist" });
-
-            var news = game.News?.FirstOrDefault(x => x.Id == data.Id);
+            var news = await db.News.FirstOrDefaultAsync(x => x.Id == data.Id);
             if (news is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "News does not exist" });
 
             if (!string.IsNullOrWhiteSpace(data.Photo))
@@ -106,9 +103,9 @@ namespace GamesDataService_API.Repository
             if (await db.SaveChangesAsync() > 0)
             {
                 if (!string.IsNullOrEmpty(oldPhotoId)) await uploadService.DeletePhoto(oldPhotoId);
-                
-                var newsCached = await GetNewsFromCache(mapped.Id);
-                if(newsCached is not null) await cacheService.TryReplaceCache<News>(CacheType.News, newsCached, mapped);
+
+                var newsCached = await GetNewsFromCache(news.Id);
+                if (newsCached is not null) await cacheService.TryReplaceCache<News>(CacheType.News, newsCached, mapped);
 
                 logger.LogInformation("Edited News with ID: {newsId} in Game with ID: {gameId} successfully", data.Id, data.GameId);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Edited news successfuly" });
@@ -128,12 +125,13 @@ namespace GamesDataService_API.Repository
                 foreach (var item in dbNews) await cacheService.TryAddToCache<News>(CacheType.News, item);
                 news = dbNews;
             }
-            
+
             IEnumerable<News> gameNews = news.Where(x => x.GameId == gameId).OrderByDescending(x => x.CreatedDate).Take(500);
             return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<NewsDto>>(gameNews));
         }
 
-        private async Task<News?> GetNewsFromCache(Guid newsId){
+        private async Task<News?> GetNewsFromCache(Guid newsId)
+        {
             IEnumerable<News> news = await cacheService.TryGetFromCache<News>(CacheType.News);
             return news.FirstOrDefault(x => x.Id == newsId);
         }

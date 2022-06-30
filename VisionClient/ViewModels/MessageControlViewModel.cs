@@ -191,7 +191,7 @@ namespace VisionClient.ViewModels
         }
 
         private void NavigateToGames() => regionManager.RequestNavigate("LibraryContentRegion", "GamesControl");
-        
+
         public async Task GetMoreMessages()
         {
             if (StaticData.MaxPages <= CurrentPage || LoadingVisibility == Visibility.Visible) return;

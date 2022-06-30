@@ -3,11 +3,7 @@ using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VisionClient.Core.Events;
 using VisionClient.Core.Models;
 using VisionClient.Core.Repository.IRepository;
@@ -32,8 +28,8 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
         }
 
         private bool isActive;
-        public bool IsActive 
-        { 
+        public bool IsActive
+        {
             get => isActive;
             set
             {

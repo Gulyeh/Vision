@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using VisionClient.Core.Dtos;
+﻿using VisionClient.Core.Dtos;
 using VisionClient.Core.Models.Account;
 
 namespace VisionClient.Core.Repository.IRepository

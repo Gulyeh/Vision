@@ -49,10 +49,17 @@ namespace OrderService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
-                logger.LogInformation("Received data from queue: PaymentQueue");
-                var content = Encoding.UTF8.GetString(args.Body.ToArray());
-                PaymentCompleted? paymentCompleted = JsonConvert.DeserializeObject<PaymentCompleted>(content);
-                HandleMessage(paymentCompleted).GetAwaiter().GetResult();
+                try
+                {
+                    logger.LogInformation("Received data from queue: PaymentQueue");
+                    var content = Encoding.UTF8.GetString(args.Body.ToArray());
+                    PaymentCompleted? paymentCompleted = JsonConvert.DeserializeObject<PaymentCompleted>(content);
+                    HandleMessage(paymentCompleted).GetAwaiter().GetResult();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex.ToString());
+                }
                 channel.BasicAck(args.DeliveryTag, false);
             };
             channel.BasicConsume("PaymentQueue", false, consumer);
@@ -69,10 +76,7 @@ namespace OrderService_API.RabbitMQConsumer
                     if (data.IsSuccess)
                     {
                         using var scope = serviceScopeFactory.CreateScope();
-                        var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<OrderHub>>();
                         var orderRepository = scope.ServiceProvider.GetRequiredService<IOrderRepository>();
-                        var productService = scope.ServiceProvider.GetRequiredService<IProductsService>();
-                        var cacheService = scope.ServiceProvider.GetRequiredService<ICacheService>();
                         var orderTypeProcessor = scope.ServiceProvider.GetRequiredService<IOrderTypeProcessor>();
 
                         var order = await orderRepository.GetOrder(data.OrderId);
@@ -93,7 +97,6 @@ namespace OrderService_API.RabbitMQConsumer
                         }
 
                         rabbitMQSender.SendMessage(new EmailDataDto(data.UserId, order.Title, data.Email), "SendEmailQueue");
-                        scope.Dispose();
                     }
                     else
                     {
@@ -115,8 +118,6 @@ namespace OrderService_API.RabbitMQConsumer
 
             var connIds = await cacheService.TryGetFromCache(data.UserId);
             if (connIds.Count() > 0) await hubContext.Clients.Clients(connIds).SendAsync("PaymentFailed");
-
-            scope.Dispose();
         }
     }
 }

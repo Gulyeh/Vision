@@ -4,7 +4,6 @@ using Prism.Mvvm;
 using Prism.Regions;
 using Prism.Services.Dialogs;
 using System;
-using System.Collections.ObjectModel;
 using VisionClient.Core;
 using VisionClient.Core.Enums;
 using VisionClient.Core.Events;

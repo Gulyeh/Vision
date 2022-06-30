@@ -3,10 +3,7 @@ using Prism.Events;
 using Prism.Mvvm;
 using Prism.Regions;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using VisionClient.Core.Dtos;
 using VisionClient.Core.Events;
@@ -79,11 +76,11 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
         }
 
         private bool Validation() => !string.IsNullOrWhiteSpace(NewsData.Title) && !string.IsNullOrWhiteSpace(NewsData.Content);
-        
+
         private async void Execute()
         {
             ErrorText = string.Empty;
-            if(!Validation())
+            if (!Validation())
             {
                 ErrorText = "Fill all data";
                 return;
@@ -91,7 +88,7 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
             IsButtonEnabled = false;
 
             try
-            { 
+            {
                 if (CoverImage.GetType() == typeof(BitmapImage))
                 {
                     BitmapImage bitmapImage = (BitmapImage)CoverImage;
@@ -106,7 +103,7 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
                     NavigateToNews();
                 }
             }
-            catch(Exception)
+            catch (Exception)
             {
                 ErrorText = "Something went wrong";
                 IsButtonEnabled = true;

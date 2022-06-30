@@ -2,11 +2,8 @@
 using Prism.Commands;
 using Prism.Mvvm;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using VisionClient.Core.Dtos;
 using VisionClient.Core.Repository.IRepository;
@@ -18,13 +15,13 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
     internal class AddPaymentControlViewModel : BindableBase, IActiveAware
     {
         private bool _isActive;
-        public bool IsActive 
+        public bool IsActive
         {
             get => _isActive;
             set
             {
                 SetProperty(ref _isActive, value, RaiseIsActiveChanged);
-                if(value) GetProviders();
+                if (value) GetProviders();
             }
         }
 
@@ -122,7 +119,8 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
                     ProvidersList.Remove(PaymentMethod.Provider);
                     ClearData();
                 }
-            }catch (Exception)
+            }
+            catch (Exception)
             {
                 IsButtonEnabled = true;
                 ErrorText = "Something went wrong";

@@ -1,6 +1,4 @@
-﻿using Humanizer;
-
-namespace VisionClient.Core.Models
+﻿namespace VisionClient.Core.Models
 {
     public class UserModel : BaseUserModel
     {

@@ -4,7 +4,7 @@ namespace UsersService_API.Repository.IRepository
 {
     public interface IFriendsRepository
     {
-        Task<IEnumerable<GetFriendsDto>> GetFriends(Guid userId, string? access_token);
+        Task<IEnumerable<GetFriendsDto>> GetFriends(Guid userId);
         Task<IEnumerable<GetFriendRequestsDto>> GetFriendRequests(Guid userId);
         Task<bool> SendFriendRequest(FriendRequestDto data);
         Task<bool> AcceptFriendRequest(Guid userId, Guid SenderId);

@@ -2,11 +2,8 @@
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using VisionClient.Core.Dtos;
 using VisionClient.Core.Models;
@@ -43,8 +40,8 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
         public PaymentMethod PaymentMethod
         {
             get { return paymentMethod; }
-            set 
-            { 
+            set
+            {
                 SetProperty(ref paymentMethod, value);
                 if (value is not null) IconImage = value.PhotoUrl;
             }
@@ -148,7 +145,7 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
                     IsAvailable = PaymentMethod.IsAvailable
                 };
 
-                if(IconImage.GetType() == typeof(BitmapImage))
+                if (IconImage.GetType() == typeof(BitmapImage))
                 {
                     var bitmap = (BitmapImage)IconImage;
                     editPayment.Photo = bitmap.GetBase64();

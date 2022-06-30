@@ -19,6 +19,7 @@ namespace GameAccessService_API.Repository
         private readonly ILogger<AccessRepository> logger;
         private readonly IAddProductProcessor addProductProcessor;
 
+
         public AccessRepository(ApplicationDbContext db, IMapper mapper, ICacheService cacheService, ILogger<AccessRepository> logger, IAddProductProcessor addProductProcessor)
         {
             this.db = db;
@@ -31,7 +32,7 @@ namespace GameAccessService_API.Repository
         public async Task<ResponseDto> BanUserAccess(UserAccessDto data)
         {
             var hasGame = await CheckUserHasGame(data.GameId, data.UserId);
-            if(!hasGame) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "User does not own this game" });
+            if (!hasGame) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "User does not own this game" });
 
             var userAccess = await cacheService.TryGetFromCache<UserAccess>(CacheType.GameAccess, data.UserId);
             var isBanned = userAccess.FirstOrDefault(x => x.GameId == data.GameId && x.BanExpires > DateTime.UtcNow);
@@ -54,11 +55,11 @@ namespace GameAccessService_API.Repository
         public async Task<(bool, BanModelDto?)> CheckUserAccess(Guid gameId, Guid userId)
         {
             var userHasGame = await CheckUserHasGame(gameId, userId);
-            if(!userHasGame) return (false, null);
+            if (!userHasGame) return (false, null);
 
             (var hasAccess, var bannedData) = await CheckAccessCacheAndGetData<UserAccess>(gameId, userId, CacheType.GameAccess);
             if (hasAccess) return (true, null);
-            
+
             return (false, mapper.Map<BanModelDto>(bannedData));
         }
 
@@ -74,7 +75,7 @@ namespace GameAccessService_API.Repository
         {
             var productData = addProductProcessor.GenerateProduct(gameId);
             productData.SetData(userId, gameId, productId);
-            if(await productData.OwnsProduct()) return false;
+            if (await productData.OwnsProduct()) return false;
             await productData.SaveData();
 
             if (await db.SaveChangesAsync() > 0)
@@ -100,9 +101,10 @@ namespace GameAccessService_API.Repository
             if (await db.SaveChangesAsync() > 0)
             {
                 var cachedData = await cacheService.TryGetFromCache<UserAccess>(CacheType.GameAccess, userId);
-                if(cachedData is not null && cachedData.Any()) {
+                if (cachedData is not null && cachedData.Any())
+                {
                     var bannedGame = cachedData.FirstOrDefault(x => x.GameId == gameId);
-                    if(bannedGame is not null) await cacheService.TryRemoveFromCache<UserAccess>(CacheType.GameAccess, bannedGame);
+                    if (bannedGame is not null) await cacheService.TryRemoveFromCache<UserAccess>(CacheType.GameAccess, bannedGame);
                 }
                 logger.LogInformation("User with ID: {userId} has been unbanned successfuly", userId);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "User has been unbanned successfuly" });
@@ -191,31 +193,32 @@ namespace GameAccessService_API.Repository
             var game = await db.UsersGames.Where(x => x.GameId == data.GameId).ToListAsync();
             var gameAccess = await db.UsersGameAccess.Where(x => x.GameId == data.GameId).ToListAsync();
             var products = await db.UsersProducts.Where(x => data.ProductsId.Contains(x.ProductId)).ToListAsync();
-            
-            if(game is not null && game.Any()) db.UsersGames.RemoveRange(game);
-            if(products is not null && products.Any()) db.UsersProducts.RemoveRange(products);
-            if(gameAccess is not null && gameAccess.Any()) db.UsersGameAccess.RemoveRange(gameAccess);
-        
-            if(await db.SaveChangesAsync() > 0){
+
+            if (game is not null && game.Any()) db.UsersGames.RemoveRange(game);
+            if (products is not null && products.Any()) db.UsersProducts.RemoveRange(products);
+            if (gameAccess is not null && gameAccess.Any()) db.UsersGameAccess.RemoveRange(gameAccess);
+
+            if (await db.SaveChangesAsync() > 0)
+            {
                 await cacheService.TryUpdateCache<UserGames>(CacheType.OwnGame);
                 await cacheService.TryUpdateCache<UserProducts>(CacheType.OwnProduct);
                 await cacheService.TryUpdateCache<UserAccess>(CacheType.GameAccess);
-            }        
+            }
         }
 
         public async Task RemoveProductAccess(Guid productId)
         {
             var products = await db.UsersProducts.Where(x => x.ProductId == productId).ToListAsync();
-            if(products is null || !products.Any()) return;
-            
+            if (products is null || !products.Any()) return;
+
             db.UsersProducts.RemoveRange(products);
-            if(await db.SaveChangesAsync() > 0) await cacheService.TryUpdateCache<UserProducts>(CacheType.OwnProduct);
+            if (await db.SaveChangesAsync() > 0) await cacheService.TryUpdateCache<UserProducts>(CacheType.OwnProduct);
         }
 
         public async Task<bool> CheckUserIsBanned(Guid userId, Guid gameId)
         {
             var hasGame = await CheckUserHasGame(gameId, userId);
-            if(!hasGame) return false;
+            if (!hasGame) return false;
 
             var userAccess = await cacheService.TryGetFromCache<UserAccess>(CacheType.GameAccess, userId);
             var isBanned = userAccess.FirstOrDefault(x => x.GameId == gameId && x.BanExpires > DateTime.UtcNow);

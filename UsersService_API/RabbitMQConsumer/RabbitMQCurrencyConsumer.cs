@@ -47,11 +47,17 @@ namespace UsersService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
-                logger.LogInformation("Received message from queue: ChangeFundsQueue");
-                var content = Encoding.UTF8.GetString(args.Body.ToArray());
-                CurrencyDto? currencyData = JsonConvert.DeserializeObject<CurrencyDto>(content);
-                HandleMessage(currencyData).GetAwaiter().GetResult();
-
+                try
+                {
+                    logger.LogInformation("Received message from queue: ChangeFundsQueue");
+                    var content = Encoding.UTF8.GetString(args.Body.ToArray());
+                    CurrencyDto? currencyData = JsonConvert.DeserializeObject<CurrencyDto>(content);
+                    HandleMessage(currencyData).GetAwaiter().GetResult();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex.ToString());
+                }
                 channel.BasicAck(args.DeliveryTag, false);
             };
             channel.BasicConsume("ChangeFundsQueue", false, consumer);

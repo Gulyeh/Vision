@@ -1,6 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.ComponentModel;
 using VisionClient.Core.Extends;
 using VisionClient.Core.Helpers;
 using VisionClient.Core.Models;
@@ -23,14 +22,14 @@ namespace VisionClient.Core
         void ClearStatics();
     }
 
-    public class StaticData : NotifyPropertyChanged ,IStaticData
+    public class StaticData : NotifyPropertyChanged, IStaticData
     {
         public StaticData()
         {
             FriendsList.CollectionChanged += TestCollection;
         }
         private void TestCollection(object? sender, NotifyCollectionChangedEventArgs e) => OnPropertyChanged(nameof(FriendsList));
-        
+
         public ObservableCollection<GameModel> GameModels { get; set; } = new();
         public UserDataModel UserData { get; set; } = new();
         public ObservableCollection<BaseUserModel> PendingFriendsList { get; set; } = new();

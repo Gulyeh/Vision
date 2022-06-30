@@ -252,7 +252,7 @@ namespace Identity_API.Repository
             var results = await signInManager.CheckPasswordSignInAsync(user, data.Password, false);
             if (!results.Succeeded) return new ResponseDto(false, StatusCodes.Status401Unauthorized, new[] { "Wrong email or password" });
 
-            if (user.TwoFactorEnabled && string.IsNullOrEmpty(data.AuthCode)) return new ResponseDto(false, StatusCodes.Status403Forbidden, new{});
+            if (user.TwoFactorEnabled && string.IsNullOrEmpty(data.AuthCode)) return new ResponseDto(false, StatusCodes.Status403Forbidden, new { });
             else if (user.TwoFactorEnabled && !string.IsNullOrEmpty(data.AuthCode))
             {
                 var TFAResults = await userManager.VerifyTwoFactorTokenAsync(user, userManager.Options.Tokens.AuthenticatorTokenProvider, data.AuthCode);
@@ -263,7 +263,8 @@ namespace Identity_API.Repository
             }
 
             db.Users.Remove(user);
-            if(await db.SaveChangesAsync() > 0){
+            if (await db.SaveChangesAsync() > 0)
+            {
                 rabbitMQSender.SendMessage(user.Id, "DeleteAccountQueue");
                 logger.LogInformation("Deleted account for User with ID: {userId}", user.Id);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Account has been deleted" });

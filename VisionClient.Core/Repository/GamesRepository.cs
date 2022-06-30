@@ -99,7 +99,7 @@ namespace VisionClient.Core.Repository
         public async Task<List<NewsModel>> GetPagedNews(Guid gameId)
         {
             var response = await gamesService.GetNews(gameId);
-            if(response is null) throw new Exception();
+            if (response is null) throw new Exception();
             return ResponseToJsonHelper.GetJson<List<NewsModel>>(response);
         }
 
@@ -156,7 +156,7 @@ namespace VisionClient.Core.Repository
         {
             var response = await gamesService.CheckIfUserIsBanned(userId, gameId);
             if (response is null) throw new Exception();
-            if(!response.isSuccess) return (false, ResponseToJsonHelper.GetJson(response));
+            if (!response.isSuccess) return (false, ResponseToJsonHelper.GetJson(response));
             return ((bool)response.Response, string.Empty);
         }
 

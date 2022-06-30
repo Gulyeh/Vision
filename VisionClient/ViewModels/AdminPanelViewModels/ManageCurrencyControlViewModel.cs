@@ -4,11 +4,8 @@ using Prism.Mvvm;
 using Prism.Regions;
 using Prism.Services.Dialogs;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using VisionClient.Core.Events;
 using VisionClient.Core.Models;
@@ -112,7 +109,7 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
             {
                 (bool success, ErrorText) = await currencyRepository.DeletePackage((Guid)currencyId);
                 if (success) CoinsList.Remove(CoinsList.First(x => x.Id == currencyId));
-               
+
                 LoadingVisibility = Visibility.Collapsed;
             }
             catch (Exception)

@@ -44,11 +44,17 @@ namespace GameAccessService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
-                logger.LogInformation("RabbitMQ Consumed request from queue: ProductCuponUsedQueue");
-                var content = Encoding.UTF8.GetString(args.Body.ToArray());
-                UserCodeDto? gameData = JsonConvert.DeserializeObject<UserCodeDto>(content);
-                HandleMessage(gameData).GetAwaiter().GetResult();
-
+                try
+                {
+                    logger.LogInformation("RabbitMQ Consumed request from queue: ProductCuponUsedQueue");
+                    var content = Encoding.UTF8.GetString(args.Body.ToArray());
+                    UserCodeDto? gameData = JsonConvert.DeserializeObject<UserCodeDto>(content);
+                    HandleMessage(gameData).GetAwaiter().GetResult();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex.ToString());
+                }
                 channel.BasicAck(args.DeliveryTag, false);
             };
             channel.BasicConsume("ProductCuponUsedQueue", false, consumer);

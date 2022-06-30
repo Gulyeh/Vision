@@ -1,6 +1,5 @@
 ﻿using Prism.Events;
 using Prism.Mvvm;
-using System.Collections.ObjectModel;
 using VisionClient.Core;
 using VisionClient.Core.Events;
 using VisionClient.Core.Models;
@@ -31,6 +30,6 @@ namespace VisionClient.ViewModels
             if (StaticData.GameModels.Count > 0) SelectedGame = StaticData.GameModels[0];
         }
 
-        private void GameSelected(GameModel game) => eventAggregator.GetEvent<SendEvent<GameModel>>().Publish(game);      
+        private void GameSelected(GameModel game) => eventAggregator.GetEvent<SendEvent<GameModel>>().Publish(game);
     }
 }

@@ -28,8 +28,9 @@ namespace GameAccessService_API.Extensions
             services.Configure<RabbitMQSettings>(config.GetSection("RabbitMQSettings"));
             services.AddHostedService<RabbitMQOrderConsumer>();
             services.AddHostedService<RabbitMQCouponConsumer>();
-            services.AddHostedService<RabbitMQGameProductConsumer>();
-            services.AddHostedService<RabbitMQProductConsumer>();
+            services.AddHostedService<RabbitMQRemoveGameAndProductsConsumer>();
+            services.AddHostedService<RabbitMQCheckProductAccessConsumer>();
+            services.AddHostedService<RabbitMQRemoveProductAccessConsumer>();
             services.AddSingleton<IRabbitMQSender, RabbitMQMessageSender>();
             services.AddScoped<IAddProductProcessor, AddProductProcessor>();
             return services;

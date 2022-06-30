@@ -21,12 +21,11 @@ namespace PaymentService_API.Repository
         private readonly ILogger<PaymentRepository> logger;
         private readonly ICacheService cacheService;
         private readonly IPaymentProcessor paymentProcessor;
-        private readonly IValidateJWT validateJWT;
         private readonly IUploadService uploadService;
 
         public PaymentRepository(ApplicationDbContext db, IMapper mapper,
             IStripeService stripeService, IRabbitMQSender rabbitMQSender, ILogger<PaymentRepository> logger, ICacheService cacheService,
-            IPaymentProcessor paymentProcessor, IValidateJWT validateJWT, IUploadService uploadService)
+            IPaymentProcessor paymentProcessor, IUploadService uploadService)
         {
             this.uploadService = uploadService;
             this.mapper = mapper;
@@ -35,14 +34,13 @@ namespace PaymentService_API.Repository
             this.logger = logger;
             this.cacheService = cacheService;
             this.paymentProcessor = paymentProcessor;
-            this.validateJWT = validateJWT;
             this.db = db;
         }
 
         public async Task<ResponseDto> AddPaymentMethod(AddPaymentMethodDto data)
         {
             var isProviderParsed = Enum.TryParse(data.Provider, out PaymentProvider providerParsed);
-            if(!isProviderParsed) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] {"Provider does not exist"});
+            if (!isProviderParsed) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Provider does not exist" });
 
             var mapped = mapper.Map<PaymentMethods>(data);
             mapped.Provider = providerParsed;
@@ -51,17 +49,19 @@ namespace PaymentService_API.Repository
             mapped.PhotoId = results.PublicId;
             mapped.PhotoUrl = results.SecureUrl.AbsoluteUri;
 
-            if(!string.IsNullOrWhiteSpace(mapped.PhotoId) && !string.IsNullOrWhiteSpace(mapped.PhotoUrl)){
+            if (!string.IsNullOrWhiteSpace(mapped.PhotoId) && !string.IsNullOrWhiteSpace(mapped.PhotoUrl))
+            {
                 db.PaymentMethods.Add(mapped);
-                if(await db.SaveChangesAsync() > 0){
+                if (await db.SaveChangesAsync() > 0)
+                {
                     await cacheService.AddMethodsToCache(mapped);
                     logger.LogInformation("New method: {x} - has been added successfully", data.Provider);
-                    return new ResponseDto(true, StatusCodes.Status200OK, new[] {"New method has been added successfully"});
+                    return new ResponseDto(true, StatusCodes.Status200OK, new[] { "New method has been added successfully" });
                 }
             }
 
             logger.LogInformation("Method: {x} - could not be added", data.Provider);
-            return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] {"Method could not be added"});
+            return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Method could not be added" });
         }
 
         public async Task CreatePayment(PaymentMessage data)
@@ -81,14 +81,16 @@ namespace PaymentService_API.Repository
         public async Task<ResponseDto> DeletePaymentMethod(Guid paymentId)
         {
             var paymentMethod = await db.PaymentMethods.FirstOrDefaultAsync(x => x.Id == paymentId);
-            if(paymentMethod is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Payment method does not exist" });
+            if (paymentMethod is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Payment method does not exist" });
 
             db.PaymentMethods.Remove(paymentMethod);
-            if(await db.SaveChangesAsync() > 0){
+            if (await db.SaveChangesAsync() > 0)
+            {
                 var cached = await cacheService.GetMethodsFromCache();
-                if(cached is not null && cached.Any()){
+                if (cached is not null && cached.Any())
+                {
                     var method = cached.FirstOrDefault(x => x.Id == paymentId);
-                    if(method is not null) await cacheService.RemoveMethodsFromCache(method);
+                    if (method is not null) await cacheService.RemoveMethodsFromCache(method);
                 }
 
                 await uploadService.DeletePhoto(paymentMethod.PhotoId);
@@ -107,9 +109,10 @@ namespace PaymentService_API.Repository
             var usedProvidersName = new List<string>();
             var allProviders = Enum.GetNames(typeof(PaymentProvider));
 
-            foreach(var provider in usedProviders){
+            foreach (var provider in usedProviders)
+            {
                 var name = Enum.GetName(typeof(PaymentProvider), provider.Provider);
-                if(!string.IsNullOrWhiteSpace(name)) usedProvidersName.Add(name);
+                if (!string.IsNullOrWhiteSpace(name)) usedProvidersName.Add(name);
             }
 
             return allProviders.Except(usedProvidersName);
@@ -123,7 +126,7 @@ namespace PaymentService_API.Repository
             return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<GetPaymentsDto>>(payments));
         }
 
-        public async Task<ResponseDto> PaymentCompleted(string sessionId, PaymentStatus status, string Access_Token)
+        public async Task<ResponseDto> PaymentCompleted(string sessionId, PaymentStatus status)
         {
             var payment = await db.Payments.FirstOrDefaultAsync(x => x.PaymentId == sessionId);
             if (payment is null || payment.PaymentStatus != PaymentStatus.Inprogress) return new ResponseDto(false, StatusCodes.Status400BadRequest, new { });
@@ -136,7 +139,6 @@ namespace PaymentService_API.Repository
             paymentCompletedMessage.OrderId = payment.OrderId;
             paymentCompletedMessage.PaymentId = payment.Id;
             paymentCompletedMessage.isSuccess = status == PaymentStatus.Completed ? true : false;
-            paymentCompletedMessage.Access_Token = Access_Token;
 
             rabbitMQSender.SendMessage(paymentCompletedMessage, "PaymentQueue");
 
@@ -151,7 +153,6 @@ namespace PaymentService_API.Repository
             paymentUrlData.userId = data.UserId;
             try
             {
-                data.Access_Token = validateJWT.EncodeToken(data.Access_Token);
                 var providers = await db.PaymentMethods.FirstOrDefaultAsync(x => x.Id == data.PaymentMethodId);
                 if (providers is null) return paymentUrlData;
                 paymentUrlData.PaymentUrl = await paymentProcessor.GetProvider(providers.Provider).GeneratePaymentUrl(data);
@@ -169,27 +170,29 @@ namespace PaymentService_API.Repository
             string oldPhotoId = string.Empty;
 
             var payment = await db.PaymentMethods.FirstOrDefaultAsync(x => x.Id == data.Id);
-            if(payment is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Payment method does not exist" });
-            
+            if (payment is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Payment method does not exist" });
+
             mapper.Map(data, payment);
 
-            if(!string.IsNullOrWhiteSpace(data.Photo)){
+            if (!string.IsNullOrWhiteSpace(data.Photo))
+            {
                 var results = await uploadService.UploadPhoto(data.Photo);
                 oldPhotoId = payment.PhotoId;
                 payment.PhotoId = results.PublicId;
-                payment.PhotoUrl = results.SecureUrl.AbsoluteUri;          
+                payment.PhotoUrl = results.SecureUrl.AbsoluteUri;
             }
 
-            if(await db.SaveChangesAsync() > 0){
-                if(!string.IsNullOrWhiteSpace(oldPhotoId)) await uploadService.DeletePhoto(oldPhotoId);
+            if (await db.SaveChangesAsync() > 0)
+            {
+                if (!string.IsNullOrWhiteSpace(oldPhotoId)) await uploadService.DeletePhoto(oldPhotoId);
                 await cacheService.ReplacePaymentMethod(payment);
 
                 logger.LogInformation("Payment method with ID: {x} - has been edited successfully", data.Id);
-                return new ResponseDto(true, StatusCodes.Status200OK, new[] {"Payment method has been edited successfully"});
+                return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Payment method has been edited successfully" });
             }
 
             logger.LogInformation("Method: {x} - could not be edited", data.Id);
-            return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] {"Method could not be edited"});
+            return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Method could not be edited" });
         }
     }
 }

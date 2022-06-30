@@ -36,7 +36,7 @@ namespace PaymentService_API.Services
             };
             var service = new CustomerService();
             var created = service.Create(options);
-            if (created is not null && created.Equals(email)) return Task.FromResult(created.Id);
+            if (created is not null && created.Email.Equals(email)) return Task.FromResult(created.Id);
             return Task.FromResult(string.Empty);
         }
 
@@ -66,7 +66,7 @@ namespace PaymentService_API.Services
                     "card",
                 },
                 Mode = "payment",
-                SuccessUrl = $"{WebclientAddress}/payment/success?sessionId=" + "{CHECKOUT_SESSION_ID}" + $"&token={data.Access_Token}",
+                SuccessUrl = $"{WebclientAddress}/payment/success?sessionId=" + "{CHECKOUT_SESSION_ID}",
                 CancelUrl = $"{WebclientAddress}/payment/failed?sessionId=" + "{CHECKOUT_SESSION_ID}",
                 ExpiresAt = DateTime.Now + new TimeSpan(0, 60, 0),
                 Customer = CustomerId,
@@ -77,7 +77,7 @@ namespace PaymentService_API.Services
             var payment = await db.Payments.FirstOrDefaultAsync(x => x.OrderId == data.OrderId);
             if (payment is not null)
             {
-                payment.PaymentUrl= session.Url;
+                payment.PaymentUrl = session.Url;
                 payment.PaymentStatus = PaymentStatus.Inprogress;
                 payment.PaymentId = session.Id;
                 await db.SaveChangesAsync();

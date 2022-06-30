@@ -3,11 +3,8 @@ using Prism.Events;
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VisionClient.Core;
 using VisionClient.Core.Dtos;
 using VisionClient.Core.Events;
@@ -60,7 +57,8 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
                 ProductModel.UserId = x.Item1.UserId;
             }, ThreadOption.PublisherThread, false, x => x.Item2.Equals("GiveUserProduct"));
 
-            eventAggregator.GetEvent<SendEvent<DetailedUserModel>>().Subscribe(x => {
+            eventAggregator.GetEvent<SendEvent<DetailedUserModel>>().Subscribe(x =>
+            {
                 GameProductsList.Clear();
                 ErrorText = string.Empty;
                 ProductModel = new();

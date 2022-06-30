@@ -1,6 +1,4 @@
-﻿using VisionClient.Core.Helpers;
-
-namespace VisionClient.Core.Models
+﻿namespace VisionClient.Core.Models
 {
     public class GameModel : ICloneable
     {
@@ -23,6 +21,6 @@ namespace VisionClient.Core.Models
         public RequirementsModel Requirements { get; set; }
         public ProductInfoModel Informations { get; set; }
 
-        public object Clone() => MemberwiseClone();        
+        public object Clone() => MemberwiseClone();
     }
 }

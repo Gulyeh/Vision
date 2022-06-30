@@ -3,7 +3,6 @@ using Prism.Mvvm;
 using Prism.Unity;
 using System.Windows;
 using VisionClient.Extensions;
-using VisionClient.SignalR;
 using VisionClient.ViewModels;
 using VisionClient.ViewModels.AdminPanelViewModels;
 using VisionClient.Views;

@@ -1,10 +1,7 @@
 ﻿using Prism.Commands;
 using Prism.Mvvm;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using VisionClient.Core;
 using VisionClient.Core.Dtos;
@@ -76,12 +73,12 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
 
         private bool Validator()
         {
-            if(SelectedGame.Id != Guid.Empty && NewsData.Validation() && CoverImage.GetType() == typeof(BitmapImage)) return true;
+            if (SelectedGame.Id != Guid.Empty && NewsData.Validation() && CoverImage.GetType() == typeof(BitmapImage)) return true;
 
             ErrorText = "Please fill all data";
             return false;
         }
-        
+
 
         private async void Execute()
         {
@@ -96,7 +93,7 @@ namespace VisionClient.ViewModels.AdminPanelViewModels
 
                 (bool success, ErrorText) = await gamesRepository.AddNews(NewsData);
                 IsButtonEnabled = true;
-                if(success) ClearData();
+                if (success) ClearData();
             }
             catch (Exception)
             {

@@ -2,9 +2,7 @@ using GameAccessService_API.DbContexts;
 using GameAccessService_API.Entites;
 using GameAccessService_API.Helpers;
 using GameAccessService_API.Processors.Interfaces;
-using GameAccessService_API.Repository.IRepository;
 using GameAccessService_API.Services.IServices;
-using Microsoft.EntityFrameworkCore;
 
 namespace GameAccessService_API.Processors
 {
@@ -38,9 +36,10 @@ namespace GameAccessService_API.Processors
             await db.UsersProducts.AddAsync(userProduct);
         }
 
-        public async Task<bool> OwnsProduct() {
+        public async Task<bool> OwnsProduct()
+        {
             var cachedGames = await cacheService.TryGetFromCache<UserGames>(CacheType.OwnGame, userProduct.UserId);
-            if(cachedGames.Any(x => x.GameId == GameId))
+            if (cachedGames.Any(x => x.GameId == GameId))
             {
                 var cached = await cacheService.TryGetFromCache<UserProducts>(CacheType.OwnProduct, userProduct.UserId);
                 return cached.Any(x => x.ProductId == userProduct.ProductId);

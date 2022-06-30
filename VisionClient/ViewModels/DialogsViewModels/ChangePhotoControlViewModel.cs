@@ -53,7 +53,7 @@ namespace VisionClient.ViewModels.DialogsViewModels
         private void SelectFile()
         {
             var image = FileDialogHelper.OpenFile(false);
-            if(image.Any()) ImageSource = image.First();
+            if (image.Any()) ImageSource = image.First();
         }
 
         protected override async void Execute(object? data)

@@ -1,12 +1,9 @@
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
-using UsersService_API.DbContexts;
 using UsersService_API.Helpers;
 using UsersService_API.Repository.IRepository;
 using UsersService_API.Services.IServices;
@@ -45,10 +42,17 @@ namespace UsersService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
-                logger.LogInformation("Received message from queue: BanUserQueue");
-                var content = Encoding.UTF8.GetString(args.Body.ToArray());
-                Guid? userId = JsonConvert.DeserializeObject<Guid>(content);
-                HandleMessage(userId).GetAwaiter().GetResult();
+                try
+                {
+                    logger.LogInformation("Received message from queue: BanUserQueue");
+                    var content = Encoding.UTF8.GetString(args.Body.ToArray());
+                    Guid? userId = JsonConvert.DeserializeObject<Guid>(content);
+                    HandleMessage(userId).GetAwaiter().GetResult();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex.ToString());
+                }
                 channel.BasicAck(args.DeliveryTag, false);
             };
             channel.BasicConsume("BanUserQueue", false, consumer);
@@ -63,16 +67,14 @@ namespace UsersService_API.RabbitMQConsumer
                 using var scope = serviceScopeFactory.CreateScope();
                 var cache = scope.ServiceProvider.GetRequiredService<ICacheService>();
                 var usersHub = scope.ServiceProvider.GetRequiredService<IHubContext<UsersHub>>();
-                var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                
-                var cachedIds = await cache.TryGetFromCache(HubTypes.Users);
-                if (cachedIds.Any(x => x.Key == userId)) await usersHub.Clients.Clients(cachedIds[(Guid)userId]).SendAsync("UserKicked", string.Empty);    
+                var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
 
-                var user = await db.Users.FirstOrDefaultAsync(x => x.UserId == userId);    
-                if(user is not null){
-                    user.IsBanned = true;
-                    await db.SaveChangesAsync();
-                }              
+                var isBanned = await userRepository.BanUser((Guid)userId);
+                if (isBanned)
+                {
+                    var cachedIds = await cache.TryGetFromCache(HubTypes.Users);
+                    if (cachedIds.Any(x => x.Key == userId)) await usersHub.Clients.Clients(cachedIds[(Guid)userId]).SendAsync("UserKicked", string.Empty);
+                }
             }
         }
     }

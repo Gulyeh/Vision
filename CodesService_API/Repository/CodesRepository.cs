@@ -15,18 +15,16 @@ namespace CodesService_API.Repository
     public class CodesRepository : ICodesRepository
     {
         private readonly ApplicationDbContext db;
-        private readonly IGameAccessService gameAccessService;
         private readonly IMapper mapper;
         private readonly ICacheService cacheService;
         private readonly IRabbitMQSender rabbitMQSender;
         private readonly ILogger<CodesRepository> logger;
         private readonly ICodeTypeProcessor codeTypeProcessor;
 
-        public CodesRepository(ApplicationDbContext db, IGameAccessService gameAccessService, IMapper mapper, ICacheService cacheService, IRabbitMQSender rabbitMQSender,
+        public CodesRepository(ApplicationDbContext db, IMapper mapper, ICacheService cacheService, IRabbitMQSender rabbitMQSender,
             ILogger<CodesRepository> logger, ICodeTypeProcessor codeTypeProcessor)
         {
             this.db = db;
-            this.gameAccessService = gameAccessService;
             this.mapper = mapper;
             this.cacheService = cacheService;
             this.rabbitMQSender = rabbitMQSender;
@@ -34,7 +32,7 @@ namespace CodesService_API.Repository
             this.codeTypeProcessor = codeTypeProcessor;
         }
 
-        public async Task<ResponseDto> ApplyCode(string code, Guid userId, CodeTypes codeType, string Access_Token)
+        public async Task<ResponseDto> ApplyCode(string code, Guid userId, CodeTypes codeType)
         {
             IEnumerable<Codes> Codes = await cacheService.TryGetFromCache<Codes>(CacheType.Codes);
             var validate = await ValidateCode(Codes, codeType, userId, code);
@@ -42,7 +40,7 @@ namespace CodesService_API.Repository
 
             var dbcode = await db.Codes.FirstAsync(x => x.Code.Equals(code));
             var codeAccess = codeTypeProcessor.CreateAccessCode(codeType);
-            if (codeAccess is not null && await codeAccess.CheckAccess(dbcode.GameId, Access_Token, dbcode.CodeValue)) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "You cannot redeem this coupon" });
+            if (codeAccess is not null && await codeAccess.CheckAccess(dbcode.GameId, dbcode.CodeValue, userId)) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "You cannot redeem this coupon" });
 
             if (dbcode.IsLimited == true) dbcode.Uses--;
 
@@ -65,7 +63,7 @@ namespace CodesService_API.Repository
 
                 string? enumString = string.Empty;
                 if (dbcode.Signature is not null) enumString = Enum.GetName(typeof(Signatures), dbcode.Signature);
-                return new ResponseDto(true, StatusCodes.Status200OK, new { CodeValue = dbcode.CodeValue, Signature = enumString });
+                return new ResponseDto(true, StatusCodes.Status200OK, new AppliedCodeDto(dbcode.CodeValue, enumString));
             }
 
             logger.LogError("User: {userId} had error while applying code: {code}", userId, code);
@@ -75,15 +73,15 @@ namespace CodesService_API.Repository
         public async Task<ResponseDto> AddCode(AddCodesDto code)
         {
             IEnumerable<Codes> Codes = await cacheService.TryGetFromCache<Codes>(CacheType.Codes);
-            if(Codes.Any(x => x.Code.Equals(code.Code))) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Code already exists" });
-            
+            if (Codes.Any(x => x.Code.Equals(code.Code))) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Code already exists" });
+
             var isTypeParsed = Enum.TryParse(code.CodeType, true, out CodeTypes typeParsed);
             var isSignatureParsed = Enum.TryParse(code.Signature, true, out Signatures signatureParsed);
-            if(!isTypeParsed || (typeParsed == CodeTypes.Discount && !isSignatureParsed)) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not parse data" });
-            
+            if (!isTypeParsed || (typeParsed == CodeTypes.Discount && !isSignatureParsed)) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "Could not parse data" });
+
             var mapped = mapper.Map<Codes>(code);
             mapped.CodeType = typeParsed;
-            if(typeParsed == CodeTypes.Discount) mapped.Signature = signatureParsed;
+            if (typeParsed == CodeTypes.Discount) mapped.Signature = signatureParsed;
 
             await db.Codes.AddAsync(mapped);
             if (await db.SaveChangesAsync() > 0)
@@ -119,15 +117,15 @@ namespace CodesService_API.Repository
         {
             var checkCode = await db.Codes.FirstOrDefaultAsync(c => c.Id == codeData.Id);
             if (checkCode is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Code does not exist" });
-            if(await db.Codes.AnyAsync(x => x.Code.Equals(codeData.Code)) && !checkCode.Code.Equals(codeData.Code)) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "This code already exists" });
+            if (await db.Codes.AnyAsync(x => x.Code.Equals(codeData.Code)) && !checkCode.Code.Equals(codeData.Code)) return new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { "This code already exists" });
 
             mapper.Map(codeData, checkCode);
             if (await db.SaveChangesAsync() > 0)
             {
                 var cachedCode = await FindCouponInCache(codeData.Id);
-                if(cachedCode is not null) await cacheService.TryReplaceCache<Codes>(CacheType.Codes, cachedCode, checkCode);
+                if (cachedCode is not null) await cacheService.TryReplaceCache<Codes>(CacheType.Codes, cachedCode, checkCode);
 
-                logger.LogInformation("Code: {code} has been modified", codeData.Code);             
+                logger.LogInformation("Code: {code} has been modified", codeData.Code);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Code has been modified successfuly" });
             }
 
@@ -151,7 +149,7 @@ namespace CodesService_API.Repository
             if (await db.SaveChangesAsync() > 0)
             {
                 var cachedCode = await FindCouponInCache(code);
-                if(cachedCode is not null) await cacheService.TryRemoveFromCache<Codes>(CacheType.Codes, cachedCode);
+                if (cachedCode is not null) await cacheService.TryRemoveFromCache<Codes>(CacheType.Codes, cachedCode);
 
                 logger.LogInformation("Code: {code} has been removed", checkCode.Code);
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Code has been deleted successfuly" });
@@ -190,17 +188,19 @@ namespace CodesService_API.Repository
                 }
             }
         }
-  
+
         public async Task<ResponseDto> RemoveUsedCode(Guid codeId)
         {
             var usedCode = await db.CodesUsed.FirstOrDefaultAsync(x => x.Id == codeId);
-            if(usedCode is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Used code does not exist" });
+            if (usedCode is null) return new ResponseDto(false, StatusCodes.Status404NotFound, new[] { "Used code does not exist" });
             db.CodesUsed.Remove(usedCode);
-            if(await db.SaveChangesAsync() > 0) {
+            if (await db.SaveChangesAsync() > 0)
+            {
                 var cachedUsedCode = await cacheService.TryGetFromCache<CodesUsed>(CacheType.CodesUsed);
-                if(cachedUsedCode is not null) {
+                if (cachedUsedCode is not null)
+                {
                     var userUsedCode = cachedUsedCode.FirstOrDefault(x => x.UserId == usedCode.UserId);
-                    if(userUsedCode is not null) await cacheService.TryRemoveFromCache<CodesUsed>(CacheType.CodesUsed, userUsedCode);
+                    if (userUsedCode is not null) await cacheService.TryRemoveFromCache<CodesUsed>(CacheType.CodesUsed, userUsedCode);
                 }
 
                 return new ResponseDto(true, StatusCodes.Status200OK, new[] { "Used code has been removed" });
@@ -211,18 +211,20 @@ namespace CodesService_API.Repository
         public async Task<ResponseDto> GetUserUsedCodes(Guid userId)
         {
             var codes = await db.CodesUsed.Include(x => x.Code).Where(x => x.UserId == userId).ToListAsync();
-            return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<GetUserUsedCodesDto>>(codes));           
+            return new ResponseDto(true, StatusCodes.Status200OK, mapper.Map<IEnumerable<GetUserUsedCodesDto>>(codes));
         }
 
-        private async Task<Codes?> FindCouponInCache(string code){
+        private async Task<Codes?> FindCouponInCache(string code)
+        {
             var cached = await cacheService.TryGetFromCache<Codes>(CacheType.Codes);
-            if(cached is null) return null;     
+            if (cached is null) return null;
             return cached.FirstOrDefault(x => x.Code.Equals(code));
         }
 
-        private async Task<Codes?> FindCouponInCache(Guid codeId){
+        private async Task<Codes?> FindCouponInCache(Guid codeId)
+        {
             var cached = await cacheService.TryGetFromCache<Codes>(CacheType.Codes);
-            if(cached is null) return null;     
+            if (cached is null) return null;
             return cached.FirstOrDefault(x => x.Id == codeId);
         }
     }

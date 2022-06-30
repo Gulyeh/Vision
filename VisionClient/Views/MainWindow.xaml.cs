@@ -12,7 +12,7 @@ namespace VisionClient.Views
     public partial class MainWindow : Window
     {
         public MainWindow()
-        { 
+        {
             InitializeComponent();
             SourceInitialized += Window_SourceInitialized;
         }

@@ -16,9 +16,11 @@ namespace UsersService_API.Repository.IRepository
         Task<IEnumerable<GetUserDto>> FindUsers(string containsString, Guid userId);
         Task<IEnumerable<GetDetailedUsersDto>> FindDetailedUsers(string containsString);
         Task CreateUser(Guid userId);
-        Task<ResponseDto> UserExists(Guid userId);
-        Task<ResponseDto> IsUserBlocked(Guid userId, Guid user2Id);
+        Task<bool> UserExists(Guid userId);
+        Task<bool> IsUserBlocked(Guid senderId, Guid receiverId);
         Task KickUser(Guid userId, string? reason = null);
         Task DeleteUser(Guid userId);
+        Task SendUserMessageNotification(Guid receiverId, Guid senderId);
+        Task<bool> BanUser(Guid userId);
     }
 }

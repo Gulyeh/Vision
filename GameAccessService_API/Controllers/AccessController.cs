@@ -2,7 +2,6 @@ using GameAccessService_API.Dtos;
 using GameAccessService_API.Extensions;
 using GameAccessService_API.Helpers;
 using GameAccessService_API.Repository.IRepository;
-using GameAccessService_API.Statics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -75,8 +74,8 @@ namespace GameAccessService_API.Controllers
 
             var gaveAccess = await accessRepository.AddProductOrGame(data.UserId, game, product);
             var item = data.ProductId == Guid.Empty ? "game" : "product";
-            
-            if(!gaveAccess) return CheckActionResult(new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { $"Could not give access to {item}" }));
+
+            if (!gaveAccess) return CheckActionResult(new ResponseDto(false, StatusCodes.Status400BadRequest, new[] { $"Could not give access to {item}" }));
             return CheckActionResult(new ResponseDto(true, StatusCodes.Status200OK, new[] { $"Gave access to {item}" }));
         }
     }

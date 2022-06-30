@@ -40,10 +40,17 @@ namespace MessageService_API.RabbitMQConsumer
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (sender, args) =>
             {
-                logger.LogInformation("Received message from queue: DeleteChatQueue");
-                var content = Encoding.UTF8.GetString(args.Body.ToArray());
-                DeleteChat? chatData = JsonConvert.DeserializeObject<DeleteChat>(content);
-                HandleMessage(chatData).GetAwaiter().GetResult();
+                try
+                {
+                    logger.LogInformation("Received message from queue: DeleteChatQueue");
+                    var content = Encoding.UTF8.GetString(args.Body.ToArray());
+                    DeleteChat? chatData = JsonConvert.DeserializeObject<DeleteChat>(content);
+                    HandleMessage(chatData).GetAwaiter().GetResult();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex.ToString());
+                }
                 channel.BasicAck(args.DeliveryTag, false);
             };
             channel.BasicConsume("DeleteChatQueue", false, consumer);
@@ -55,13 +62,9 @@ namespace MessageService_API.RabbitMQConsumer
         {
             if (data is not null)
             {
-                try
-                {
-                    using var scope = scopeFactory.CreateScope();
-                    var chatRepository = scope.ServiceProvider.GetRequiredService<IChatRepository>();
-                    await chatRepository.DeleteChat(data.User1, data.User2);
-                }
-                catch (Exception) { }
+                using var scope = scopeFactory.CreateScope();
+                var chatRepository = scope.ServiceProvider.GetRequiredService<IChatRepository>();
+                await chatRepository.DeleteChat(data.User1, data.User2);
             }
         }
     }

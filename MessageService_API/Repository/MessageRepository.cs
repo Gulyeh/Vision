@@ -2,6 +2,9 @@ using AutoMapper;
 using MessageService_API.DbContexts;
 using MessageService_API.Dtos;
 using MessageService_API.Entites;
+using MessageService_API.Messages;
+using MessageService_API.RabbitMQRPC;
+using MessageService_API.RabbitMQSender;
 using MessageService_API.Repository.IRepository;
 using MessageService_API.Services.IServices;
 using Microsoft.EntityFrameworkCore;
@@ -13,21 +16,26 @@ namespace MessageService_API.Repository
         private readonly IMapper mapper;
         private readonly ApplicationDbContext db;
         private readonly IUploadService uploadService;
-        private readonly IUsersService usersService;
         private readonly ILogger<MessageRepository> logger;
+        private readonly IRabbitMQRPC rabbitMQRPC;
+        private readonly IRabbitMQSender rabbitMQSender;
 
         public MessageRepository(IMapper mapper, ApplicationDbContext db, IUploadService uploadService,
-            IUsersService usersService, ILogger<MessageRepository> logger)
+            ILogger<MessageRepository> logger, IRabbitMQRPC rabbitMQRPC, IRabbitMQSender rabbitMQSender)
         {
             this.uploadService = uploadService;
-            this.usersService = usersService;
             this.logger = logger;
+            this.rabbitMQRPC = rabbitMQRPC;
+            this.rabbitMQSender = rabbitMQSender;
             this.mapper = mapper;
             this.db = db;
         }
 
-        public async Task SendUserMessageNotification(Guid receiverId, Guid senderId, string Access_Token) => await usersService.SendUserMessageNotification(receiverId, senderId, Access_Token);
-
+        public Task SendUserMessageNotification(Guid receiverId, Guid senderId)
+        {
+            rabbitMQSender.SendMessage(new ChatUsers(senderId, receiverId), "UserMessageNotificationQueue");
+            return Task.CompletedTask;
+        }
 
         public async Task<bool> DeleteMessage(DeleteMessageDto message, bool IsDelete = false)
         {
@@ -82,7 +90,7 @@ namespace MessageService_API.Repository
 
         public async Task<(IEnumerable<MessageDto>, int)> GetMessages(Guid chatId, Guid userId, int pageNumber = 1)
         {
-            var findChat = await db.Chats.Include(x => x.Messages).ThenInclude(x => x.Attachments).FirstOrDefaultAsync(x => x.Id == chatId);
+            var findChat = await db.Chats.Include(x => x.Messages).ThenInclude(x => x.Attachments).AsSplitQuery().FirstOrDefaultAsync(x => x.Id == chatId);
             if (findChat is null) return (new List<MessageDto>(), 0);
 
             foreach (var message in findChat.Messages.Where(x => x.SenderId != userId && x.ChatId == chatId && x.DateRead is null)) message.DateRead = DateTime.Now;
@@ -98,15 +106,13 @@ namespace MessageService_API.Repository
             return (mapper.Map<IEnumerable<MessageDto>>(paginatedMessages), maxPages);
         }
 
-        public async Task<(MessageDto?, bool)> SendMessage(AddMessageDto message, string access_token)
+        public async Task<(MessageDto?, bool)> SendMessage(AddMessageDto message)
         {
             var findChat = await db.Chats.FirstOrDefaultAsync(x => x.Id == message.ChatId);
             if (findChat is null) return (null, false);
 
-            var isUserBlocked = await usersService.CheckIfUserIsBlocked(message.SenderId, message.ReceiverId, access_token);
-            if (isUserBlocked is null) return (null, false);
-            var responseString = isUserBlocked.Response.ToString();
-            if (string.IsNullOrWhiteSpace(responseString) || bool.Parse(responseString)) return (null, true);
+            var response = await rabbitMQRPC.SendAsync("IsUserBlockedQueue", new ChatUsers(message.SenderId, message.ReceiverId));
+            if (response is null || string.IsNullOrWhiteSpace(response) || bool.Parse(response)) return (null, true);
 
             var mapped = mapper.Map<Message>(message);
 
@@ -156,6 +162,7 @@ namespace MessageService_API.Repository
             var findChat = await db.Chats
                .Include(x => x.Messages)
                .ThenInclude(x => x.Attachments)
+               .AsSplitQuery()
                .FirstOrDefaultAsync(x => x.Id == chatId);
             if (findChat is null) return null;
 

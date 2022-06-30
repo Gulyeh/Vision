@@ -12,7 +12,7 @@
         public Guid Id { get; set; }
         public string PhotoUrl { get; set; }
         private DateTime createdDate;
-        public DateTime CreatedDate 
+        public DateTime CreatedDate
         {
             get => createdDate;
             set => createdDate = value.ToLocalTime();

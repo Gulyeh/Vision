@@ -171,7 +171,7 @@
                         <editors:ComboBoxItemAdv Content="Procentage" Tag="Procentage"/>
                         <editors:ComboBoxItemAdv Content="Price" Tag="Price"/>
                     </editors:ComboBoxAdv>
-                    <editors:ComboBoxAdv 
+                    <ComboBox 
                             Name="Game"
                             Visibility="Collapsed"
                             Width="180" 
@@ -182,8 +182,8 @@
                             HorizontalAlignment="Center"
                             Background="#164971"
                             Foreground="Black" 
-                            DefaultText="Game" Margin="0,0,20,0"/>
-                    <editors:ComboBoxAdv 
+                            Margin="0,0,20,0"/>
+                    <ComboBox 
                             Name="Package"
                             Visibility="Collapsed"
                             Width="150" 
@@ -193,8 +193,7 @@
                             HorizontalAlignment="Center"
                             DisplayMemberPath="Title"
                             Background="#164971"
-                            Foreground="Black" 
-                            DefaultText="Package"/>
+                            Foreground="Black"/>
                     <editors:SfTextBoxExt 
                         Name="DiscountAmount"
                         PreviewTextInput="CheckNumeric"

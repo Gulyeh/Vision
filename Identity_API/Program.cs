@@ -3,7 +3,6 @@ using Identity_API.DbContexts;
 using Identity_API.Extensions;
 using Identity_API.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
 using Serilog;
 
@@ -14,7 +13,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Host.UseSerilog((context, config) => {
+builder.Host.UseSerilog((context, config) =>
+{
     config.WriteTo.Console();
     config.WriteTo.Seq(builder.Configuration["SeqServer"], apiKey: builder.Configuration["SeqAPI"]);
     config.MinimumLevel.Information();
@@ -64,7 +64,7 @@ if (app.Environment.IsDevelopment())
 await DbMigration.Migrate(app);
 await RoleSeeder.SeedRoles(app);
 app.UseMiddleware<ErrorHandler>();
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

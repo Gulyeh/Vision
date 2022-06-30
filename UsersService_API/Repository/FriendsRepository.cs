@@ -5,27 +5,28 @@ using UsersService_API.DbContexts;
 using UsersService_API.Dtos;
 using UsersService_API.Entites;
 using UsersService_API.Messages;
+using UsersService_API.RabbitMQRPC;
 using UsersService_API.RabbitMQSender;
 using UsersService_API.Repository.IRepository;
-using UsersService_API.Services.IServices;
 
 namespace UsersService_API.Repository
 {
     public class FriendsRepository : IFriendsRepository
     {
-        private readonly IMessageService messageService;
         private readonly ApplicationDbContext db;
         private readonly IMapper mapper;
         private readonly IRabbitMQSender rabbitMQSender;
         private readonly ILogger<FriendsRepository> logger;
+        private readonly IRabbitMQRPC rabbitMQRPC;
 
-        public FriendsRepository(IMessageService messageService, ApplicationDbContext db, IMapper mapper, IRabbitMQSender rabbitMQSender, ILogger<FriendsRepository> logger)
+        public FriendsRepository(ApplicationDbContext db, IMapper mapper, IRabbitMQSender rabbitMQSender,
+            ILogger<FriendsRepository> logger, IRabbitMQRPC rabbitMQRPC)
         {
-            this.messageService = messageService;
             this.db = db;
             this.mapper = mapper;
             this.rabbitMQSender = rabbitMQSender;
             this.logger = logger;
+            this.rabbitMQRPC = rabbitMQRPC;
         }
 
         public async Task<(bool, bool)> ToggleBlock(Guid userId, Guid UserToToggleId)
@@ -86,7 +87,7 @@ namespace UsersService_API.Repository
             return false;
         }
 
-        public async Task<IEnumerable<GetFriendsDto>> GetFriends(Guid userId, string? access_token)
+        public async Task<IEnumerable<GetFriendsDto>> GetFriends(Guid userId)
         {
             var findFriends = await db.UsersFriends.Where(x => x.User1 == userId || x.User2 == userId).ToListAsync();
             var blockedUsers = await db.BlockedUsers.Where(x => x.BlockerId == userId).ToListAsync();
@@ -106,33 +107,19 @@ namespace UsersService_API.Repository
                 }
             }
 
+            ICollection<Guid> friends = new List<Guid>(friendList.Select(x => x.UserId));
+            var response = await rabbitMQRPC.SendAsync("CheckUnreadMessagesQueue", friends, userId);
+            var json = JsonConvert.DeserializeObject<IEnumerable<HasUnreadMessagesDto>>(response);
 
-            if (!string.IsNullOrWhiteSpace(access_token))
+            if (json is not null && json.Any())
             {
-                ICollection<Guid> friends = new List<Guid>(friendList.Select(x => x.UserId));
-                var response = await messageService.CheckUnreadMessages(access_token, friends);
-
-                if (response is not null)
+                foreach (var friend in json.Where(x => x.HasUnreadMessages == true))
                 {
-                    var dataString = response.Response.ToString();
-
-                    if (!string.IsNullOrWhiteSpace(dataString))
-                    {
-                        var json = JsonConvert.DeserializeObject<IEnumerable<HasUnreadMessagesDto>>(dataString);
-
-                        if (json is not null)
-                        {
-                            foreach (var friend in json.Where(x => x.HasUnreadMessages == true))
-                            {
-                                var user = friendList.FirstOrDefault(x => x.UserId == friend.UserId);
-                                if (user is null) continue;
-                                user.HasUnreadMessages = friend.HasUnreadMessages;
-                            }
-                        }
-                    }
+                    var user = friendList.FirstOrDefault(x => x.UserId == friend.UserId);
+                    if (user is null) continue;
+                    user.HasUnreadMessages = friend.HasUnreadMessages;
                 }
             }
-
             return friendList;
         }
 

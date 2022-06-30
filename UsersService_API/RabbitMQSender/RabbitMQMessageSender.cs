@@ -18,15 +18,15 @@ namespace UsersService_API.RabbitMQSender
             this.logger = logger;
         }
 
-        public void SendMessage(object message, string queueName)
+        public void SendMessage(object? message, string queueName, IBasicProperties? properties = null)
         {
             if (ConnectionExists())
             {
                 using var channel = connection?.CreateModel();
-                channel?.QueueDeclare(queue: queueName, false, false, false, arguments: null);
                 var json = JsonConvert.SerializeObject(message);
                 var body = Encoding.UTF8.GetBytes(json);
-                channel.BasicPublish(exchange: "", routingKey: queueName, basicProperties: null, body: body);
+
+                channel.BasicPublish(exchange: "", routingKey: queueName, basicProperties: properties, body: body);
                 logger.LogInformation("RabbitMQ sent message to queue: {queueName}", queueName);
             }
         }

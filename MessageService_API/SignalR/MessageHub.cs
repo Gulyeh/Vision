@@ -14,15 +14,13 @@ namespace MessageService_API.SignalR
         private readonly IMessageRepository messageRepository;
         private readonly IChatRepository chatRepository;
         private readonly IConnectionsCacheService cacheService;
-        private readonly IUsersService usersService;
         private readonly ILogger<MessageHub> logger;
         private readonly IChatCacheService chatCacheService;
 
         public MessageHub(IMessageRepository messageRepository, IChatRepository chatRepository,
-            IConnectionsCacheService cacheService, IUsersService usersService, ILogger<MessageHub> logger, IChatCacheService chatCacheService)
+            IConnectionsCacheService cacheService, ILogger<MessageHub> logger, IChatCacheService chatCacheService)
         {
             this.cacheService = cacheService;
-            this.usersService = usersService;
             this.logger = logger;
             this.chatCacheService = chatCacheService;
             this.messageRepository = messageRepository;
@@ -46,7 +44,7 @@ namespace MessageService_API.SignalR
 
             if (chat == Guid.Empty)
             {
-                var guid = await chatRepository.CreateChat(receiverGuid, userId, token);
+                var guid = await chatRepository.CreateChat(receiverGuid, userId);
                 if (guid == Guid.Empty) return;
                 chat = guid;
             }
@@ -112,7 +110,7 @@ namespace MessageService_API.SignalR
             var isOtherMember = connIds.Any(x => x.Key != userId);
             if (isOtherMember) data.DateRead = DateTime.UtcNow;
 
-            (var message, bool isBlocked) = await messageRepository.SendMessage(data, token);
+            (var message, bool isBlocked) = await messageRepository.SendMessage(data);
             if (message is null && !isBlocked)
             {
                 await SendSystemMessage("Cannot send message");
@@ -128,7 +126,7 @@ namespace MessageService_API.SignalR
             if (!isOtherMember)
             {
                 var access_token = Context.GetHttpContext()?.Request.Headers["Authorization"][0];
-                if (!string.IsNullOrEmpty(access_token)) await messageRepository.SendUserMessageNotification(data.ReceiverId, userId, access_token);
+                if (!string.IsNullOrEmpty(access_token)) await messageRepository.SendUserMessageNotification(data.ReceiverId, userId);
             }
 
             await Clients.Group(data.ChatId.ToString()).SendAsync("NewMessage", message);

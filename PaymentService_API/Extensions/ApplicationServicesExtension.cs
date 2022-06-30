@@ -33,7 +33,6 @@ namespace PaymentService_API.Extensions
             services.AddScoped<IPaymentRepository, PaymentRepository>();
             services.AddScoped<ICacheService, CacheService>();
             services.AddScoped<IPaymentProcessor, PaymentUrlProcessor>();
-            services.AddScoped<IValidateJWT, ValidateJWTHelper>();
             return services;
         }
     }

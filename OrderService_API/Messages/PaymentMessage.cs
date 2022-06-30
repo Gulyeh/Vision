@@ -1,5 +1,3 @@
-using OrderService_API.Dtos;
-
 namespace OrderService_API.Messages
 {
     public class PaymentMessage
@@ -8,7 +6,6 @@ namespace OrderService_API.Messages
         {
             Title = string.Empty;
             Email = string.Empty;
-            Access_Token = string.Empty;
             TotalPrice = Price - (Price * Discount / 100);
             if (couponData.CodeValue > 0)
             {
@@ -32,6 +29,5 @@ namespace OrderService_API.Messages
             }
         }
         public string Title { get; set; }
-        public string Access_Token { get; set; }
     }
 }
