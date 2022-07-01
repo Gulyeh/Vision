@@ -12,7 +12,7 @@
   <img src="https://user-images.githubusercontent.com/38474768/176936530-665d5bba-3671-4f99-a5cc-07112362568c.png" height=160 width=180/>
   <p>Game launcher with friends and chatting features</p>
   <p>You can chat with your friends, purchase games, games packages and launcher currency - Visions!</p>
-  <p>Project is based on .NET Core 6 microservices, JWT Token access, RabbitMQ Messaging and RPC, SignalR WebSocket, Entity Framework also some external providers like Cloudinary to store files, Stripe for purchase various bundles available in desktop client and Mailjet for email delivery. Desktop client has been made in .NET Core 6 WPF using Prism Framework. Web client for downloading and confirmation has been made in Angular</p>
+  <p>Project is based on .NET Core 6 microservices, JWT Token access, RabbitMQ Messaging and RPC, SignalR WebSocket, Entity Framework also some external providers like Cloudinary to store files, Stripe for purchase various bundles available in desktop client and Mailjet for email delivery. Desktop client has been made in .NET Core 6 WPF using Prism Framework. Web client for downloading and confirmations has been made in Angular</p>
 </div>
 
  ---
