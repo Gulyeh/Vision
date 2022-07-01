@@ -83,6 +83,6 @@
   ---
   
   <div id="preview">
-     <h2>Client preview</h2>
+     <h2>Clients preview</h2>
      
   </div>
