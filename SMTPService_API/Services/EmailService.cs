@@ -38,22 +38,8 @@ namespace SMTPService_API.Services
                         {"Email", data.ReceiverEmail}
                     }
                 })
-                .Property(Send.HtmlPart, generator.GenerateContent(data.Content));
-
-                switch (data.EmailType)
-                {
-                    case EmailTypes.ResetPassword:
-                        request.Property(Send.Subject, "Reset Password");
-                        break;
-                    case EmailTypes.Confirmation:
-                        request.Property(Send.Subject, "Account Confirmation");
-                        break;
-                    case EmailTypes.Payment:
-                        request.Property(Send.Subject, "Payment Confirmation");
-                        break;
-                    default:
-                        break;
-                }
+                .Property(Send.HtmlPart, generator.GenerateContent(data.Content))
+                .Property(Send.Subject, generator.GenerateSubject());  
 
                 MailjetResponse response = await client.PostAsync(request);
                 if (response.IsSuccessStatusCode) return true;

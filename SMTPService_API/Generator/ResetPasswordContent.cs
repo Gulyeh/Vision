@@ -32,5 +32,6 @@ namespace SMTPService_API.Generator
                 </tbody>
             </html>");
         }
+        public string GenerateSubject() => "Reset Password";
     }
 }
