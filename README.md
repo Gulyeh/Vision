@@ -18,7 +18,7 @@
  ---
  
  <div id="features">
-  <h2>Build in features:</h2>
+  <h2>Build-in features:</h2>
   <ul>
     <li>Login/Register system</li>
     <li>Forgot password</li>
